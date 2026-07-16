@@ -1,0 +1,37 @@
+
+# Android build outputs and IDE files
+.gradle/
+.idea/
+.cxx/
+*.apk
+*.aar
+*.jar
+build/
+android/app/build/
+
+# iOS/macOS build outputs
+.symlinks/
+Pods/
+DerivedData/
+*.xcworkspace
+*.xcodeproj
+
+# Flutter/Dart auto-generated files
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+generated/
+*.g.dart
+*.freezed.dart
+
+# Windows desktop build outputs
+build/windows/
+bin/
+obj/
+
+# Version control and local envs
+.git/
+.gitignore
+*.log
+tmp/
