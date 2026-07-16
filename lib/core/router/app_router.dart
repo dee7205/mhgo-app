@@ -20,6 +20,7 @@ import 'package:mhgo/features/inspections/presentation/views/inspection_gallery_
 import 'package:mhgo/features/progress/presentation/views/progress_list_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_details_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_create_edit_view.dart';
+import '../../features/materials/presentation/router/materials_router.dart';
 
 // A listenable that notifies GoRouter when auth state changes
 class RouterNotifier extends ChangeNotifier {
@@ -150,12 +151,7 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
           ),
           // Inventory Branch (Index 3)
           StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/inventory',
-                builder: (context, state) => const _PlaceholderScreen(title: 'Warehouse & Materials'),
-              ),
-            ],
+            routes: MaterialsRouter.routes,
           ),
           // QA/QC Inspections Branch (Index 4)
           StatefulShellBranch(

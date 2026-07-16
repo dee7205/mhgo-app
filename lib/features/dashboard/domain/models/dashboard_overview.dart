@@ -1,6 +1,6 @@
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
-import 'package:mhgo/core/database/models/material_model.dart';
+import 'package:mhgo/features/materials/data/models/material_model.dart';
 import 'package:mhgo/core/database/models/inspection_model.dart';
 
 class DashboardOverview {

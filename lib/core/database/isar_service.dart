@@ -8,7 +8,8 @@ import 'package:uuid/uuid.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/progress_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
-import 'package:mhgo/core/database/models/material_model.dart';
+import 'package:mhgo/features/materials/data/models/material_model.dart';
+import 'package:mhgo/features/materials/data/models/project_material_requirement_model.dart';
 import 'package:mhgo/core/database/models/inspection_model.dart';
 import 'package:mhgo/core/database/models/dar_model.dart';
 
@@ -30,18 +31,41 @@ class IsarService {
       await dbDirectory.create(recursive: true);
     }
 
-    _isar = await Isar.open(
-      [
-        ProjectModelSchema,
-        TaskModelSchema,
-        MaterialModelSchema,
-        InspectionModelSchema,
-        DarModelSchema,
-        ProgressModelSchema,
-      ],
-      directory: dbDirectory.path,
-      name: 'mhgo_local_db',
-    );
+    try {
+      _isar = await Isar.open(
+        [
+          ProjectModelSchema,
+          TaskModelSchema,
+          MaterialModelSchema,
+          ProjectMaterialRequirementModelSchema,
+          InspectionModelSchema,
+          DarModelSchema,
+          ProgressModelSchema,
+        ],
+        directory: dbDirectory.path,
+        name: 'mhgo_local_db',
+      );
+    } catch (e) {
+      // Handle schema mismatches by wiping the database and starting fresh
+      final dbFile = File('${dbDirectory.path}/mhgo_local_db.isar');
+      final lockFile = File('${dbDirectory.path}/mhgo_local_db.isar.lock');
+      if (dbFile.existsSync()) dbFile.deleteSync();
+      if (lockFile.existsSync()) lockFile.deleteSync();
+
+      _isar = await Isar.open(
+        [
+          ProjectModelSchema,
+          TaskModelSchema,
+          MaterialModelSchema,
+          ProjectMaterialRequirementModelSchema,
+          InspectionModelSchema,
+          DarModelSchema,
+          ProgressModelSchema,
+        ],
+        directory: dbDirectory.path,
+        name: 'mhgo_local_db',
+      );
+    }
 
     // Populate with realistic mock data if the database is currently empty
     await _seedMockDataIfNeeded();
@@ -290,66 +314,61 @@ class IsarService {
     final materials = [
       MaterialModel()
         ..uuid = 'm-1'
-        ..sku = 'PV-JK-550W'
         ..name = 'Jinko Tiger Neo 550W Monocrystalline PV Panel'
         ..category = 'Solar Modules'
-        ..quantityInStock = 12400.0
-        ..quantityReserved = 8500.0
+        ..currentStock = 12400.0
         ..unit = 'pcs'
-        ..reorderPoint = 3000.0
-        ..warehouseLocation = 'Main Yard - Section A'
+        ..minimumStock = 3000.0
+        ..storageLocation = 'Main Yard - Section A'
+        ..remarks = 'SKU: PV-JK-550W'
         ..createdAt = DateTime.now().subtract(const Duration(days: 100))
         ..updatedAt = DateTime.now()
         ..isSynced = true,
       MaterialModel()
         ..uuid = 'm-2'
-        ..sku = 'INV-SL-110K'
         ..name = 'Solis 110kW 3-Phase Grid-Tied String Inverter'
         ..category = 'Inverters'
-        ..quantityInStock = 85.0
-        ..quantityReserved = 45.0
+        ..currentStock = 85.0
         ..unit = 'pcs'
-        ..reorderPoint = 15.0
-        ..warehouseLocation = 'Building 2 - Rack B3'
+        ..minimumStock = 15.0
+        ..storageLocation = 'Building 2 - Rack B3'
+        ..remarks = 'SKU: INV-SL-110K'
         ..createdAt = DateTime.now().subtract(const Duration(days: 100))
         ..updatedAt = DateTime.now()
         ..isSynced = true,
       MaterialModel()
         ..uuid = 'm-3'
-        ..sku = 'CAB-DC-4-RD'
         ..name = '4mm2 XLPE Solar DC Cable - Red'
         ..category = 'DC/AC Cabling'
-        ..quantityInStock = 45.0
-        ..quantityReserved = 30.0
+        ..currentStock = 45.0
         ..unit = 'rolls'
-        ..reorderPoint = 10.0
-        ..warehouseLocation = 'Building 1 - Row D'
+        ..minimumStock = 10.0
+        ..storageLocation = 'Building 1 - Row D'
+        ..remarks = 'SKU: CAB-DC-4-RD'
         ..createdAt = DateTime.now().subtract(const Duration(days: 100))
         ..updatedAt = DateTime.now()
         ..isSynced = true,
       MaterialModel()
         ..uuid = 'm-4'
-        ..sku = 'CAB-DC-4-BK'
         ..name = '4mm2 XLPE Solar DC Cable - Black'
         ..category = 'DC/AC Cabling'
-        ..quantityInStock = 8.0 // Low Stock Alert
-        ..quantityReserved = 5.0
+        ..currentStock = 8.0 // Low Stock Alert
         ..unit = 'rolls'
-        ..reorderPoint = 10.0
-        ..warehouseLocation = 'Building 1 - Row D'
+        ..minimumStock = 10.0
+        ..storageLocation = 'Building 1 - Row D'
+        ..remarks = 'SKU: CAB-DC-4-BK'
         ..createdAt = DateTime.now().subtract(const Duration(days: 100))
         ..updatedAt = DateTime.now()
         ..isSynced = true,
       MaterialModel()
         ..uuid = 'm-5'
-        ..sku = 'MNT-HDG-BRK'
         ..name = 'HDG Al-Magnesite Ground Mount Bracket Set'
         ..category = 'Mounting Structures'
-        ..quantityInStock = 18000.0
-        ..quantityReserved = 16000.0
+        ..currentStock = 18000.0
         ..unit = 'sets'
-        ..reorderPoint = 5000.0
-        ..warehouseLocation = 'Main Yard - Section C'
+        ..minimumStock = 5000.0
+        ..storageLocation = 'Main Yard - Section C'
+        ..remarks = 'SKU: MNT-HDG-BRK'
         ..createdAt = DateTime.now().subtract(const Duration(days: 100))
         ..updatedAt = DateTime.now()
         ..isSynced = true,

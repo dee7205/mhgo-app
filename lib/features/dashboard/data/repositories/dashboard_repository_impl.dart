@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mhgo/core/database/isar_service.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
-import 'package:mhgo/core/database/models/material_model.dart';
+import 'package:mhgo/features/materials/data/models/material_model.dart';
 import 'package:mhgo/core/database/models/inspection_model.dart';
 import 'package:mhgo/features/dashboard/data/datasources/dashboard_local_datasource.dart';
 import 'package:mhgo/features/dashboard/domain/repositories/dashboard_repository.dart';

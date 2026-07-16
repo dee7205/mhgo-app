@@ -1,4 +1,4 @@
-import 'materials_entities.dart';
+import '../entities/materials_entities.dart';
 
 abstract class MaterialsRepository {
   // Materials
@@ -8,12 +8,8 @@ abstract class MaterialsRepository {
   Future<void> deleteMaterial(String uuid);
 
   // Requests
-  Future<List<MaterialRequestEntity>> getRequests();
-  Future<List<MaterialRequestEntity>> getRequestsForProject(String projectUuid);
-  Future<void> saveRequest(MaterialRequestEntity request);
-  Future<void> deleteRequest(String uuid);
-
-  // Deliveries
-  Future<List<DeliveryEntity>> getDeliveries();
-  Future<void> recordDelivery(DeliveryEntity delivery);
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForProject(String projectUuid);
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForMaterial(String materialUuid);
+  Future<void> saveRequirement(ProjectMaterialRequirementEntity requirement);
+  Future<void> deleteRequirement(String uuid);
 }

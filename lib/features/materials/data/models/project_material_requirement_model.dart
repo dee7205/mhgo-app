@@ -1,9 +1,9 @@
 import 'package:isar_community/isar.dart';
 
-part 'material_request_model.g.dart';
+part 'project_material_requirement_model.g.dart';
 
 @collection
-class MaterialRequestModel {
+class ProjectMaterialRequirementModel {
   Id id = Isar.autoIncrement;
 
   @Index(unique: true)
@@ -12,17 +12,12 @@ class MaterialRequestModel {
   @Index()
   late String projectUuid;
 
+  @Index()
   late String materialUuid;
-  late String projectName;
-  late String materialName;
 
-  late double quantity;
+  late double requiredQuantity;
+  late double allocatedQuantity;
   late String unit;
-  late String requestedBy;
-  late DateTime date;
-
-  late String status; // Pending, Approved, Fulfilled, Rejected
-  String? remarks;
 
   late DateTime createdAt;
   late DateTime updatedAt;

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../providers/materials_provider.dart';
 import '../../domain/entities/materials_entities.dart';
 
+import '../widgets/material_form_dialog.dart';
+
 class InventoryView extends ConsumerStatefulWidget {
   const InventoryView({super.key});
 
@@ -76,7 +78,10 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Future functionality: create material dialog or view
+          showDialog(
+            context: context,
+            builder: (context) => const MaterialFormDialog(),
+          );
         },
         child: const Icon(Icons.add),
       ),

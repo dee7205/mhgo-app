@@ -13,7 +13,7 @@ import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provide
 import 'package:mhgo/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
-import 'package:mhgo/core/database/models/material_model.dart';
+import 'package:mhgo/features/materials/data/models/material_model.dart';
 import 'package:mhgo/core/database/models/inspection_model.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
@@ -1171,7 +1171,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'SKU: ${mat.sku} • Location: ${mat.warehouseLocation}',
+                              'ID: ${mat.uuid.substring(0, 8)} • Location: ${mat.storageLocation ?? "Unassigned"}',
                               style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                             ),
                           ],
@@ -1182,14 +1182,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${mat.quantityInStock.toInt()} ${mat.unit}',
+                            '${mat.currentStock.toInt()} ${mat.unit}',
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: const Color(0xFFD32F2F),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           Text(
-                            'Min: ${mat.reorderPoint.toInt()}',
+                            'Min: ${mat.minimumStock.toInt()}',
                             style: theme.textTheme.bodySmall?.copyWith(fontSize: 9),
                           ),
                         ],

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/isar_service.dart';
 import '../../domain/repositories/materials_repository.dart';
@@ -49,74 +50,59 @@ final deliveriesProvider = FutureProvider<List<DeliveryEntity>>((ref) async {
 });
 
 // Notifier for CRUD actions to auto-invalidate relevant states
-class MaterialsNotifier extends StateNotifier<AsyncValue<void>> {
-  final Ref _ref;
-  final MaterialsRepository _repo;
+class MaterialsNotifier extends AsyncNotifier<void> {
+  late MaterialsRepository _repo;
 
-  MaterialsNotifier(this._ref, this._repo) : super(const AsyncData(null));
+  @override
+  FutureOr<void> build() {
+    _repo = ref.watch(materialsRepositoryProvider);
+    return null;
+  }
 
   Future<void> saveMaterial(MaterialEntity material) async {
     state = const AsyncLoading();
-    try {
+    state = await AsyncValue.guard(() async {
       await _repo.saveMaterial(material);
-      _ref.invalidate(materialsProvider);
-      _ref.invalidate(materialDetailsProvider(material.uuid));
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+      ref.invalidate(materialsProvider);
+      ref.invalidate(materialDetailsProvider(material.uuid));
+    });
   }
 
   Future<void> deleteMaterial(String uuid) async {
     state = const AsyncLoading();
-    try {
+    state = await AsyncValue.guard(() async {
       await _repo.deleteMaterial(uuid);
-      _ref.invalidate(materialsProvider);
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+      ref.invalidate(materialsProvider);
+    });
   }
 
   Future<void> saveRequest(MaterialRequestEntity request) async {
     state = const AsyncLoading();
-    try {
+    state = await AsyncValue.guard(() async {
       await _repo.saveRequest(request);
-      _ref.invalidate(materialRequestsProvider);
-      _ref.invalidate(projectMaterialRequestsProvider(request.projectUuid));
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+      ref.invalidate(materialRequestsProvider);
+      ref.invalidate(projectMaterialRequestsProvider(request.projectUuid));
+    });
   }
 
   Future<void> deleteRequest(String uuid, String projectUuid) async {
     state = const AsyncLoading();
-    try {
+    state = await AsyncValue.guard(() async {
       await _repo.deleteRequest(uuid);
-      _ref.invalidate(materialRequestsProvider);
-      _ref.invalidate(projectMaterialRequestsProvider(projectUuid));
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+      ref.invalidate(materialRequestsProvider);
+      ref.invalidate(projectMaterialRequestsProvider(projectUuid));
+    });
   }
 
   Future<void> recordDelivery(DeliveryEntity delivery) async {
     state = const AsyncLoading();
-    try {
+    state = await AsyncValue.guard(() async {
       await _repo.recordDelivery(delivery);
-      _ref.invalidate(deliveriesProvider);
-      _ref.invalidate(materialsProvider);
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+      ref.invalidate(deliveriesProvider);
+      ref.invalidate(materialsProvider);
+    });
   }
 }
 
 final materialsNotifierProvider =
-    StateNotifierProvider<MaterialsNotifier, AsyncValue<void>>((ref) {
-      final repo = ref.watch(materialsRepositoryProvider);
-      return MaterialsNotifier(ref, repo);
-    });
+    AsyncNotifierProvider<MaterialsNotifier, void>(MaterialsNotifier.new);
