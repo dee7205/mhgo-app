@@ -2,7 +2,7 @@
 
 **Built for MHG.**
 
-MHGo is an **offline-first Solar EPC Project Management Platform** built with Flutter. It is designed to replace spreadsheets, paper forms, and scattered project files with a centralized application that helps manage the lifecycle of engineering projects.
+MHGo is an **offline Solar EPC Project Management Platform** built with Flutter. It is designed to replace spreadsheets, paper forms, and scattered project files with a centralized application that helps manage the lifecycle of engineering projects.
 
 > **Project Status:** 🚧 Active Development (Work in Progress)
 
