@@ -25,29 +25,25 @@ final materialDetailsProvider = FutureProvider.family<MaterialEntity?, String>((
   return repo.getMaterialById(uuid);
 });
 
-// Material Requests
-final materialRequestsProvider = FutureProvider<List<MaterialRequestEntity>>((
-  ref,
-) async {
-  final repo = ref.watch(materialsRepositoryProvider);
-  return repo.getRequests();
-});
-
-// Project-Specific Material Requests
-final projectMaterialRequestsProvider =
-    FutureProvider.family<List<MaterialRequestEntity>, String>((
+// Project-Specific Material Requirements
+final projectMaterialRequirementsProvider =
+    FutureProvider.family<List<ProjectMaterialRequirementEntity>, String>((
       ref,
       projectUuid,
     ) async {
       final repo = ref.watch(materialsRepositoryProvider);
-      return repo.getRequestsForProject(projectUuid);
+      return repo.getRequirementsForProject(projectUuid);
     });
 
-// Deliveries
-final deliveriesProvider = FutureProvider<List<DeliveryEntity>>((ref) async {
-  final repo = ref.watch(materialsRepositoryProvider);
-  return repo.getDeliveries();
-});
+// Material-Specific Project Allocations
+final materialAllocationsProvider =
+    FutureProvider.family<List<ProjectMaterialRequirementEntity>, String>((
+      ref,
+      materialUuid,
+    ) async {
+      final repo = ref.watch(materialsRepositoryProvider);
+      return repo.getRequirementsForMaterial(materialUuid);
+    });
 
 // Notifier for CRUD actions to auto-invalidate relevant states
 class MaterialsNotifier extends AsyncNotifier<void> {
@@ -73,33 +69,34 @@ class MaterialsNotifier extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       await _repo.deleteMaterial(uuid);
       ref.invalidate(materialsProvider);
+      // Since requirements cascaded, invalidate any project requirements we might have loaded
+      // We can't invalidate all families easily, but any active view will rebuild or we can let Riverpod GC
     });
   }
 
-  Future<void> saveRequest(MaterialRequestEntity request) async {
+  Future<void> saveRequirement(ProjectMaterialRequirementEntity req) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _repo.saveRequest(request);
-      ref.invalidate(materialRequestsProvider);
-      ref.invalidate(projectMaterialRequestsProvider(request.projectUuid));
+      await _repo.saveRequirement(req);
+      ref.invalidate(projectMaterialRequirementsProvider(req.projectUuid));
+      ref.invalidate(materialAllocationsProvider(req.materialUuid));
+      ref.invalidate(materialsProvider); // Allocations changed, stock might be affected implicitly
+      ref.invalidate(materialDetailsProvider(req.materialUuid));
     });
   }
 
-  Future<void> deleteRequest(String uuid, String projectUuid) async {
+  Future<void> deleteRequirement(String uuid, String projectUuid) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _repo.deleteRequest(uuid);
-      ref.invalidate(materialRequestsProvider);
-      ref.invalidate(projectMaterialRequestsProvider(projectUuid));
-    });
-  }
-
-  Future<void> recordDelivery(DeliveryEntity delivery) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await _repo.recordDelivery(delivery);
-      ref.invalidate(deliveriesProvider);
+      // We need the req before deleting to invalidate its material UUID
+      final reqs = await _repo.getRequirementsForProject(projectUuid);
+      final req = reqs.firstWhere((r) => r.uuid == uuid);
+      
+      await _repo.deleteRequirement(uuid);
+      ref.invalidate(projectMaterialRequirementsProvider(projectUuid));
+      ref.invalidate(materialAllocationsProvider(req.materialUuid));
       ref.invalidate(materialsProvider);
+      ref.invalidate(materialDetailsProvider(req.materialUuid));
     });
   }
 }

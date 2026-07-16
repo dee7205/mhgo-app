@@ -566,6 +566,7 @@ class _InspectionCreateEditViewState extends ConsumerState<InspectionCreateEditV
       error: (_, __) => const Text('Error loading projects'),
       data: (projects) {
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           value: _selectedProjectUuid,
           decoration: const InputDecoration(labelText: 'Project Portfolio *'),
           validator: (val) => val == null ? 'Project portfolio is required' : null,
@@ -654,13 +655,14 @@ class _InspectionCreateEditViewState extends ConsumerState<InspectionCreateEditV
 
   Widget _buildPriorityDropdown() {
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       value: _priority,
       decoration: const InputDecoration(labelText: 'Inspection Priority *'),
       items: const [
-        DropdownMenuItem(value: 'Low', child: Text('Low')),
-        DropdownMenuItem(value: 'Medium', child: Text('Medium')),
-        DropdownMenuItem(value: 'High', child: Text('High')),
-        DropdownMenuItem(value: 'Critical', child: Text('Critical')),
+        DropdownMenuItem(value: 'Low', child: Text('Low', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Medium', child: Text('Medium', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'High', child: Text('High', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Critical', child: Text('Critical', overflow: TextOverflow.ellipsis)),
       ],
       onChanged: (val) {
         if (val != null) {
@@ -672,14 +674,17 @@ class _InspectionCreateEditViewState extends ConsumerState<InspectionCreateEditV
 
   Widget _buildTypeDropdown() {
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       value: _inspectionType,
       decoration: const InputDecoration(labelText: 'Inspection Type *'),
       items: const [
-        DropdownMenuItem(value: 'Civil', child: Text('Civil')),
-        DropdownMenuItem(value: 'Structural', child: Text('Structural')),
-        DropdownMenuItem(value: 'Electrical', child: Text('Electrical')),
-        DropdownMenuItem(value: 'Mechanical', child: Text('Mechanical')),
-        DropdownMenuItem(value: 'General', child: Text('General')),
+        DropdownMenuItem(value: 'Civil', child: Text('Civil', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Structural', child: Text('Structural', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Electrical', child: Text('Electrical', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Mechanical', child: Text('Mechanical', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'Logistics', child: Text('Logistics', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'HSE (Safety)', child: Text('HSE (Safety)', overflow: TextOverflow.ellipsis)),
+        DropdownMenuItem(value: 'General', child: Text('General', overflow: TextOverflow.ellipsis)),
       ],
       onChanged: (val) {
         if (val != null) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
+import '../../domain/entities/materials_entities.dart';
 import '../providers/materials_provider.dart';
 
 class MaterialDetailsView extends ConsumerStatefulWidget {
@@ -18,7 +20,7 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -38,8 +40,7 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
           controller: _tabController,
           tabs: const [
             Tab(text: 'Stock Levels'),
-            Tab(text: 'Requests'),
-            Tab(text: 'Deliveries'),
+            Tab(text: 'Project Allocations'),
           ],
         ),
         actions: [
@@ -62,8 +63,7 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
             controller: _tabController,
             children: [
               _buildStockLevels(material),
-              _buildRequests(),
-              _buildDeliveries(),
+              _buildAllocations(),
             ],
           );
         },
@@ -159,77 +159,58 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
     );
   }
 
-  Widget _buildRequests() {
-    // Ideally this filters by material. For now, fetch all and filter client-side.
-    final requestsAsync = ref.watch(materialRequestsProvider);
-    return requestsAsync.when(
+  Widget _buildAllocations() {
+    final allocationsAsync = ref.watch(materialAllocationsProvider(widget.uuid));
+    return allocationsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (allReqs) {
-        final reqs = allReqs
-            .where((r) => r.materialUuid == widget.uuid)
-            .toList();
-        if (reqs.isEmpty)
-          return const Center(child: Text('No requests for this material.'));
+      data: (allocations) {
+        if (allocations.isEmpty) {
+          return const Center(child: Text('No allocations for this material.'));
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16.0),
-          itemCount: reqs.length,
+          itemCount: allocations.length,
           itemBuilder: (context, index) {
-            final req = reqs[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8.0),
-              child: ListTile(
-                title: Text(
-                  '${req.quantity} ${req.unit} for ${req.projectName}',
-                ),
-                subtitle: Text(
-                  'Status: ${req.status} | By: ${req.requestedBy}',
-                ),
-              ),
-            );
+            final allocation = allocations[index];
+            return _AllocationTile(allocation: allocation);
           },
         );
       },
     );
   }
+}
 
-  Widget _buildDeliveries() {
-    final deliveriesAsync = ref.watch(deliveriesProvider);
-    return deliveriesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (allDels) {
-        // Filter deliveries that include this material JSON
-        final dels = allDels
-            .where(
-              (d) => d.deliveredMaterialsJson.any(
-                (json) => json.contains(widget.uuid),
-              ),
-            )
-            .toList();
-        if (dels.isEmpty)
-          return const Center(child: Text('No deliveries for this material.'));
+class _AllocationTile extends ConsumerWidget {
+  final ProjectMaterialRequirementEntity allocation;
+  const _AllocationTile({required this.allocation});
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: dels.length,
-          itemBuilder: (context, index) {
-            final d = dels[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8.0),
-              child: ListTile(
-                title: Text(
-                  'Delivery on ${d.deliveryDate.toLocal().toString().split(' ')[0]}',
-                ),
-                subtitle: Text(
-                  'Project: ${d.projectName} | Status: ${d.status}',
-                ),
-              ),
-            );
-          },
-        );
-      },
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final projectAsync = ref.watch(projectDetailsProvider(allocation.projectUuid));
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8.0),
+      child: projectAsync.when(
+        loading: () => const ListTile(title: Text('Loading project...')),
+        error: (err, stack) => ListTile(title: Text('Error: $err')),
+        data: (data) {
+          return ListTile(
+            title: Text(
+              data.project.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Required: ${allocation.requiredQuantity} ${allocation.unit}'),
+                Text('Allocated: ${allocation.allocatedQuantity} ${allocation.unit}'),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

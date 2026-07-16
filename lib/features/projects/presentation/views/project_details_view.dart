@@ -9,6 +9,7 @@ import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/features/projects/domain/entities/projects_entities.dart';
 import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
 import 'package:mhgo/features/projects/presentation/widgets/project_create_edit_dialog.dart';
+import 'package:mhgo/features/materials/presentation/widgets/project_material_requirements_tab.dart';
 
 class ProjectDetailsView extends ConsumerStatefulWidget {
   final String uuid;
@@ -28,7 +29,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -261,6 +262,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                 Tab(text: 'Overview & Analytics'),
                 Tab(text: 'Timeline & Milestones'),
                 Tab(text: 'Engineering Team'),
+                Tab(text: 'Material Requirements'),
               ],
             ),
           ),
@@ -276,6 +278,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               _buildOverviewTab(data, theme, isDark),
               _buildTimelineTab(data, theme, isDark),
               _buildTeamTab(data, theme, isDark),
+              ProjectMaterialRequirementsTab(projectUuid: widget.uuid),
             ],
           ),
         ),

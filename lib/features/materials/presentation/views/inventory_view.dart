@@ -90,25 +90,19 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  width: 250,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      labelText: 'Search materials',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                    ),
+                TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    labelText: 'Search materials',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(
-                  width: 200,
-                  child: DropdownButtonFormField<String>(
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
                     isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Category',
@@ -128,10 +122,8 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                         .toList(),
                     onChanged: (val) => setState(() => _selectedCategory = val),
                   ),
-                ),
-                SizedBox(
-                  width: 200,
-                  child: DropdownButtonFormField<String>(
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
                     isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Sort By',
@@ -154,7 +146,6 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                             .toList(),
                     onChanged: (val) => setState(() => _sortOption = val!),
                   ),
-                ),
               ],
             ),
           ),
@@ -190,7 +181,29 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                             Text('Stock: ${item.currentStock} ${item.unit}'),
                           ],
                         ),
-                        trailing: _StockStatusChip(status: item.stockStatus),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _StockStatusChip(status: item.stockStatus),
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 20),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => MaterialFormDialog(
+                                    existingMaterial: item,
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                              onPressed: () {
+                                ref.read(materialsNotifierProvider.notifier).deleteMaterial(item.uuid);
+                              },
+                            ),
+                          ],
+                        ),
                         onTap: () =>
                             context.push('/inventory/details/${item.uuid}'),
                       ),

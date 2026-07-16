@@ -106,7 +106,7 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.all(16),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500), // Max width for tablet, full width for mobile
+        constraints: BoxConstraints(minWidth: MediaQuery.sizeOf(context).width),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Form(

@@ -3,8 +3,7 @@ import 'package:isar_community/isar.dart';
 import '../../domain/entities/materials_entities.dart';
 import '../../domain/repositories/materials_repository.dart';
 import '../models/material_model.dart';
-import '../models/material_request_model.dart';
-import '../models/delivery_model.dart';
+import '../models/project_material_requirement_model.dart';
 
 class MaterialsRepositoryImpl implements MaterialsRepository {
   final Isar isar;
@@ -14,7 +13,12 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
   @override
   Future<List<MaterialEntity>> getMaterials() async {
     final models = await isar.materialModels.where().findAll();
-    return models.map(_mapMaterialToEntity).toList();
+    final entities = <MaterialEntity>[];
+    for (final model in models) {
+      final allocated = await _computeAllocatedStock(model.uuid);
+      entities.add(_mapMaterialToEntity(model, allocated));
+    }
+    return entities;
   }
 
   @override
@@ -23,7 +27,17 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
         .filter()
         .uuidEqualTo(uuid)
         .findFirst();
-    return model != null ? _mapMaterialToEntity(model) : null;
+    if (model == null) return null;
+    final allocated = await _computeAllocatedStock(uuid);
+    return _mapMaterialToEntity(model, allocated);
+  }
+
+  Future<double> _computeAllocatedStock(String materialUuid) async {
+    final requirements = await isar.projectMaterialRequirementModels
+        .filter()
+        .materialUuidEqualTo(materialUuid)
+        .findAll();
+    return requirements.fold<double>(0.0, (sum, req) => sum + req.allocatedQuantity);
   }
 
   @override
@@ -50,103 +64,70 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
     if (existing != null) {
       await isar.writeTxn(() async {
         await isar.materialModels.delete(existing.id);
+        
+        // Cascading delete requirements linked to this material
+        final requirements = await isar.projectMaterialRequirementModels
+            .filter()
+            .materialUuidEqualTo(uuid)
+            .findAll();
+        for (final req in requirements) {
+          await isar.projectMaterialRequirementModels.delete(req.id);
+        }
       });
     }
   }
 
   @override
-  Future<List<MaterialRequestEntity>> getRequests() async {
-    final models = await isar.materialRequestModels.where().findAll();
-    return models.map(_mapRequestToEntity).toList();
-  }
-
-  @override
-  Future<List<MaterialRequestEntity>> getRequestsForProject(
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForProject(
     String projectUuid,
   ) async {
-    final models = await isar.materialRequestModels
+    final models = await isar.projectMaterialRequirementModels
         .filter()
         .projectUuidEqualTo(projectUuid)
         .findAll();
-    return models.map(_mapRequestToEntity).toList();
+    return models.map(_mapReqToEntity).toList();
   }
 
   @override
-  Future<void> saveRequest(MaterialRequestEntity request) async {
-    final model = _mapRequestToModel(request);
-    final existing = await isar.materialRequestModels
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForMaterial(
+    String materialUuid,
+  ) async {
+    final models = await isar.projectMaterialRequirementModels
         .filter()
-        .uuidEqualTo(request.uuid)
+        .materialUuidEqualTo(materialUuid)
+        .findAll();
+    return models.map(_mapReqToEntity).toList();
+  }
+
+  @override
+  Future<void> saveRequirement(ProjectMaterialRequirementEntity req) async {
+    final model = _mapReqToModel(req);
+    final existing = await isar.projectMaterialRequirementModels
+        .filter()
+        .uuidEqualTo(req.uuid)
         .findFirst();
     if (existing != null) {
       model.id = existing.id;
     }
     await isar.writeTxn(() async {
-      await isar.materialRequestModels.put(model);
+      await isar.projectMaterialRequirementModels.put(model);
     });
   }
 
   @override
-  Future<void> deleteRequest(String uuid) async {
-    final existing = await isar.materialRequestModels
+  Future<void> deleteRequirement(String uuid) async {
+    final existing = await isar.projectMaterialRequirementModels
         .filter()
         .uuidEqualTo(uuid)
         .findFirst();
     if (existing != null) {
       await isar.writeTxn(() async {
-        await isar.materialRequestModels.delete(existing.id);
+        await isar.projectMaterialRequirementModels.delete(existing.id);
       });
     }
   }
 
-  @override
-  Future<List<DeliveryEntity>> getDeliveries() async {
-    final models = await isar.deliveryModels.where().findAll();
-    return models.map(_mapDeliveryToEntity).toList();
-  }
-
-  @override
-  Future<void> recordDelivery(DeliveryEntity delivery) async {
-    final model = _mapDeliveryToModel(delivery);
-    final existing = await isar.deliveryModels
-        .filter()
-        .uuidEqualTo(delivery.uuid)
-        .findFirst();
-    if (existing != null) {
-      model.id = existing.id;
-    }
-
-    await isar.writeTxn(() async {
-      // 1. Save delivery record
-      await isar.deliveryModels.put(model);
-
-      // 2. Increment stock for all delivered materials
-      // deliveredMaterialsJson contains a list of JSON objects as strings, e.g. '{"materialUuid": "...", "quantity": 10.0}'
-      for (final jsonStr in delivery.deliveredMaterialsJson) {
-        try {
-          final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-          final mUuid = data['materialUuid'] as String?;
-          final qty = (data['quantity'] as num?)?.toDouble() ?? 0.0;
-
-          if (mUuid != null && qty > 0) {
-            final material = await isar.materialModels
-                .filter()
-                .uuidEqualTo(mUuid)
-                .findFirst();
-            if (material != null) {
-              material.currentStock += qty;
-              material.updatedAt = DateTime.now();
-              await isar.materialModels.put(material);
-            }
-          }
-        } catch (e) {
-          // Skip invalid data
-        }
-      }
-    });
-  }
-
-  MaterialEntity _mapMaterialToEntity(MaterialModel m) {
+  MaterialEntity _mapMaterialToEntity(MaterialModel m, double allocated) {
     return MaterialEntity(
       uuid: m.uuid,
       name: m.name,
@@ -154,6 +135,8 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       unit: m.unit,
       currentStock: m.currentStock,
       minimumStock: m.minimumStock,
+      allocatedStock: allocated,
+      availableStock: m.currentStock - allocated,
       supplier: m.supplier,
       storageLocation: m.storageLocation,
       remarks: m.remarks,
@@ -177,61 +160,25 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       ..isSynced = false;
   }
 
-  MaterialRequestEntity _mapRequestToEntity(MaterialRequestModel m) {
-    return MaterialRequestEntity(
+  ProjectMaterialRequirementEntity _mapReqToEntity(ProjectMaterialRequirementModel m) {
+    return ProjectMaterialRequirementEntity(
       uuid: m.uuid,
       projectUuid: m.projectUuid,
       materialUuid: m.materialUuid,
-      projectName: m.projectName,
-      materialName: m.materialName,
-      quantity: m.quantity,
+      requiredQuantity: m.requiredQuantity,
+      allocatedQuantity: m.allocatedQuantity,
       unit: m.unit,
-      requestedBy: m.requestedBy,
-      date: m.date,
-      status: m.status,
-      remarks: m.remarks,
     );
   }
 
-  MaterialRequestModel _mapRequestToModel(MaterialRequestEntity e) {
-    return MaterialRequestModel()
+  ProjectMaterialRequirementModel _mapReqToModel(ProjectMaterialRequirementEntity e) {
+    return ProjectMaterialRequirementModel()
       ..uuid = e.uuid
       ..projectUuid = e.projectUuid
       ..materialUuid = e.materialUuid
-      ..projectName = e.projectName
-      ..materialName = e.materialName
-      ..quantity = e.quantity
+      ..requiredQuantity = e.requiredQuantity
+      ..allocatedQuantity = e.allocatedQuantity
       ..unit = e.unit
-      ..requestedBy = e.requestedBy
-      ..date = e.date
-      ..status = e.status
-      ..remarks = e.remarks
-      ..createdAt = DateTime.now()
-      ..updatedAt = DateTime.now()
-      ..isSynced = false;
-  }
-
-  DeliveryEntity _mapDeliveryToEntity(DeliveryModel m) {
-    return DeliveryEntity(
-      uuid: m.uuid,
-      projectUuid: m.projectUuid,
-      projectName: m.projectName,
-      supplier: m.supplier,
-      deliveryDate: m.deliveryDate,
-      status: m.status,
-      deliveredMaterialsJson: m.deliveredMaterialsJson,
-    );
-  }
-
-  DeliveryModel _mapDeliveryToModel(DeliveryEntity e) {
-    return DeliveryModel()
-      ..uuid = e.uuid
-      ..projectUuid = e.projectUuid
-      ..projectName = e.projectName
-      ..supplier = e.supplier
-      ..deliveryDate = e.deliveryDate
-      ..status = e.status
-      ..deliveredMaterialsJson = e.deliveredMaterialsJson
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now()
       ..isSynced = false;

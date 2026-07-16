@@ -5,6 +5,8 @@ class MaterialEntity {
   final String unit;
   final double currentStock;
   final double minimumStock;
+  final double allocatedStock; // dynamically computed
+  final double availableStock; // currentStock - allocatedStock
   final String? supplier;
   final String? storageLocation;
   final String? remarks;
@@ -17,6 +19,8 @@ class MaterialEntity {
     required this.unit,
     required this.currentStock,
     required this.minimumStock,
+    this.allocatedStock = 0.0,
+    this.availableStock = 0.0,
     this.supplier,
     this.storageLocation,
     this.remarks,
