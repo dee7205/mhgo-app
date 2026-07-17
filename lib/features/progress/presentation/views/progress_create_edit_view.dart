@@ -15,13 +15,15 @@ class ProgressCreateEditView extends ConsumerStatefulWidget {
   const ProgressCreateEditView({super.key, required this.id});
 
   @override
-  ConsumerState<ProgressCreateEditView> createState() => _ProgressCreateEditViewState();
+  ConsumerState<ProgressCreateEditView> createState() =>
+      _ProgressCreateEditViewState();
 }
 
-class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView> {
+class _ProgressCreateEditViewState
+    extends ConsumerState<ProgressCreateEditView> {
   final _formKey = GlobalKey<FormState>();
   final _progressController = TextEditingController(text: '0');
-  
+
   String? _categoryId;
   bool _isInit = false;
   bool _isLoading = false;
@@ -39,7 +41,7 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
     if (!_isInit) {
       final queryParams = GoRouterState.of(context).uri.queryParameters;
       _categoryId = queryParams['categoryId'];
-      
+
       if (_categoryId != null) {
         _loadExistingCategory();
       }
@@ -49,10 +51,15 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
 
   void _loadExistingCategory() {
     final reportsAsync = ref.read(progressNotifierProvider);
-    final report = reportsAsync.value?.firstWhere((r) => r.uuid == widget.id);
+    final report = reportsAsync.value?.cast<ProgressReport?>().firstWhere(
+      (r) => r?.uuid == widget.id || r?.projectUuid == widget.id,
+      orElse: () => null,
+    );
     if (report != null) {
       try {
-        final category = report.categories.firstWhere((c) => c.id == _categoryId);
+        final category = report.categories.firstWhere(
+          (c) => c.id == _categoryId,
+        );
         setState(() {
           _name = category.name;
           _description = category.description ?? '';
@@ -83,23 +90,27 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-    
+
     setState(() => _isLoading = true);
 
     try {
       final reportsAsync = ref.read(progressNotifierProvider);
       var report = reportsAsync.value?.cast<ProgressReport?>().firstWhere(
-        (r) => r?.uuid == widget.id, 
+        (r) => r?.uuid == widget.id || r?.projectUuid == widget.id,
         orElse: () => null,
       );
-      
+
       bool isNewReport = false;
       if (report == null || report.uuid.isEmpty) {
         // Find the project via Isar to get details
         final isarService = ref.read(isarServiceProvider);
-        final project = await isarService.isar.projectModels.filter().uuidEqualTo(widget.id).findFirst();
-        if (project == null) throw Exception('Project not found to attach progress.');
-        
+        final project = await isarService.isar.projectModels
+            .filter()
+            .uuidEqualTo(widget.id)
+            .findFirst();
+        if (project == null)
+          throw Exception('Project not found to attach progress.');
+
         isNewReport = true;
         report = ProgressReport(
           uuid: widget.id,
@@ -114,9 +125,27 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
         );
       }
 
-      if (_categoryId != null && !isNewReport) {
+      final notifier = ref.read(progressNotifierProvider.notifier);
+      final nav = GoRouter.of(context);
+      final scaffold = ScaffoldMessenger.of(context);
+      final isEdit = _categoryId != null;
+
+      nav.pop();
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text(
+            isEdit
+                ? 'Category updated successfully'
+                : 'Category added successfully',
+          ),
+        ),
+      );
+
+      if (isEdit && !isNewReport) {
         // Edit existing
-        final existing = report.categories.firstWhere((c) => c.id == _categoryId);
+        final existing = report.categories.firstWhere(
+          (c) => c.id == _categoryId,
+        );
         final updatedCategory = existing.copyWith(
           name: _name,
           description: _description.isEmpty ? null : _description,
@@ -126,7 +155,7 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
           notes: _notes.isEmpty ? null : _notes,
           lastUpdated: DateTime.now(),
         );
-        await ref.read(progressNotifierProvider.notifier).updateCategory(widget.id, updatedCategory);
+        await notifier.updateCategory(widget.id, updatedCategory);
       } else {
         // Create new
         final newCategory = ProgressCategory(
@@ -141,29 +170,22 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
           isArchived: false,
           orderIndex: report.categories.length,
         );
-        
+
         if (isNewReport) {
           final updatedReport = report.copyWith(
             categories: [newCategory],
             overallProgress: newCategory.progress,
           );
-          await ref.read(progressNotifierProvider.notifier).saveReport(updatedReport);
+          await notifier.saveReport(updatedReport);
         } else {
-          await ref.read(progressNotifierProvider.notifier).addCategory(widget.id, newCategory);
+          await notifier.addCategory(widget.id, newCategory);
         }
-      }
-      
-      if (mounted) {
-        context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_categoryId != null ? 'Category updated successfully' : 'Category added successfully')),
-        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -200,9 +222,14 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Category Details', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    'Category Details',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 24),
-                  
+
                   // Name
                   TextFormField(
                     initialValue: _name,
@@ -210,7 +237,9 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                       labelText: 'Category Name',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (val) => val == null || val.trim().isEmpty ? 'Name is required' : null,
+                    validator: (val) => val == null || val.trim().isEmpty
+                        ? 'Name is required'
+                        : null,
                     onSaved: (val) => _name = val!.trim(),
                   ),
                   const SizedBox(height: 16),
@@ -226,7 +255,7 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                     onSaved: (val) => _description = val?.trim() ?? '',
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Status
                   DropdownButtonFormField<String>(
                     isExpanded: true,
@@ -235,18 +264,23 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                       border: OutlineInputBorder(),
                     ),
                     value: _status,
-                    items: [
-                      'Not Started',
-                      'On Track',
-                      'At Risk',
-                      'Delayed',
-                      'Completed',
-                    ].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                    items:
+                        [
+                              'Not Started',
+                              'On Track',
+                              'At Risk',
+                              'Delayed',
+                              'Completed',
+                            ]
+                            .map(
+                              (d) => DropdownMenuItem(value: d, child: Text(d)),
+                            )
+                            .toList(),
                     onChanged: (val) => setState(() => _status = val!),
                     onSaved: (val) => _status = val ?? 'Not Started',
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Progress Slider & Input
                   Row(
                     children: [
@@ -255,9 +289,16 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Progress: ${(_progress.isNaN || _progress.isInfinite ? 0 : _progress).toStringAsFixed(1)}%', style: theme.textTheme.bodyMedium),
+                            Text(
+                              'Progress: ${(_progress.isNaN || _progress.isInfinite ? 0 : _progress).toStringAsFixed(1)}%',
+                              style: theme.textTheme.bodyMedium,
+                            ),
                             Slider(
-                              value: (_progress.isNaN || _progress.isInfinite ? 0.0 : _progress).clamp(0.0, 100.0),
+                              value:
+                                  (_progress.isNaN || _progress.isInfinite
+                                          ? 0.0
+                                          : _progress)
+                                      .clamp(0.0, 100.0),
                               min: 0,
                               max: 100,
                               divisions: 100,
@@ -265,10 +306,13 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                                 setState(() => _progress = val);
                                 final formatted = val.toStringAsFixed(0);
                                 if (_progressController.text != formatted) {
-                                  _progressController.value = _progressController.value.copyWith(
-                                    text: formatted,
-                                    selection: TextSelection.collapsed(offset: formatted.length),
-                                  );
+                                  _progressController.value =
+                                      _progressController.value.copyWith(
+                                        text: formatted,
+                                        selection: TextSelection.collapsed(
+                                          offset: formatted.length,
+                                        ),
+                                      );
                                 }
                               },
                             ),
@@ -284,7 +328,9 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                             labelText: '%',
                             border: OutlineInputBorder(),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           onChanged: (val) {
                             final p = double.tryParse(val);
                             if (p != null && p >= 0 && p <= 100) {
@@ -312,15 +358,20 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                         suffixIcon: _targetDate != null
                             ? IconButton(
                                 icon: const Icon(Icons.clear),
-                                onPressed: () => setState(() => _targetDate = null),
+                                onPressed: () =>
+                                    setState(() => _targetDate = null),
                               )
                             : null,
                       ),
-                      child: Text(_targetDate != null ? DateFormat('yyyy-MM-dd').format(_targetDate!) : 'Not set'),
+                      child: Text(
+                        _targetDate != null
+                            ? DateFormat('yyyy-MM-dd').format(_targetDate!)
+                            : 'Not set',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Notes
                   TextFormField(
                     initialValue: _notes,
@@ -332,7 +383,7 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                     onSaved: (val) => _notes = val?.trim() ?? '',
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Submit Button
                   SizedBox(
                     height: 50,

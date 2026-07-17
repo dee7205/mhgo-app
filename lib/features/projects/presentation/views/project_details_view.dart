@@ -206,7 +206,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress * 100).toStringAsFixed(0)}%',
+                        '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
@@ -220,7 +220,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: LinearProgressIndicator(
-                        value: project.progress,
+                        value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
                         minHeight: 8.0,
                         backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                       ),
@@ -381,6 +381,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           _buildInfoRow('Arrangement Type', project.type, theme, isDark),
           _buildInfoRow('Contract Start', formattedStart, theme, isDark),
           _buildInfoRow('Expected Completion', formattedEnd, theme, isDark),
+          _buildInfoRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost), theme, isDark),
         ],
       ),
     );
@@ -750,15 +751,26 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                     Color dotColor;
                     IconData statusIcon;
                     switch (item.status) {
+                      case 'Completed':
                       case 'completed':
                         dotColor = const Color(0xFF2E7D32); // Solar Green
                         statusIcon = Icons.check_circle_outline;
                         break;
+                      case 'Delayed':
                       case 'delayed':
+                        dotColor = const Color(0xFFD32F2F); // Red
+                        statusIcon = Icons.error_outline;
+                        break;
+                      case 'At Risk':
                         dotColor = const Color(0xFFFFB300); // Amber
                         statusIcon = Icons.warning_amber_rounded;
                         break;
+                      case 'On Track':
+                        dotColor = theme.colorScheme.primary;
+                        statusIcon = Icons.play_circle_outline;
+                        break;
                       case 'upcoming':
+                      case 'Not Started':
                       default:
                         dotColor = theme.disabledColor;
                         statusIcon = Icons.schedule;
@@ -864,7 +876,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          '${(item.progress * 100).toStringAsFixed(0)}%',
+                                          '${(item.progress.isNaN || item.progress.isInfinite ? 0 : item.progress).toStringAsFixed(0)}%',
                                           style: theme.textTheme.bodySmall?.copyWith(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,

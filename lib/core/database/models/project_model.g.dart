@@ -82,13 +82,18 @@ const ProjectModelSchema = CollectionSchema(
       name: r'teamMembersJson',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 17, name: r'type', type: IsarType.string),
+    r'totalCost': PropertySchema(
+      id: 17,
+      name: r'totalCost',
+      type: IsarType.double,
+    ),
+    r'type': PropertySchema(id: 18, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'uuid': PropertySchema(id: 19, name: r'uuid', type: IsarType.string),
+    r'uuid': PropertySchema(id: 20, name: r'uuid', type: IsarType.string),
   },
 
   estimateSize: _projectModelEstimateSize,
@@ -205,9 +210,10 @@ void _projectModelSerialize(
   writer.writeString(offsets[14], object.supervisor);
   writer.writeString(offsets[15], object.systemType);
   writer.writeString(offsets[16], object.teamMembersJson);
-  writer.writeString(offsets[17], object.type);
-  writer.writeDateTime(offsets[18], object.updatedAt);
-  writer.writeString(offsets[19], object.uuid);
+  writer.writeDouble(offsets[17], object.totalCost);
+  writer.writeString(offsets[18], object.type);
+  writer.writeDateTime(offsets[19], object.updatedAt);
+  writer.writeString(offsets[20], object.uuid);
 }
 
 ProjectModel _projectModelDeserialize(
@@ -235,9 +241,10 @@ ProjectModel _projectModelDeserialize(
   object.supervisor = reader.readStringOrNull(offsets[14]);
   object.systemType = reader.readStringOrNull(offsets[15]);
   object.teamMembersJson = reader.readStringOrNull(offsets[16]);
-  object.type = reader.readString(offsets[17]);
-  object.updatedAt = reader.readDateTime(offsets[18]);
-  object.uuid = reader.readString(offsets[19]);
+  object.totalCost = reader.readDouble(offsets[17]);
+  object.type = reader.readString(offsets[18]);
+  object.updatedAt = reader.readDateTime(offsets[19]);
+  object.uuid = reader.readString(offsets[20]);
   return object;
 }
 
@@ -283,10 +290,12 @@ P _projectModelDeserializeProp<P>(
     case 16:
       return (reader.readStringOrNull(offset)) as P;
     case 17:
-      return (reader.readString(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 18:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 19:
+      return (reader.readDateTime(offset)) as P;
+    case 20:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2600,6 +2609,81 @@ extension ProjectModelQueryFilter
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  totalCostEqualTo(double value, {double epsilon = Query.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'totalCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  totalCostGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'totalCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  totalCostLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'totalCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  totalCostBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'totalCost',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition> typeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -3170,6 +3254,18 @@ extension ProjectModelQuerySortBy
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByTotalCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalCost', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByTotalCostDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalCost', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -3433,6 +3529,18 @@ extension ProjectModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByTotalCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalCost', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByTotalCostDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalCost', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -3598,6 +3706,12 @@ extension ProjectModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByTotalCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalCost');
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByType({
     bool caseSensitive = true,
   }) {
@@ -3729,6 +3843,12 @@ extension ProjectModelQueryProperty
   teamMembersJsonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'teamMembersJson');
+    });
+  }
+
+  QueryBuilder<ProjectModel, double, QQueryOperations> totalCostProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalCost');
     });
   }
 

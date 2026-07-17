@@ -13,19 +13,7 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
 
   @override
   Future<List<ProjectModel>> getProjects() async {
-    final allProjects = await _isar.projectModels.where().findAll();
-    final mockProjects = allProjects
-        .where((p) => p.name.toLowerCase().contains('test project'))
-        .toList();
-    if (mockProjects.isNotEmpty) {
-      await _isar.writeTxn(() async {
-        for (final p in mockProjects) {
-          await _isar.projectModels.delete(p.id);
-        }
-      });
-      return _isar.projectModels.where().findAll();
-    }
-    return allProjects;
+    return _isar.projectModels.where().findAll();
   }
 
   @override
@@ -99,9 +87,7 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
     
     // Timeline auto-updated from progress entries
     final timeline = categoryProgresses.map((c) {
-      String status = 'upcoming';
-      if (c.progress >= 100.0) status = 'completed';
-      else if (c.progress > 0.0) status = 'delayed'; // or 'in-progress', but Timeline handles 'delayed' and 'completed' and 'upcoming'
+      String status = c.status;
 
       return ProjectTimelineItem(
         milestoneName: c.name,

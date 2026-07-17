@@ -22,6 +22,7 @@ class ProjectModel {
   String? client;
   
   late double progress; // 0.0 to 1.0
+  double totalCost = 0.0;
 
   late DateTime startDate;
   late DateTime endDate;

@@ -13,9 +13,9 @@ final dashboardStateProvider = AsyncNotifierProvider<DashboardNotifier, Dashboar
 class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
   @override
   Future<DashboardOverview> build() async {
-    // Watch main modules so dashboard auto-refreshes on CRUD operations
-    ref.watch(progressNotifierProvider); // just tracking progress changes
-
+    // Dashboard auto-refreshes on CRUD operations via specific provider futures.
+    // We intentionally don't watch progressNotifierProvider here because saveReport
+    // explicitly invalidates projectsListProvider, which we already watch below.
     // Wait for all data to load to ensure sync is accurate
     // If any provider throws a RangeError due to Isar schema corruption or invalid data,
     // we catch it and fallback to safe defaults to prevent the EPC offline sync crash.

@@ -28,10 +28,10 @@ const ProjectMaterialRequirementModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'estimatedCost': PropertySchema(
+    r'customName': PropertySchema(
       id: 2,
-      name: r'estimatedCost',
-      type: IsarType.double,
+      name: r'customName',
+      type: IsarType.string,
     ),
     r'isSynced': PropertySchema(id: 3, name: r'isSynced', type: IsarType.bool),
     r'materialUuid': PropertySchema(
@@ -120,6 +120,12 @@ int _projectMaterialRequirementModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.customName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.materialUuid.length * 3;
   bytesCount += 3 + object.projectUuid.length * 3;
   bytesCount += 3 + object.status.length * 3;
@@ -136,7 +142,7 @@ void _projectMaterialRequirementModelSerialize(
 ) {
   writer.writeDouble(offsets[0], object.allocatedQuantity);
   writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeDouble(offsets[2], object.estimatedCost);
+  writer.writeString(offsets[2], object.customName);
   writer.writeBool(offsets[3], object.isSynced);
   writer.writeString(offsets[4], object.materialUuid);
   writer.writeString(offsets[5], object.projectUuid);
@@ -156,7 +162,7 @@ ProjectMaterialRequirementModel _projectMaterialRequirementModelDeserialize(
   final object = ProjectMaterialRequirementModel();
   object.allocatedQuantity = reader.readDouble(offsets[0]);
   object.createdAt = reader.readDateTime(offsets[1]);
-  object.estimatedCost = reader.readDoubleOrNull(offsets[2]);
+  object.customName = reader.readStringOrNull(offsets[2]);
   object.id = id;
   object.isSynced = reader.readBool(offsets[3]);
   object.materialUuid = reader.readString(offsets[4]);
@@ -181,7 +187,7 @@ P _projectMaterialRequirementModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
       return (reader.readBool(offset)) as P;
     case 4:
@@ -762,10 +768,10 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostIsNull() {
+  customNameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'estimatedCost'),
+        const FilterCondition.isNull(property: r'customName'),
       );
     });
   }
@@ -775,10 +781,10 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostIsNotNull() {
+  customNameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'estimatedCost'),
+        const FilterCondition.isNotNull(property: r'customName'),
       );
     });
   }
@@ -788,14 +794,13 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostEqualTo(double? value, {double epsilon = Query.epsilon}) {
+  customNameEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.equalTo(
-          property: r'estimatedCost',
+          property: r'customName',
           value: value,
-
-          epsilon: epsilon,
+          caseSensitive: caseSensitive,
         ),
       );
     });
@@ -806,19 +811,18 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostGreaterThan(
-    double? value, {
+  customNameGreaterThan(
+    String? value, {
     bool include = false,
-    double epsilon = Query.epsilon,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(
           include: include,
-          property: r'estimatedCost',
+          property: r'customName',
           value: value,
-
-          epsilon: epsilon,
+          caseSensitive: caseSensitive,
         ),
       );
     });
@@ -829,19 +833,18 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostLessThan(
-    double? value, {
+  customNameLessThan(
+    String? value, {
     bool include = false,
-    double epsilon = Query.epsilon,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.lessThan(
           include: include,
-          property: r'estimatedCost',
+          property: r'customName',
           value: value,
-
-          epsilon: epsilon,
+          caseSensitive: caseSensitive,
         ),
       );
     });
@@ -852,24 +855,117 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
-  estimatedCostBetween(
-    double? lower,
-    double? upper, {
+  customNameBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    double epsilon = Query.epsilon,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.between(
-          property: r'estimatedCost',
+          property: r'customName',
           lower: lower,
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
-
-          epsilon: epsilon,
+          caseSensitive: caseSensitive,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'customName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'customName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'customName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'customName',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'customName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  customNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'customName', value: ''),
       );
     });
   }
@@ -2098,9 +2194,9 @@ extension ProjectMaterialRequirementModelQuerySortBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
-  sortByEstimatedCost() {
+  sortByCustomName() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'estimatedCost', Sort.asc);
+      return query.addSortBy(r'customName', Sort.asc);
     });
   }
 
@@ -2109,9 +2205,9 @@ extension ProjectMaterialRequirementModelQuerySortBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
-  sortByEstimatedCostDesc() {
+  sortByCustomNameDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'estimatedCost', Sort.desc);
+      return query.addSortBy(r'customName', Sort.desc);
     });
   }
 
@@ -2348,9 +2444,9 @@ extension ProjectMaterialRequirementModelQuerySortThenBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
-  thenByEstimatedCost() {
+  thenByCustomName() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'estimatedCost', Sort.asc);
+      return query.addSortBy(r'customName', Sort.asc);
     });
   }
 
@@ -2359,9 +2455,9 @@ extension ProjectMaterialRequirementModelQuerySortThenBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
-  thenByEstimatedCostDesc() {
+  thenByCustomNameDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'estimatedCost', Sort.desc);
+      return query.addSortBy(r'customName', Sort.desc);
     });
   }
 
@@ -2598,9 +2694,9 @@ extension ProjectMaterialRequirementModelQueryWhereDistinct
     ProjectMaterialRequirementModel,
     QDistinct
   >
-  distinctByEstimatedCost() {
+  distinctByCustomName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'estimatedCost');
+      return query.addDistinctBy(r'customName', caseSensitive: caseSensitive);
     });
   }
 
@@ -2721,10 +2817,10 @@ extension ProjectMaterialRequirementModelQueryProperty
     });
   }
 
-  QueryBuilder<ProjectMaterialRequirementModel, double?, QQueryOperations>
-  estimatedCostProperty() {
+  QueryBuilder<ProjectMaterialRequirementModel, String?, QQueryOperations>
+  customNameProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'estimatedCost');
+      return query.addPropertyName(r'customName');
     });
   }
 

@@ -268,6 +268,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
               _buildSpecsRow('Solar Panels', formatSpecs(solar), isFirst: true),
               _buildSpecsRow('Inverter', formatSpecs(inverter)),
               _buildSpecsRow('Battery System', formatSpecs(battery)),
+              _buildSpecsRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost)),
             ],
           ),
         ),
@@ -331,14 +332,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                     Expanded(flex: 1, child: Text('QTY', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                     Expanded(flex: 1, child: Text('UNIT', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                     Expanded(flex: 2, child: Text('STATUS', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('TOTAL', textAlign: TextAlign.right, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                   ],
                 ),
               ),
               const Divider(height: 1, thickness: 1, color: Colors.black54),
               ...materials.map((m) {
-                final total = m.estimatedCost ?? 0.0;
-                grandTotal += total;
                 return Container(
                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                   decoration: const BoxDecoration(
@@ -350,21 +348,10 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                       Expanded(flex: 1, child: Text(m.requiredQuantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
                       Expanded(flex: 1, child: Text(m.unit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
                       Expanded(flex: 2, child: Text(m.status, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
-                      Expanded(flex: 2, child: Text(total > 0 ? '₱${total.toStringAsFixed(2)}' : '-', textAlign: TextAlign.right, style: const TextStyle(fontSize: 9))),
                     ],
                   ),
                 );
               }),
-              Container(
-                color: const Color(0xFFF5F5F5),
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                child: Row(
-                  children: [
-                    const Expanded(flex: 7, child: Text('GRAND TOTAL', textAlign: TextAlign.right, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('₱${grandTotal.toStringAsFixed(2)}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -494,6 +481,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 _pdfSpecsRow('Solar Panels', formatSpecs(solar)),
                 _pdfSpecsRow('Inverter', formatSpecs(inverter)),
                 _pdfSpecsRow('Battery System', formatSpecs(battery)),
+                _pdfSpecsRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost)),
               ],
             ),
             pw.SizedBox(height: 24),
@@ -505,7 +493,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 8),
-              _buildRealPdfMaterialsTable(materials),
+              _buildRealPdfMaterialsTable(materials, project.totalCost),
               pw.SizedBox(height: 24),
             ],
           ];
@@ -566,8 +554,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
     );
   }
 
-  pw.Widget _buildRealPdfMaterialsTable(List<ProjectMaterialRequirementEntity> materials) {
-    double grandTotal = 0;
+  pw.Widget _buildRealPdfMaterialsTable(List<ProjectMaterialRequirementEntity> materials, double totalCost) {
     return pw.Table(
       border: pw.TableBorder.all(color: const PdfColor.fromInt(0xFF9E9E9E)),
       columnWidths: {
@@ -575,7 +562,6 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         1: const pw.FlexColumnWidth(1),
         2: const pw.FlexColumnWidth(1),
         3: const pw.FlexColumnWidth(2),
-        4: const pw.FlexColumnWidth(2),
       },
       children: [
         // Header
@@ -586,32 +572,27 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('QTY', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('UNIT', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('STATUS', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('TOTAL', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
           ],
         ),
         // Rows
         ...materials.map((m) {
-          final total = m.estimatedCost ?? 0.0;
-          grandTotal += total;
           return pw.TableRow(
             children: [
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.materialUuid, style: const pw.TextStyle(fontSize: 9))),
+              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.customName ?? m.materialUuid, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.requiredQuantity.toString(), textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.unit, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.status, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(total > 0 ? 'PHP ${total.toStringAsFixed(2)}' : '-', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9))),
             ],
           );
         }),
-        // Grand Total
+        // Grand Total omitted from material list, as it was moved to specs. But to satisfy "Replace with project saved totalCost":
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFF5F5F5)),
           children: [
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('GRAND TOTAL', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('TOTAL PROJECT COST', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
             pw.Container(),
             pw.Container(),
-            pw.Container(),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('PHP ${grandTotal.toStringAsFixed(2)}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('PHP ${totalCost.toStringAsFixed(2)}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
           ],
         ),
       ],

@@ -3,8 +3,140 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/materials_entities.dart';
 import '../providers/materials_provider.dart';
+
+const List<String> bomSections = [
+  'DC Wire Materials',
+  'AC Wire Materials',
+  'DC Conduits and Materials',
+  'Solar Mounting Materials',
+  'Protection Devices and Enclosure',
+  'Net Metering (Optional)',
+];
+
+const Map<String, List<(String, String, double)>> onGridBom = {
+  'DC Wire Materials': [
+    ('PV Cable Single Core 2-4mmsq Black', 'roll/100m', 90.0),
+    ('PV Cable Single Core 2-4mmsq Red', 'roll/100m', 90.0),
+    ('35mm² Battery Cable Black', 'meters', 0.0),
+    ('35mm² Battery Cable Red', 'meters', 0.0),
+    ('Terminal Lugs', 'pcs', 28.0),
+    ('Mechanical Lugs', 'pcs', 5.0),
+  ],
+  'AC Wire Materials': [
+    ('14 mm² THHN Supply Wire Black', 'meters', 90.0),
+    ('8 mm² THHN Ground', 'meters', 45.0),
+    ('5.5 mm² THHN Black', 'meters', 90.0),
+    ('5.5 mm² THW Green', 'meters', 45.0),
+    ('2 mm² THHN Black', 'meters', 30.0),
+  ],
+  'DC Conduits and Materials': [
+    ('Metal Clamp 1"', 'pcs', 25.0),
+    ('Plastic Cable Tray 100×50', 'pcs', 10.0),
+    ('Pull Box 4×6×6', 'pcs', 3.0),
+    ('Tex Screw 2"', 'pcs', 60.0),
+    ('HDPE 25mm Flexible Conduit', 'meters', 90.0),
+    ('Moldflex 1"', 'meters', 40.0),
+    ('Plastic Box', 'pcs', 6.0),
+    ('Cable Tie', 'pack', 1.0),
+    ('25mm Liquid Tight Connector', 'pcs', 10.0),
+    ('Electrical Tape Red', 'pcs', 2.0),
+    ('Electrical Tape Black', 'pcs', 2.0),
+  ],
+  'Solar Mounting Materials': [
+    ('2.4 Railing', 'length', 18.0),
+    ('MC4 Connector', 'pairs', 8.0),
+    ('Rail Splice Connector', 'pcs', 15.0),
+    ('Lfoot Long 17cm', 'pcs', 80.0),
+    ('End Clamp', 'pcs', 60.0),
+    ('Mid Clamp', 'pcs', 50.0),
+    ('Expansion Bolt', 'pcs', 12.0),
+  ],
+  'Protection Devices and Enclosure': [
+    ('AC 63A MCB 2 Pole', 'pcs', 3.0),
+    ('AC 275V SPD 2 Pole', 'pcs', 2.0),
+    ('160A DC MCCB', 'pc', 1.0),
+    ('20A DC MCB Breaker', 'pcs', 2.0),
+    ('20A AC MCB Breaker', 'pcs', 3.0),
+    ('32A AC MCB Breaker', 'pcs', 3.0),
+    ('Shrinkable Hose', 'meters', 5.0),
+    ('1000V DC SPD', 'pcs', 3.0),
+    ('19 Way Combiner Box', 'pcs', 2.0),
+    ('ATS 2P YCQ1B-63A', 'pc', 1.0),
+    ('Grounding Rod & Clamp', 'pc', 1.0),
+    ('Vulcaseal 1/4', 'pcs', 2.0),
+    ('NEMA 3R Enclosure', 'pc', 1.0),
+  ],
+  'Net Metering (Optional)': [
+    ('IMC PIPE 1-1/2"', 'length', 0.0),
+    ('IMC Elbow 1-1/2"', 'pcs', 0.0),
+    ('1-1/2" Metal Clamp', 'pcs', 0.0),
+    ('LB Conduit', 'pcs', 0.0),
+  ],
+};
+
+const Map<String, List<(String, String, double)>> hybridBom = {
+  'DC Wire Materials': [
+    ('PV Cable Single Core 2-4mmsq Black', 'roll/100m', 60.0),
+    ('PV Cable Single Core 2-4mmsq Red', 'roll/100m', 60.0),
+    ('35mm² Battery Cable Black', 'meters', 4.0),
+    ('35mm² Battery Cable Red', 'meters', 4.0),
+    ('Terminal Lugs', 'pcs', 28.0),
+    ('Mechanical Lugs', 'pcs', 5.0),
+  ],
+  'AC Wire Materials': [
+    ('5.5mm² THHN Supply Wire Black', 'meters', 60.0),
+    ('3.5mm² THHN Ground', 'meters', 30.0),
+    ('5.5mm² THHN Black', 'meters', 60.0),
+    ('3.5mm² THW Green', 'meters', 30.0),
+    ('2mm² THHN Black', 'meters', 30.0),
+  ],
+  'DC Conduits and Materials': [
+    ('Metal Clamp 1"', 'pcs', 25.0),
+    ('Plastic Cable Tray 100×50', 'pcs', 10.0),
+    ('Pull Box 4×6×6', 'pcs', 3.0),
+    ('Tex Screw 2"', 'pcs', 50.0),
+    ('HDPE 25mm Flexible Conduit', 'meters', 60.0),
+    ('Moldflex 1"', 'meters', 40.0),
+    ('Plastic Box', 'pcs', 6.0),
+    ('Cable Tie', 'pack', 1.0),
+    ('25mm Liquid Tight Connector', 'pcs', 10.0),
+    ('Electrical Tape Red', 'pcs', 2.0),
+    ('Electrical Tape Black', 'pcs', 2.0),
+  ],
+  'Solar Mounting Materials': [
+    ('2.4 Railing', 'lengths', 9.0),
+    ('MC4 Connector', 'pairs', 4.0),
+    ('Rail Splice Connector', 'pcs', 5.0),
+    ('Lfoot Long 17cm', 'pcs', 25.0),
+    ('End Clamp', 'pcs', 15.0),
+    ('Mid Clamp', 'pcs', 20.0),
+    ('Expansion Bolt', 'pcs', 12.0),
+  ],
+  'Protection Devices and Enclosure': [
+    ('AC 32A MCB 2 Pole', 'pcs', 3.0),
+    ('AC 275V SPD 2 Pole', 'pcs', 2.0),
+    ('160A DC MCCB', 'pc', 1.0),
+    ('20A DC MCB Breaker', 'pcs', 2.0),
+    ('20A AC MCB Breaker', 'pcs', 3.0),
+    ('32A AC MCB Breaker', 'pcs', 3.0),
+    ('Shrinkable Hose', 'meters', 5.0),
+    ('1000V DC SPD', 'pcs', 3.0),
+    ('19 Way Combiner Box', 'pcs', 2.0),
+    ('ATS 2P YCQ1B-63A', 'pc', 1.0),
+    ('Grounding Rod & Clamp', 'pc', 1.0),
+    ('Vulcaseal 1/4', 'pcs', 2.0),
+    ('NEMA 3R Enclosure', 'pc', 1.0),
+  ],
+  'Net Metering (Optional)': [
+    ('IMC PIPE 1-1/2"', 'length', 0.0),
+    ('IMC Elbow 1-1/2"', 'pcs', 0.0),
+    ('1-1/2" Metal Clamp', 'pcs', 0.0),
+    ('LB Conduit', 'pcs', 0.0),
+  ],
+};
 
 class ProjectMaterialRequirementsTab extends ConsumerStatefulWidget {
   final String projectUuid;
@@ -22,64 +154,67 @@ class ProjectMaterialRequirementsTab extends ConsumerStatefulWidget {
 
 class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterialRequirementsTab> {
   bool _isSeeding = false;
+  
+  bool get isOngrid => widget.projectType.toLowerCase().contains('on-grid') || widget.projectType.toLowerCase().contains('ongrid');
 
   Future<void> _seedDefaults() async {
     setState(() => _isSeeding = true);
-    final isOngrid = widget.projectType.toLowerCase().contains('on-grid') || widget.projectType.toLowerCase().contains('ongrid');
 
-    final hybridMaterials = [
-      ('JINKO 640W', 'pcs', 8.0, 49600.0),
-      ('PYLONTECH FIDUS 5.12KWH', 'pcs', 1.0, 42000.0),
-      ('S6-EH1P5K-L-PLUS', 'pcs', 1.0, 41000.0),
-      ('Twisted Wire #18', 'pcs', 1.0, 3700.0),
-      ('PV Cable Single Core 2-4mmsq Black', 'roll', 60.0, 3900.0),
-      ('PV Cable Single Core 2-4mmsq Red', 'roll', 60.0, 3900.0),
-      ('35mm2 Battery Cable Black', 'meters', 4.0, 2400.0),
-      ('35mm2 Battery Cable Red', 'meters', 4.0, 2400.0),
-      ('Terminal lugs', 'pcs', 28.0, 2520.0),
-      ('5.5mm2 THHN Supply Wire Black', 'meters', 60.0, 4800.0),
-      ('3.5mm2 THHN Ground', 'meters', 30.0, 2400.0),
-      ('5.5 mm2 THHN Black', 'meters', 60.0, 4800.0),
-      ('HDPE 25mm Flexible Conduit', 'meters', 60.0, 6000.0),
-      ('Plastic Box', 'pcs', 6.0, 6000.0),
-      ('2.4 Railing', 'length', 9.0, 4500.0),
-      ('Lfoot Long 17cm', 'pcs', 25.0, 8750.0),
-    ];
-
-    final ongridMaterials = [
-      ('Jinko 640W', 'pcs', 16.0, 6600.0),
-      ('S6-EH1P10K-L-PLUS (21A)', 'pcs', 1.0, 58000.0),
-      ('PV Cable Single Core 2-4mmsq Black', 'meters', 90.0, 65.0),
-      ('PV Cable Single Core 2-4mmsq Red', 'meters', 90.0, 65.0),
-      ('Terminal lugs', 'pcs', 28.0, 90.0),
-      ('14 mm2 THHN Supply Wire Black', 'meters', 90.0, 300.0),
-      ('8 mm2 THHN Ground', 'meters', 45.0, 150.0),
-      ('5.5 mm2 THHN Black', 'meters', 90.0, 80.0),
-      ('5.5 mm2 THW Green', 'meters', 45.0, 80.0),
-      ('Metal Clamp 1"', 'pcs', 25.0, 25.0),
-      ('HDPE 25mm Flexible Conduit', 'meters', 90.0, 100.0),
-      ('Plastic Box', 'pcs', 6.0, 1000.0),
-      ('2.4 Railing', 'length', 18.0, 500.0),
-      ('Lfoot Long 17cm', 'pcs', 80.0, 350.0),
-      ('AC 63A MCB 2POLE', 'pcs', 3.0, 4000.0),
-      ('19 Way Combiner Box', 'pcs', 2.0, 1500.0),
-    ];
-
-    final defaultMaterials = isOngrid ? ongridMaterials : hybridMaterials;
-
-    for (final item in defaultMaterials) {
-      final req = ProjectMaterialRequirementEntity(
-        uuid: const Uuid().v4(),
-        projectUuid: widget.projectUuid,
-        materialUuid: item.$1,
-        requiredQuantity: item.$3,
-        allocatedQuantity: 0.0,
-        unit: item.$2,
-        estimatedCost: item.$4,
-      );
-      await ref.read(materialsNotifierProvider.notifier).saveRequirement(req);
+    final defaultBom = isOngrid ? onGridBom : hybridBom;
+    
+    final existingReqs = await ref.read(materialsRepositoryProvider).getRequirementsForProject(widget.projectUuid);
+    
+    // Gather all valid material names for the current project type
+    final validNames = <String>{};
+    for (final items in defaultBom.values) {
+      for (final item in items) {
+        validNames.add(item.$1);
+      }
     }
+
+    // Delete existing requirements that do NOT belong to the current template
+    final notifier = ref.read(materialsNotifierProvider.notifier);
+    for (final req in existingReqs) {
+      if (!validNames.contains(req.materialUuid)) {
+        await notifier.deleteRequirement(req.uuid, widget.projectUuid);
+      }
+    }
+
+    final existingNames = existingReqs.map((e) => e.materialUuid).toSet();
+
+    for (final section in bomSections) {
+      final items = defaultBom[section] ?? [];
+      for (final item in items) {
+        if (!existingNames.contains(item.$1)) {
+          final req = ProjectMaterialRequirementEntity(
+            uuid: const Uuid().v4(),
+            projectUuid: widget.projectUuid,
+            materialUuid: item.$1,
+            requiredQuantity: item.$3,
+            allocatedQuantity: 0.0,
+            unit: item.$2,
+            status: 'Pending',
+          );
+          await notifier.saveRequirement(req);
+        }
+      }
+    }
+    
+    // Also invalidate the cache so UI updates
+    ref.invalidate(projectMaterialRequirementsProvider(widget.projectUuid));
     setState(() => _isSeeding = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndSeed();
+    });
+  }
+  
+  Future<void> _checkAndSeed() async {
+    await _seedDefaults();
   }
 
   @override
@@ -91,42 +226,41 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Material Requirements', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-              Row(
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.refresh, color: Colors.red),
-                    label: const Text('Reset All to 0', style: TextStyle(color: Colors.red)),
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Reset BOM?'),
-                          content: const Text('This will set Qty, Allocated, and Cost to 0 for ALL projects.'),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reset', style: TextStyle(color: Colors.red))),
-                          ],
-                        ),
-                      );
-                      if (confirm == true) {
-                        await ref.read(materialsRepositoryProvider).forceResetAllRequirementsToZero();
-                        ref.invalidate(projectMaterialRequirementsProvider);
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  AppButton(
-                    text: 'Add Material',
-                    icon: Icons.add,
-                    width: 150,
-                    onPressed: () => _showAddRequirementDialog(context),
-                  ),
-                ],
+              Text(
+                'Material Requirements', 
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+              ),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  alignment: Alignment.centerLeft,
+                ),
+                icon: const Icon(Icons.refresh, color: Colors.red, size: 18),
+                label: const Text('Reset All to 0', style: TextStyle(color: Colors.red, fontSize: 13)),
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Reset BOM?'),
+                      content: const Text('This will set Qty and Allocated to 0 for ALL projects.'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reset', style: TextStyle(color: Colors.red))),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await ref.read(materialsRepositoryProvider).forceResetAllRequirementsToZero();
+                    ref.invalidate(projectMaterialRequirementsProvider);
+                  }
+                },
               ),
             ],
           ),
@@ -144,10 +278,10 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('No material requirements assigned yet.', style: theme.textTheme.bodyMedium),
+                      Text('No material requirements assigned.', style: theme.textTheme.bodyMedium),
                       const SizedBox(height: 16),
                       AppButton(
-                        text: 'Load Default BOM Template',
+                        text: 'Load BOM Template',
                         icon: Icons.download,
                         width: 250,
                         variant: AppButtonVariant.secondary,
@@ -157,77 +291,62 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   ),
                 );
               }
-              final grandTotal = requirements.fold<double>(0, (sum, req) => sum + (req.estimatedCost ?? 0));
 
-              return Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Grand Total', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        Text('₱${grandTotal.toStringAsFixed(2)}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: requirements.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final requirement = requirements[index];
-                      return AppCard(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.category, color: Colors.grey),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Wrap(
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    spacing: 8,
-                                    children: [
-                                      Text(requirement.materialUuid, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                      _buildStatusChip(requirement.status),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Wrap(
-                                    spacing: 12,
-                                    children: [
-                                      Text('Required: ${requirement.requiredQuantity} ${requirement.unit}'),
-                                      Text('Allocated: ${requirement.allocatedQuantity} ${requirement.unit}'),
-                                      if (requirement.estimatedCost != null) ...[
-                                        Text(
-                                          'Total: ₱${requirement.estimatedCost!.toStringAsFixed(2)}', 
-                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () => _showAddRequirementDialog(context, existingRequirement: requirement),
-                            ),
-                          ],
+              // Group requirements by section
+              final Map<String, List<ProjectMaterialRequirementEntity>> groupedReqs = {};
+              final defaultBom = isOngrid ? onGridBom : hybridBom;
+              
+              for (final req in requirements) {
+                String foundSection = 'Other Materials';
+                for (final section in bomSections) {
+                  if (defaultBom[section]?.any((item) => item.$1 == req.materialUuid) ?? false) {
+                    foundSection = section;
+                    break;
+                  }
+                }
+                groupedReqs.putIfAbsent(foundSection, () => []).add(req);
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 32.0),
+                itemCount: bomSections.length + (groupedReqs.containsKey('Other Materials') ? 1 : 0),
+                itemBuilder: (context, index) {
+                  final sectionName = index < bomSections.length 
+                      ? bomSections[index] 
+                      : 'Other Materials';
+                      
+                  final sectionReqs = groupedReqs[sectionName] ?? [];
+                  if (sectionReqs.isEmpty) return const SizedBox.shrink();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      Text(
+                        sectionName.toUpperCase(),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
                         ),
-                      );
-                    },
-                  ),
-                ],
+                      ),
+                      const SizedBox(height: 12),
+                      AppCard(
+                        padding: EdgeInsets.zero,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: sectionReqs.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (ctx, idx) {
+                            final req = sectionReqs[idx];
+                            return _buildMaterialRow(context, req);
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -236,178 +355,178 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
     );
   }
 
+  Widget _buildMaterialRow(BuildContext context, ProjectMaterialRequirementEntity req) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  req.customName ?? req.materialUuid,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text('Qty: ${req.requiredQuantity} ${req.unit}', style: const TextStyle(fontSize: 13, color: Colors.white24)),
+                    _buildStatusChip(req.status),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+            onPressed: () => _showEditRequirementDialog(context, req),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status) {
-      case 'Approved': color = Colors.green; break;
-      case 'Procured': color = Colors.blue; break;
+      case 'Requested': color = Colors.orange; break;
+      case 'Ordered': color = Colors.blue; break;
       case 'Delivered': color = Colors.purple; break;
-      default: color = Colors.orange;
+      case 'Installed': color = Colors.green; break;
+      case 'Cancelled': color = Colors.red; break;
+      case 'Pending':
+      default: color = Colors.grey; break;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        border: Border.all(color: color),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(status, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+      child: Text(
+        status, 
+        style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)
+      ),
     );
   }
 
-  void _showAddRequirementDialog(BuildContext context, {ProjectMaterialRequirementEntity? existingRequirement}) {
+  void _showEditRequirementDialog(BuildContext context, ProjectMaterialRequirementEntity req) {
     showDialog(
       context: context,
-      builder: (context) => _AddRequirementDialog(
+      builder: (context) => _EditRequirementDialog(
         projectUuid: widget.projectUuid,
-        existingRequirement: existingRequirement,
+        req: req,
       ),
     );
   }
 }
 
-class _AddRequirementDialog extends ConsumerStatefulWidget {
+class _EditRequirementDialog extends ConsumerStatefulWidget {
   final String projectUuid;
-  final ProjectMaterialRequirementEntity? existingRequirement;
+  final ProjectMaterialRequirementEntity req;
 
-  const _AddRequirementDialog({
+  const _EditRequirementDialog({
     required this.projectUuid,
-    this.existingRequirement,
+    required this.req,
   });
 
   @override
-  ConsumerState<_AddRequirementDialog> createState() => _AddRequirementDialogState();
+  ConsumerState<_EditRequirementDialog> createState() => _EditRequirementDialogState();
 }
 
-class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
+class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _unitController = TextEditingController();
-  TextEditingController _requiredController = TextEditingController();
-  TextEditingController _allocatedController = TextEditingController();
-  TextEditingController _totalCostController = TextEditingController();
-  String _status = 'Pending';
+  late TextEditingController _qtyController;
+  late TextEditingController _nameController;
+  late TextEditingController _unitController;
+  late String _status;
 
   final FocusNode _qtyFocus = FocusNode();
-  final FocusNode _allocFocus = FocusNode();
-  final FocusNode _totalFocus = FocusNode();
 
-  void _setupZeroClear(TextEditingController controller, FocusNode node, {bool isCurrency = false}) {
-    node.addListener(() {
-      if (node.hasFocus) {
-        if (controller.text == '0' || controller.text == '0.0' || controller.text == '0.00') {
-          controller.clear();
-        }
+  @override
+  void initState() {
+    super.initState();
+    final validStatuses = ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled'];
+    _status = validStatuses.contains(widget.req.status) ? widget.req.status : 'Pending';
+    
+    // Strip trailing .0 if integer
+    final qty = widget.req.requiredQuantity;
+    _qtyController = TextEditingController(text: qty == qty.truncateToDouble() ? qty.toInt().toString() : qty.toString());
+    _nameController = TextEditingController(text: widget.req.customName ?? widget.req.materialUuid);
+    _unitController = TextEditingController(text: widget.req.unit);
+
+    _qtyFocus.addListener(() {
+      if (_qtyFocus.hasFocus) {
+        if (double.tryParse(_qtyController.text) == 0) _qtyController.clear();
       } else {
-        if (controller.text.trim().isEmpty) {
-          controller.text = isCurrency ? '0.00' : '0';
-        }
+        if (_qtyController.text.trim().isEmpty) _qtyController.text = '0';
       }
     });
   }
 
   @override
-  void initState() {
-    super.initState();
-    _status = widget.existingRequirement?.status ?? 'Pending';
-    _nameController.text = widget.existingRequirement?.materialUuid ?? '';
-    _unitController.text = widget.existingRequirement?.unit ?? '';
-    _requiredController.text = widget.existingRequirement?.requiredQuantity.toString() ?? '0';
-    _allocatedController.text = widget.existingRequirement?.allocatedQuantity.toString() ?? '0';
-    final cost = widget.existingRequirement?.estimatedCost;
-    if (cost != null) {
-      _totalCostController.text = cost.toStringAsFixed(2);
-    } else {
-      _totalCostController.text = '0.00';
-    }
-
-    _setupZeroClear(_requiredController, _qtyFocus);
-    _setupZeroClear(_allocatedController, _allocFocus);
-    _setupZeroClear(_totalCostController, _totalFocus, isCurrency: true);
-  }
-
-  @override
   void dispose() {
     _qtyFocus.dispose();
-    _allocFocus.dispose();
-    _totalFocus.dispose();
+    _qtyController.dispose();
     _nameController.dispose();
     _unitController.dispose();
-    _requiredController.dispose();
-    _allocatedController.dispose();
-    _totalCostController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.existingRequirement == null ? 'Add Material Requirement' : 'Edit Material Requirement'),
+      title: const Text('Edit Material'),
       content: SizedBox(
-        width: 500,
+        width: 400,
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DropdownButtonFormField<String>(
-                  value: _status,
-                  decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-                  items: ['Pending', 'Approved', 'Procured', 'Delivered']
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis)))
-                      .toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _status = val);
-                  },
-                  isExpanded: true,
-                ),
-                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Material Name (BOM item)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'Material Name', border: OutlineInputBorder()),
                   validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _unitController,
-                  decoration: const InputDecoration(labelText: 'Unit (e.g., pcs, meters)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'Unit', border: OutlineInputBorder()),
                   validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _status,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
+                  items: ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled']
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _status = val);
+                  },
+                ),
+                const SizedBox(height: 24),
                 TextFormField(
-                  controller: _requiredController,
+                  controller: _qtyController,
                   focusNode: _qtyFocus,
-                  decoration: const InputDecoration(labelText: 'Required Quantity', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity', 
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Required';
                     if (double.tryParse(val) == null) return 'Must be a number';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _allocatedController,
-                  focusNode: _allocFocus,
-                  decoration: const InputDecoration(labelText: 'Allocated/Delivered Quantity', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) return 'Required';
-                    if (double.tryParse(val) == null) return 'Must be a number';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _totalCostController,
-                  focusNode: _totalFocus,
-                  decoration: const InputDecoration(labelText: 'Total Cost (₱)', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
-                  validator: (val) {
-                    if (val != null && val.isNotEmpty) {
-                      if (double.tryParse(val) == null) return 'Must be a number';
-                    }
                     return null;
                   },
                 ),
@@ -417,29 +536,22 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
         ),
       ),
       actions: [
-        if (widget.existingRequirement != null)
-          TextButton(
-            onPressed: () {
-              ref.read(materialsNotifierProvider.notifier).deleteRequirement(widget.existingRequirement!.uuid, widget.projectUuid);
-              Navigator.pop(context);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              final req = ProjectMaterialRequirementEntity(
-                uuid: widget.existingRequirement?.uuid ?? const Uuid().v4(),
+              final customName = _nameController.text.trim();
+              final updatedReq = ProjectMaterialRequirementEntity(
+                uuid: widget.req.uuid,
                 projectUuid: widget.projectUuid,
-                materialUuid: _nameController.text.trim(),
-                requiredQuantity: double.parse(_requiredController.text),
-                allocatedQuantity: double.parse(_allocatedController.text),
+                materialUuid: widget.req.materialUuid,
+                requiredQuantity: double.parse(_qtyController.text),
+                allocatedQuantity: widget.req.allocatedQuantity,
                 unit: _unitController.text.trim(),
-                estimatedCost: _totalCostController.text.isNotEmpty ? double.parse(_totalCostController.text) : null,
                 status: _status,
+                customName: customName == widget.req.materialUuid ? null : customName,
               );
-              ref.read(materialsNotifierProvider.notifier).saveRequirement(req);
+              ref.read(materialsNotifierProvider.notifier).saveRequirement(updatedReq);
               Navigator.pop(context);
             }
           },

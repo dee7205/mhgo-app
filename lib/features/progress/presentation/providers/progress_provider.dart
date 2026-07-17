@@ -61,7 +61,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     
     // Invalidate related providers so Projects views refresh with the new data
     ref.invalidate(projectsListProvider);
-    ref.invalidate(projectDetailsProvider);
+    ref.invalidate(projectDetailsProvider(report.projectUuid));
     
     await refresh();
   }
@@ -72,14 +72,19 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     await refresh();
   }
 
-  ProgressReport? _getReport(String uuid) {
+  Future<ProgressReport?> _getReport(String uuid) async {
     final reports = state.value;
-    if (reports == null) return null;
-    try {
-      return reports.firstWhere((r) => r.uuid == uuid || r.projectUuid == uuid);
-    } catch (e) {
-      return null;
+    if (reports != null) {
+      try {
+        final r = reports.firstWhere((r) => r.uuid == uuid || r.projectUuid == uuid);
+        return r;
+      } catch (e) {
+        // Fallback to fetch
+      }
     }
+    final getReportById = ref.read(getProgressReportByIdProvider);
+    final report = await getReportById(uuid);
+    return report;
   }
 
   double _calculateOverallProgress(List<ProgressCategory> categories) {
@@ -90,7 +95,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> addCategory(String reportUuid, ProgressCategory category) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final updatedCategories = List<ProgressCategory>.from(report.categories)..add(category);
@@ -110,7 +115,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> updateCategory(String reportUuid, ProgressCategory category) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final updatedCategories = report.categories.map((c) => c.id == category.id ? category : c).toList();
@@ -130,7 +135,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> deleteCategory(String reportUuid, String categoryId) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final updatedCategories = report.categories.where((c) => c.id != categoryId).toList();
@@ -150,7 +155,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> reorderCategories(String reportUuid, int oldIndex, int newIndex) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final categories = List<ProgressCategory>.from(report.categories);
@@ -177,7 +182,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> toggleAutoCalculate(String reportUuid, bool isAuto) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     double overallProgress = report.overallProgress;
@@ -195,7 +200,7 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   }
 
   Future<void> updateOverallProgress(String reportUuid, double progress) async {
-    final report = _getReport(reportUuid);
+    final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final updatedReport = report.copyWith(

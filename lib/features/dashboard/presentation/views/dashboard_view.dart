@@ -24,7 +24,8 @@ class DashboardView extends ConsumerStatefulWidget {
   ConsumerState<DashboardView> createState() => _DashboardViewState();
 }
 
-class _DashboardViewState extends ConsumerState<DashboardView> with TickerProviderStateMixin {
+class _DashboardViewState extends ConsumerState<DashboardView>
+    with TickerProviderStateMixin {
   bool _showNotifications = false;
   int _touchedChartIndex = -1;
   DateTime _lastSyncTime = DateTime.now();
@@ -78,7 +79,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
           ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          ),
           backgroundColor: AppTheme.lightPrimary,
         ),
       );
@@ -87,16 +90,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
 
   // Quick Action Handler
   void _handleQuickAction(String actionTitle) {
-    if (actionTitle.toLowerCase().contains('daily activity report') || 
+    if (actionTitle.toLowerCase().contains('daily activity report') ||
         actionTitle.toLowerCase().contains('dar')) {
-      if (actionTitle.toLowerCase().contains('new') || 
+      if (actionTitle.toLowerCase().contains('new') ||
           actionTitle.toLowerCase().contains('create')) {
         context.push('/dar/create');
       } else {
         context.push('/dar');
       }
     } else if (actionTitle.toLowerCase().contains('survey')) {
-      if (actionTitle.toLowerCase().contains('new') || 
+      if (actionTitle.toLowerCase().contains('new') ||
           actionTitle.toLowerCase().contains('create')) {
         context.push('/survey/new');
       } else {
@@ -104,7 +107,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       }
     } else if (actionTitle.toLowerCase().contains('inspection') ||
         actionTitle.toLowerCase().contains('qa/qc')) {
-      if (actionTitle.toLowerCase().contains('new') || 
+      if (actionTitle.toLowerCase().contains('new') ||
           actionTitle.toLowerCase().contains('create') ||
           actionTitle.toLowerCase().contains('checklist')) {
         context.push('/inspections/new');
@@ -118,7 +121,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         SnackBar(
           content: Text('Triggered Action: $actionTitle'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          ),
         ),
       );
     }
@@ -132,10 +137,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
 
     // Define keyboard shortcuts
     final shortcuts = <ShortcutActivator, VoidCallback>{
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR): _triggerSync,
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN): () => _handleQuickAction('New Project Creation'),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyD): () => _handleQuickAction('Create Daily Activity Report (DAR)'),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyI): () => _handleQuickAction('New QA/QC Site Inspection'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR):
+          _triggerSync,
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN): () =>
+          _handleQuickAction('New Project Creation'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyD): () =>
+          _handleQuickAction('Create Daily Activity Report (DAR)'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyI): () =>
+          _handleQuickAction('New QA/QC Site Inspection'),
     };
 
     return CallbackShortcuts(
@@ -146,7 +155,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
           appBar: AppBar(
             title: Row(
               children: [
-                const Icon(Icons.solar_power_outlined, size: 24, color: Color(0xFF2E7D32)),
+                const Icon(
+                  Icons.solar_power_outlined,
+                  size: 24,
+                  color: Color(0xFF2E7D32),
+                ),
                 const SizedBox(width: 10),
                 Text(
                   'MHGo - Built for MHG',
@@ -170,7 +183,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                   size: 20,
                 ),
                 tooltip: 'Toggle Theme',
-                onPressed: () => ref.read(themeModeProvider.notifier).toggleTheme(context),
+                onPressed: () =>
+                    ref.read(themeModeProvider.notifier).toggleTheme(context),
               ),
 
               // Notification Bell
@@ -179,12 +193,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 children: [
                   IconButton(
                     icon: Icon(
-                      _showNotifications ? Icons.notifications : Icons.notifications_none_outlined,
+                      _showNotifications
+                          ? Icons.notifications
+                          : Icons.notifications_none_outlined,
                       size: 20,
-                      color: _showNotifications ? theme.colorScheme.primary : null,
+                      color: _showNotifications
+                          ? theme.colorScheme.primary
+                          : null,
                     ),
                     tooltip: 'System Alerts',
-                    onPressed: () => setState(() => _showNotifications = !_showNotifications),
+                    onPressed: () => setState(
+                      () => _showNotifications = !_showNotifications,
+                    ),
                   ),
                   Positioned(
                     top: 8,
@@ -212,12 +232,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                   children: [
                     Expanded(
                       child: stateAsync.when(
-                        loading: () => _DashboardSkeleton(pulse: _pulseAnimation),
+                        loading: () =>
+                            _DashboardSkeleton(pulse: _pulseAnimation),
                         error: (err, stack) => _buildErrorState(err),
                         data: (data) {
-                          final double screenWidth = MediaQuery.sizeOf(context).width;
-                          final double horizontalPadding = screenWidth < 600 ? 16.0 : 32.0;
-                          final double verticalPadding = screenWidth < 600 ? 16.0 : 24.0;
+                          final double screenWidth = MediaQuery.sizeOf(
+                            context,
+                          ).width;
+                          final double horizontalPadding = screenWidth < 600
+                              ? 16.0
+                              : 32.0;
+                          final double verticalPadding = screenWidth < 600
+                              ? 16.0
+                              : 24.0;
                           return RefreshIndicator(
                             onRefresh: _triggerSync,
                             child: SingleChildScrollView(
@@ -248,56 +275,104 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                         const SizedBox(height: 24),
                                         _buildUrgentTasks(data.urgentTasks),
                                         const SizedBox(height: 24),
-                                        _buildProjectDistribution(data.projects),
+                                        _buildProjectDistribution(
+                                          data.projects,
+                                        ),
                                         const SizedBox(height: 24),
-                                        _buildInventoryAlerts(data.lowStockMaterials),
+                                        _buildInventoryAlerts(
+                                          data.lowStockMaterials,
+                                        ),
                                         const SizedBox(height: 24),
-                                        _buildQCFeed(data.recentInspections, data.projects),
+                                        _buildQCFeed(
+                                          data.recentInspections,
+                                          data.projects,
+                                        ),
                                         const SizedBox(height: 24),
-                                        _buildActivityTimeline(theme, isDark, data),
+                                        _buildActivityTimeline(
+                                          theme,
+                                          isDark,
+                                          data,
+                                        ),
                                       ],
                                     ),
                                     tablet: Column(
                                       children: [
                                         Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(child: _buildQuickActionsPanel(theme, isDark)),
+                                            Expanded(
+                                              child: _buildQuickActionsPanel(
+                                                theme,
+                                                isDark,
+                                              ),
+                                            ),
                                             const SizedBox(width: 24),
-                                            Expanded(child: _buildUrgentTasks(data.urgentTasks)),
+                                            Expanded(
+                                              child: _buildUrgentTasks(
+                                                data.urgentTasks,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 24),
                                         Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(child: _buildProjectDistribution(data.projects)),
+                                            Expanded(
+                                              child: _buildProjectDistribution(
+                                                data.projects,
+                                              ),
+                                            ),
                                             const SizedBox(width: 24),
-                                            Expanded(child: _buildInventoryAlerts(data.lowStockMaterials)),
+                                            Expanded(
+                                              child: _buildInventoryAlerts(
+                                                data.lowStockMaterials,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 24),
                                         Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(child: _buildQCFeed(data.recentInspections, data.projects)),
+                                            Expanded(
+                                              child: _buildQCFeed(
+                                                data.recentInspections,
+                                                data.projects,
+                                              ),
+                                            ),
                                             const SizedBox(width: 24),
-                                            Expanded(child: _buildActivityTimeline(theme, isDark, data)),
+                                            Expanded(
+                                              child: _buildActivityTimeline(
+                                                theme,
+                                                isDark,
+                                                data,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ],
                                     ),
                                     desktop: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         // Left grid content - 60%
                                         Expanded(
                                           flex: 3,
                                           child: Column(
                                             children: [
-                                              _buildProjectDistribution(data.projects),
+                                              _buildProjectDistribution(
+                                                data.projects,
+                                              ),
                                               const SizedBox(height: 28),
-                                              _buildQCFeed(data.recentInspections, data.projects),
+                                              _buildQCFeed(
+                                                data.recentInspections,
+                                                data.projects,
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -307,13 +382,24 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                           flex: 2,
                                           child: Column(
                                             children: [
-                                              _buildQuickActionsPanel(theme, isDark),
+                                              _buildQuickActionsPanel(
+                                                theme,
+                                                isDark,
+                                              ),
                                               const SizedBox(height: 28),
-                                              _buildUrgentTasks(data.urgentTasks),
+                                              _buildUrgentTasks(
+                                                data.urgentTasks,
+                                              ),
                                               const SizedBox(height: 28),
-                                              _buildInventoryAlerts(data.lowStockMaterials),
+                                              _buildInventoryAlerts(
+                                                data.lowStockMaterials,
+                                              ),
                                               const SizedBox(height: 28),
-                                              _buildActivityTimeline(theme, isDark, data),
+                                              _buildActivityTimeline(
+                                                theme,
+                                                isDark,
+                                                data,
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -328,7 +414,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                       ),
                     ),
                     // If on wide screen (desktop), show side-by-side
-                    if (_showNotifications && MediaQuery.sizeOf(context).width >= 1000)
+                    if (_showNotifications &&
+                        MediaQuery.sizeOf(context).width >= 1000)
                       _buildRightNotificationPanel(theme, isDark),
                   ],
                 ),
@@ -342,9 +429,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                       // Dimmed background tap-to-dismiss
                       GestureDetector(
                         onTap: () => setState(() => _showNotifications = false),
-                        child: Container(
-                          color: Colors.black45,
-                        ),
+                        child: Container(color: Colors.black45),
                       ),
                       // Slide-in panel from the right
                       Align(
@@ -374,10 +459,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+            color: isDark
+                ? Colors.white.withOpacity(0.04)
+                : Colors.black.withOpacity(0.03),
             shape: BoxShape.circle,
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+              color: isDark
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.05),
             ),
           ),
           child: AnimatedBuilder(
@@ -389,13 +478,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 decoration: BoxDecoration(
                   color: _isSyncing
                       ? Colors.amber
-                      : const Color(0xFF2E7D32).withOpacity(_pulseAnimation.value),
+                      : const Color(
+                          0xFF2E7D32,
+                        ).withOpacity(_pulseAnimation.value),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: _isSyncing
                           ? Colors.amber.withOpacity(0.4)
-                          : const Color(0xFF2E7D32).withOpacity(0.4 * _pulseAnimation.value),
+                          : const Color(
+                              0xFF2E7D32,
+                            ).withOpacity(0.4 * _pulseAnimation.value),
                       blurRadius: 4,
                       spreadRadius: 2,
                     ),
@@ -411,10 +504,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        color: isDark
+            ? Colors.white.withOpacity(0.04)
+            : Colors.black.withOpacity(0.03),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.05),
         ),
       ),
       child: Row(
@@ -430,13 +527,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 decoration: BoxDecoration(
                   color: _isSyncing
                       ? Colors.amber
-                      : const Color(0xFF2E7D32).withOpacity(_pulseAnimation.value),
+                      : const Color(
+                          0xFF2E7D32,
+                        ).withOpacity(_pulseAnimation.value),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: _isSyncing
                           ? Colors.amber.withOpacity(0.4)
-                          : const Color(0xFF2E7D32).withOpacity(0.4 * _pulseAnimation.value),
+                          : const Color(
+                              0xFF2E7D32,
+                            ).withOpacity(0.4 * _pulseAnimation.value),
                       blurRadius: 4,
                       spreadRadius: 2,
                     ),
@@ -447,9 +548,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
           ),
           const SizedBox(width: 8),
           Text(
-            _isSyncing
-                ? 'Syncing...'
-                : 'Offline-First (Synced $formattedTime)',
+            _isSyncing ? 'Syncing...' : 'Offline-First (Synced $formattedTime)',
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -477,7 +576,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
   }
 
   // --- "WHAT DO I NEED TO DO TODAY" WELCOME SECTION ---
-  Widget _buildWelcomeHeader(ThemeData theme, bool isDark, DashboardOverview data) {
+  Widget _buildWelcomeHeader(
+    ThemeData theme,
+    bool isDark,
+    DashboardOverview data,
+  ) {
     final String timeGreeting;
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -488,8 +591,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       timeGreeting = 'Good evening';
     }
 
-    final activeActionCount = data.urgentTasks.length +
-        data.recentInspections.where((a) => a.status.toLowerCase() == 'rejected').length +
+    final activeActionCount =
+        data.urgentTasks.length +
+        data.recentInspections
+            .where((a) => a.status.toLowerCase() == 'rejected')
+            .length +
         data.lowStockMaterials.length;
 
     return Row(
@@ -511,19 +617,27 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               RichText(
                 text: TextSpan(
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                    color: isDark
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.lightTextSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                   children: [
-                    const TextSpan(text: 'What do I need to do today? You have '),
+                    const TextSpan(
+                      text: 'What do I need to do today? You have ',
+                    ),
                     TextSpan(
                       text: '$activeActionCount critical items',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: activeActionCount > 0 ? theme.colorScheme.error : theme.colorScheme.primary,
+                        color: activeActionCount > 0
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.primary,
                       ),
                     ),
-                    const TextSpan(text: ' requiring immediate attention on site.'),
+                    const TextSpan(
+                      text: ' requiring immediate attention on site.',
+                    ),
                   ],
                 ),
               ),
@@ -576,34 +690,56 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         accentColor: const Color(0xFF2196F3), // Accent Sky Blue
         theme: theme,
         isDark: isDark,
-        customBody: data.projectsByStage.isEmpty 
-            ? Text('No project data', style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor))
+        customBody: data.projectsByStage.isEmpty
+            ? Text(
+                'No project data',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.disabledColor,
+                ),
+              )
             : Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: data.projectsByStage.entries.map((e) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2196F3).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.2)),
-                  ),
-                  child: Text(
-                    '${e.key}: ${e.value}', 
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold, 
-                      color: isDark ? const Color(0xFF64B5F6) : const Color(0xFF1976D2),
-                    ),
-                  ),
-                )).toList(),
+                children: data.projectsByStage.entries
+                    .map(
+                      (e) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2196F3).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: const Color(
+                              0xFF2196F3,
+                            ).withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(
+                          '${e.key}: ${e.value}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? const Color(0xFF64B5F6)
+                                : const Color(0xFF1976D2),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
       ),
       _KpiCard(
         title: 'LOGISTICS & SHORTAGES',
         value: '${data.lowStockMaterials.length} Alerts',
-        subtitle: data.lowStockMaterials.isEmpty ? 'All items in stock' : 'Warehouse reorders due',
+        subtitle: data.lowStockMaterials.isEmpty
+            ? 'All items in stock'
+            : 'Warehouse reorders due',
         icon: Icons.warehouse_rounded,
-        accentColor: data.lowStockMaterials.isEmpty ? Colors.green : const Color(0xFFD32F2F), // Danger Red
+        accentColor: data.lowStockMaterials.isEmpty
+            ? Colors.green
+            : const Color(0xFFD32F2F), // Danger Red
         theme: theme,
         isDark: isDark,
       ),
@@ -611,20 +747,28 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
 
     if (crossAxisCount == 1) {
       return Column(
-        children: cards.map((c) => Padding(
-          padding: EdgeInsets.only(bottom: spacing),
-          child: c,
-        )).toList(),
+        children: cards
+            .map(
+              (c) => Padding(
+                padding: EdgeInsets.only(bottom: spacing),
+                child: c,
+              ),
+            )
+            .toList(),
       );
     }
 
     if (crossAxisCount == 2) {
       if (cards.length < 4) {
         return Column(
-          children: cards.map((c) => Padding(
-            padding: EdgeInsets.only(bottom: spacing),
-            child: c,
-          )).toList(),
+          children: cards
+              .map(
+                (c) => Padding(
+                  padding: EdgeInsets.only(bottom: spacing),
+                  child: c,
+                ),
+              )
+              .toList(),
         );
       }
       return Column(
@@ -641,7 +785,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
             children: [
               Expanded(child: cards[2]),
               SizedBox(width: spacing),
-              Expanded(child: cards[3]),
+              if (cards.length > 3)
+                Expanded(child: cards[3])
+              else
+                const Spacer(),
             ],
           ),
         ],
@@ -650,23 +797,29 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
 
     if (cards.length < 4) {
       return Column(
-        children: cards.map((c) => Padding(
-          padding: EdgeInsets.only(bottom: spacing),
-          child: c,
-        )).toList(),
+        children: cards
+            .map(
+              (c) => Padding(
+                padding: EdgeInsets.only(bottom: spacing),
+                child: c,
+              ),
+            )
+            .toList(),
       );
     }
 
     return Row(
-      children: [
-        Expanded(child: cards[0]),
-        SizedBox(width: spacing),
-        Expanded(child: cards[1]),
-        SizedBox(width: spacing),
-        Expanded(child: cards[2]),
-        SizedBox(width: spacing),
-        Expanded(child: cards[3]),
-      ],
+      children:
+          cards
+              .asMap()
+              .entries
+              .map((entry) {
+                return Expanded(child: entry.value);
+              })
+              .toList()
+              .expand((w) => [w, SizedBox(width: spacing)])
+              .toList()
+            ..removeLast(),
     );
   }
 
@@ -751,14 +904,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               final action = actions[index];
               return InkWell(
                 onTap: action.onTap,
-                borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                borderRadius: BorderRadius.circular(
+                  AppTheme.borderRadiusMedium,
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.01),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    color: isDark
+                        ? Colors.white.withOpacity(0.02)
+                        : Colors.black.withOpacity(0.01),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                     border: Border.all(
-                      color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : Colors.black.withOpacity(0.04),
                     ),
                   ),
                   child: Row(
@@ -786,7 +947,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             ),
                             Text(
                               action.subtitle,
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -831,7 +994,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     Text(
                       'Active site progress, milestones, and personnel',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
                   ],
@@ -859,7 +1024,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               separatorBuilder: (context, index) => const Divider(height: 32),
               itemBuilder: (context, index) {
                 final project = projects[index];
-                return _ProjectExpandedListItem(project: project, theme: theme, isDark: isDark);
+                return _ProjectExpandedListItem(
+                  project: project,
+                  theme: theme,
+                  isDark: isDark,
+                );
               },
             ),
         ],
@@ -906,12 +1075,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
           Text(
             'Distribution of rooftop, ground-mount, and floating solar arrays',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.lightTextSecondary,
             ),
           ),
           const SizedBox(height: 32),
           if (total == 0)
-            const SizedBox(height: 150, child: Center(child: Text('No distribution data available.')))
+            const SizedBox(
+              height: 150,
+              child: Center(child: Text('No distribution data available.')),
+            )
           else
             LayoutBuilder(
               builder: (context, constraints) {
@@ -927,17 +1101,20 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                         sectionsSpace: 4,
                         centerSpaceRadius: 44,
                         pieTouchData: PieTouchData(
-                          touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                            setState(() {
-                              if (!event.isInterestedForInteractions ||
-                                  pieTouchResponse == null ||
-                                  pieTouchResponse.touchedSection == null) {
-                                _touchedChartIndex = -1;
-                                return;
-                              }
-                              _touchedChartIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                            });
-                          },
+                          touchCallback:
+                              (FlTouchEvent event, pieTouchResponse) {
+                                setState(() {
+                                  if (!event.isInterestedForInteractions ||
+                                      pieTouchResponse == null ||
+                                      pieTouchResponse.touchedSection == null) {
+                                    _touchedChartIndex = -1;
+                                    return;
+                                  }
+                                  _touchedChartIndex = pieTouchResponse
+                                      .touchedSection!
+                                      .touchedSectionIndex;
+                                });
+                              },
                         ),
                         sections: [
                           PieChartSectionData(
@@ -963,7 +1140,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             ),
                           ),
                           PieChartSectionData(
-                            color: theme.colorScheme.tertiary, // Accent Sky Blue
+                            color:
+                                theme.colorScheme.tertiary, // Accent Sky Blue
                             value: floatingCount.toDouble(),
                             title: floatingCount > 0 ? '$floatingCount' : '',
                             radius: _touchedChartIndex == 2 ? 28.0 : 22.0,
@@ -985,21 +1163,24 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     _LegendRow(
                       color: theme.colorScheme.primary,
                       label: 'Ground-Mounted',
-                      value: '$groundCount sites (${total > 0 ? (groundCount / total * 100).toStringAsFixed(0) : 0}%)',
+                      value:
+                          '$groundCount sites (${total > 0 ? (groundCount / total * 100).toStringAsFixed(0) : 0}%)',
                       theme: theme,
                     ),
                     const SizedBox(height: 14),
                     _LegendRow(
                       color: const Color(0xFFFFB300),
                       label: 'Rooftop Arrays',
-                      value: '$rooftopCount sites (${total > 0 ? (rooftopCount / total * 100).toStringAsFixed(0) : 0}%)',
+                      value:
+                          '$rooftopCount sites (${total > 0 ? (rooftopCount / total * 100).toStringAsFixed(0) : 0}%)',
                       theme: theme,
                     ),
                     const SizedBox(height: 14),
                     _LegendRow(
                       color: theme.colorScheme.tertiary,
                       label: 'Floating Arrays',
-                      value: '$floatingCount sites (${total > 0 ? (floatingCount / total * 100).toStringAsFixed(0) : 0}%)',
+                      value:
+                          '$floatingCount sites (${total > 0 ? (floatingCount / total * 100).toStringAsFixed(0) : 0}%)',
                       theme: theme,
                     ),
                   ],
@@ -1058,7 +1239,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     Text(
                       'Assigned to Dave Gigawin',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
                   ],
@@ -1066,11 +1249,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFD32F2F).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFD32F2F).withOpacity(0.2)),
+                  border: Border.all(
+                    color: const Color(0xFFD32F2F).withOpacity(0.2),
+                  ),
                 ),
                 child: Text(
                   '${tasks.length} Action Needed',
@@ -1089,7 +1277,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.check_circle_outline, color: Colors.green, size: 40),
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                      size: 40,
+                    ),
                     SizedBox(height: 10),
                     Text('No critical actions pending today.'),
                   ],
@@ -1141,7 +1333,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     Text(
                       'Items below safety stock threshold',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
                   ],
@@ -1162,13 +1356,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.green,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'All equipment levels (PV modules, Solis Inverters, mounting kits) secure.',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? Colors.green.shade300 : Colors.green.shade800,
+                        color: isDark
+                            ? Colors.green.shade300
+                            : Colors.green.shade800,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1187,9 +1387,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 return Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD32F2F).withOpacity(isDark ? 0.06 : 0.03),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-                    border: Border.all(color: const Color(0xFFD32F2F).withOpacity(isDark ? 0.15 : 0.1)),
+                    color: const Color(
+                      0xFFD32F2F,
+                    ).withOpacity(isDark ? 0.06 : 0.03),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
+                    border: Border.all(
+                      color: const Color(
+                        0xFFD32F2F,
+                      ).withOpacity(isDark ? 0.15 : 0.1),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -1199,7 +1407,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                           color: const Color(0xFFD32F2F).withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFD32F2F)),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          size: 16,
+                          color: Color(0xFFD32F2F),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -1208,13 +1420,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                           children: [
                             Text(
                               mat.name,
-                              style: theme.textTheme.titleSmall?.copyWith(fontSize: 12, fontWeight: FontWeight.w700),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'ID: ${mat.uuid.length >= 8 ? mat.uuid.substring(0, 8) : mat.uuid} • Location: ${mat.storageLocation ?? "Unassigned"}',
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -1232,7 +1449,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                           ),
                           Text(
                             'Min: ${mat.minimumStock.toInt()}',
-                            style: theme.textTheme.bodySmall?.copyWith(fontSize: 9),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 9,
+                            ),
                           ),
                         ],
                       ),
@@ -1275,7 +1494,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     Text(
                       'Active site proposals',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
                   ],
@@ -1285,7 +1506,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               IconButton(
                 icon: const Icon(Icons.add_task_outlined, size: 20),
                 tooltip: 'Log New Checklist Audit',
-                onPressed: () => _handleQuickAction('Log QA/QC Field Checklist'),
+                onPressed: () =>
+                    _handleQuickAction('Log QA/QC Field Checklist'),
               ),
             ],
           ),
@@ -1312,45 +1534,57 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
   }
 
   // --- RECENT ACTIVITY TIMELINE ---
-  Widget _buildActivityTimeline(ThemeData theme, bool isDark, DashboardOverview data) {
+  Widget _buildActivityTimeline(
+    ThemeData theme,
+    bool isDark,
+    DashboardOverview data,
+  ) {
     final List<_ActivityItem> activities = [];
 
     // Add recent projects
     for (final p in data.projects.take(2)) {
-      activities.add(_ActivityItem(
-        time: DateFormat('MMM d, h:mm a').format(p.createdAt),
-        title: 'Project Created',
-        description: '${p.name} was successfully registered.',
-        icon: Icons.folder_open,
-        color: theme.colorScheme.primary,
-        timestamp: p.createdAt,
-      ));
+      activities.add(
+        _ActivityItem(
+          time: DateFormat('MMM d, h:mm a').format(p.createdAt),
+          title: 'Project Created',
+          description: '${p.name} was successfully registered.',
+          icon: Icons.folder_open,
+          color: theme.colorScheme.primary,
+          timestamp: p.createdAt,
+        ),
+      );
     }
 
     // Add recent inspections
     for (final insp in data.recentInspections.take(3)) {
       final isRejected = insp.status.toLowerCase() == 'rejected';
-      activities.add(_ActivityItem(
-        time: DateFormat('MMM d, h:mm a').format(insp.surveyDate),
-        title: 'QC Inspection Logged',
-        description: isRejected ? '${insp.clientName} flagged an issue at ${insp.address}.' : '${insp.clientName} passed QA/QC.',
-        icon: isRejected ? Icons.cancel_outlined : Icons.check_circle_outline,
-        color: isRejected ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32),
-        timestamp: insp.surveyDate,
-      ));
+      activities.add(
+        _ActivityItem(
+          time: DateFormat('MMM d, h:mm a').format(insp.surveyDate),
+          title: 'QC Inspection Logged',
+          description: isRejected
+              ? '${insp.clientName} flagged an issue at ${insp.address}.'
+              : '${insp.clientName} passed QA/QC.',
+          icon: isRejected ? Icons.cancel_outlined : Icons.check_circle_outline,
+          color: isRejected ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32),
+          timestamp: insp.surveyDate,
+        ),
+      );
     }
 
     activities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     if (activities.isEmpty) {
-      activities.add(_ActivityItem(
-        time: 'Now',
-        title: 'System Ready',
-        description: 'Dashboard initialized and ready for new entries.',
-        icon: Icons.check,
-        color: theme.colorScheme.primary,
-        timestamp: DateTime.now(),
-      ));
+      activities.add(
+        _ActivityItem(
+          time: 'Now',
+          title: 'System Ready',
+          description: 'Dashboard initialized and ready for new entries.',
+          icon: Icons.check,
+          color: theme.colorScheme.primary,
+          timestamp: DateTime.now(),
+        ),
+      );
     }
 
     return AppCard(
@@ -1406,18 +1640,24 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             children: [
                               Text(
                                 act.title,
-                                style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Text(
                                 act.time,
-                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 3),
                           Text(
                             act.description,
-                            style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -1476,7 +1716,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               children: [
                 Text(
                   'EPC System Alerts',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 18),
@@ -1511,10 +1753,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 return Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.01),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    color: isDark
+                        ? Colors.white.withOpacity(0.02)
+                        : Colors.black.withOpacity(0.01),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                     border: Border.all(
-                      color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : Colors.black.withOpacity(0.04),
                     ),
                   ),
                   child: Row(
@@ -1536,12 +1784,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             const SizedBox(height: 4),
                             Text(
                               note.message,
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               note.time,
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 9, color: Colors.grey),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 9,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -1572,12 +1825,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 color: const Color(0xFFD32F2F).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.cloud_off, size: 48, color: Color(0xFFD32F2F)),
+              child: const Icon(
+                Icons.cloud_off,
+                size: 48,
+                color: Color(0xFFD32F2F),
+              ),
             ),
             const SizedBox(height: 20),
             Text(
               'EPC Database Offline Sync Failure',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1641,7 +1900,9 @@ class _KpiCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                    color: isDark
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.lightTextSecondary,
                     fontWeight: FontWeight.w800,
                     fontSize: 10,
                     letterSpacing: 0.8,
@@ -1669,7 +1930,9 @@ class _KpiCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 fontSize: 24,
                 letterSpacing: -0.5,
-                color: isDark ? AppTheme.darkTextPrimary : AppTheme.lightTextPrimary,
+                color: isDark
+                    ? AppTheme.darkTextPrimary
+                    : AppTheme.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -1680,7 +1943,9 @@ class _KpiCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progressValue,
                   minHeight: 5,
-                  backgroundColor: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+                  backgroundColor: isDark
+                      ? AppTheme.darkBorder
+                      : AppTheme.lightBorder,
                   valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                 ),
               ),
@@ -1690,7 +1955,9 @@ class _KpiCard extends StatelessWidget {
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary,
+                color: isDark
+                    ? AppTheme.darkTextMuted
+                    : AppTheme.lightTextSecondary,
               ),
             ),
           ],
@@ -1743,8 +2010,8 @@ class _ProjectExpandedListItem extends StatelessWidget {
     final engineerInitials = project.uuid.contains('bulacan')
         ? ['JR', 'ML']
         : project.uuid.contains('cavite')
-            ? ['JC', 'ML', 'LS']
-            : ['LS'];
+        ? ['JC', 'ML', 'LS']
+        : ['LS'];
 
     return InkWell(
       onTap: () => context.go('/projects/${project.uuid}'),
@@ -1755,185 +2022,205 @@ class _ProjectExpandedListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Circle type icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: (project.type.contains('Roof')
-                          ? const Color(0xFFFFB300)
-                          : project.type.contains('Float')
-                              ? theme.colorScheme.tertiary
-                              : theme.colorScheme.primary)
-                      .withOpacity(0.08),
-                  shape: BoxShape.circle,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Circle type icon
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color:
+                        (project.type.contains('Roof')
+                                ? const Color(0xFFFFB300)
+                                : project.type.contains('Float')
+                                ? theme.colorScheme.tertiary
+                                : theme.colorScheme.primary)
+                            .withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    project.type.contains('Roof')
+                        ? Icons.roofing
+                        : project.type.contains('Float')
+                        ? Icons.waves
+                        : Icons.wb_sunny_rounded,
+                    color: project.type.contains('Roof')
+                        ? const Color(0xFFFFB300)
+                        : project.type.contains('Float')
+                        ? theme.colorScheme.tertiary
+                        : theme.colorScheme.primary,
+                    size: 20,
+                  ),
                 ),
-                child: Icon(
-                  project.type.contains('Roof')
-                      ? Icons.roofing
-                      : project.type.contains('Float')
-                          ? Icons.waves
-                          : Icons.wb_sunny_rounded,
-                  color: project.type.contains('Roof')
-                      ? const Color(0xFFFFB300)
-                      : project.type.contains('Float')
-                          ? theme.colorScheme.tertiary
-                          : theme.colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      project.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        Text(
-                          '${project.capacityMw.toStringAsFixed(1)} MWp • ${project.location}',
-                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        project.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: statusBg,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: statusFg.withOpacity(0.2)),
-                          ),
-                          child: Text(
-                            project.stage ?? 'Planning',
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            '${project.capacityMw.toStringAsFixed(1)} MWp • ${project.location}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 9,
-                              color: statusFg,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Progress text row above progress bar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Construction Progress',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress * 100).toStringAsFixed(0)}% Complete',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 11,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: project.progress,
-              minHeight: 6,
-              backgroundColor: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                project.progress == 1.0 ? Colors.green : theme.colorScheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // Milestones Chips & Assignments
-          // Wrap(
-          //   alignment: WrapAlignment.spaceBetween,
-          //   crossAxisAlignment: WrapCrossAlignment.center,
-          //   spacing: 12,
-          //   runSpacing: 8,
-          //   children: [
-          //     // Milestones Scroll Panel
-          //     Wrap(
-          //       spacing: 6,
-          //       runSpacing: 4,
-          //       children: milestones.map((milestone) {
-          //         return Container(
-          //           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          //           decoration: BoxDecoration(
-          //             color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
-          //             borderRadius: BorderRadius.circular(6),
-          //             border: Border.all(
-          //               color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
-          //             ),
-          //           ),
-          //           child: Text(
-          //             milestone,
-          //             style: theme.textTheme.bodySmall?.copyWith(
-          //               fontSize: 9,
-          //               fontWeight: FontWeight.w600,
-          //               color: isDark ? Colors.white54 : Colors.black54,
-          //             ),
-          //           ),
-          //         );
-          //       }).toList(),
-          //     ),
-
-              // Engr Team Avatars
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Team: ',
-                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 10, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(width: 4),
-                  SizedBox(
-                    height: 20,
-                    width: (engineerInitials.length * 12.0) + 8.0,
-                    child: Stack(
-                      children: List.generate(engineerInitials.length, (idx) {
-                        return Positioned(
-                          left: idx * 12.0,
-                          child: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: theme.colorScheme.secondary.withOpacity(0.2),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusBg,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: statusFg.withOpacity(0.2),
+                              ),
+                            ),
                             child: Text(
-                              engineerInitials[idx],
-                              style: TextStyle(
-                                fontSize: 8,
+                              project.stage ?? 'Planning',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 9,
+                                color: statusFg,
                                 fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.secondary,
                               ),
                             ),
                           ),
-                        );
-                      }),
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Progress text row above progress bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Construction Progress',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}% Complete',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value:
+                    (project.progress.isNaN || project.progress.isInfinite
+                        ? 0.0
+                        : project.progress) /
+                    100.0,
+                minHeight: 6,
+                backgroundColor: isDark
+                    ? AppTheme.darkBorder
+                    : AppTheme.lightBorder,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  project.progress >= 100.0
+                      ? Colors.green
+                      : theme.colorScheme.primary,
+                ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 14),
+
+            // Milestones Chips & Assignments
+            // Wrap(
+            //   alignment: WrapAlignment.spaceBetween,
+            //   crossAxisAlignment: WrapCrossAlignment.center,
+            //   spacing: 12,
+            //   runSpacing: 8,
+            //   children: [
+            //     // Milestones Scroll Panel
+            //     Wrap(
+            //       spacing: 6,
+            //       runSpacing: 4,
+            //       children: milestones.map((milestone) {
+            //         return Container(
+            //           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            //           decoration: BoxDecoration(
+            //             color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+            //             borderRadius: BorderRadius.circular(6),
+            //             border: Border.all(
+            //               color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+            //             ),
+            //           ),
+            //           child: Text(
+            //             milestone,
+            //             style: theme.textTheme.bodySmall?.copyWith(
+            //               fontSize: 9,
+            //               fontWeight: FontWeight.w600,
+            //               color: isDark ? Colors.white54 : Colors.black54,
+            //             ),
+            //           ),
+            //         );
+            //       }).toList(),
+            //     ),
+
+            // Engr Team Avatars
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Team: ',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  height: 20,
+                  width: (engineerInitials.length * 12.0) + 8.0,
+                  child: Stack(
+                    children: List.generate(engineerInitials.length, (idx) {
+                      return Positioned(
+                        left: idx * 12.0,
+                        child: CircleAvatar(
+                          radius: 10,
+                          backgroundColor: theme.colorScheme.secondary
+                              .withOpacity(0.2),
+                          child: Text(
+                            engineerInitials[idx],
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1972,7 +2259,10 @@ class _LegendRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: theme.textTheme.titleSmall?.copyWith(fontSize: 12, fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 value,
@@ -2024,7 +2314,9 @@ class _TaskListItem extends StatelessWidget {
         children: [
           Icon(
             task.status == 'done' ? Icons.check_circle : Icons.circle_outlined,
-            color: task.status == 'done' ? Colors.green : (isDark ? Colors.white38 : Colors.black26),
+            color: task.status == 'done'
+                ? Colors.green
+                : (isDark ? Colors.white38 : Colors.black26),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -2037,7 +2329,9 @@ class _TaskListItem extends StatelessWidget {
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    decoration: task.status == 'done' ? TextDecoration.lineThrough : null,
+                    decoration: task.status == 'done'
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2047,10 +2341,16 @@ class _TaskListItem extends StatelessWidget {
                   '${task.category}  •  Due $dueDateStr',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 10,
-                    color: task.dueDate.isBefore(DateTime.now()) && task.status != 'done'
+                    color:
+                        task.dueDate.isBefore(DateTime.now()) &&
+                            task.status != 'done'
                         ? const Color(0xFFD32F2F)
-                        : (isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary),
-                    fontWeight: task.dueDate.isBefore(DateTime.now()) && task.status != 'done'
+                        : (isDark
+                              ? AppTheme.darkTextMuted
+                              : AppTheme.lightTextSecondary),
+                    fontWeight:
+                        task.dueDate.isBefore(DateTime.now()) &&
+                            task.status != 'done'
                         ? FontWeight.bold
                         : null,
                   ),
@@ -2143,7 +2443,10 @@ class _QCListItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: statusColor.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(4),
@@ -2163,7 +2466,10 @@ class _QCListItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   audit.address,
-                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, fontWeight: FontWeight.w500),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2173,7 +2479,9 @@ class _QCListItem extends StatelessWidget {
                     audit.notes!,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.lightTextSecondary,
                       fontStyle: FontStyle.italic,
                     ),
                     maxLines: 2,
@@ -2207,7 +2515,9 @@ class _DashboardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final skeletonColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04);
+    final skeletonColor = isDark
+        ? Colors.white.withOpacity(0.05)
+        : Colors.black.withOpacity(0.04);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32.0),

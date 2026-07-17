@@ -489,7 +489,7 @@ class _ProjectGridCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress * 100).toStringAsFixed(0)}%',
+                '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.primary,
@@ -501,7 +501,7 @@ class _ProjectGridCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: LinearProgressIndicator(
-              value: project.progress,
+              value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
               minHeight: 6.0,
               backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
             ),
@@ -629,7 +629,7 @@ class _ProjectListCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress * 100).toStringAsFixed(0)}%',
+                    '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -643,7 +643,7 @@ class _ProjectListCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
-                    value: project.progress,
+                    value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
                     minHeight: 5.0,
                     backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                   ),
@@ -673,7 +673,7 @@ class _ProjectListCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress * 100).toStringAsFixed(0)}% Complete',
+                      '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}% Complete',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,

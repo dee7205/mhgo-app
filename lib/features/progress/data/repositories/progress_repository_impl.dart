@@ -11,44 +11,15 @@ class ProgressRepositoryImpl implements ProgressRepository {
   ProgressRepositoryImpl(this.isar);
 
   @override
-  @override
   Future<List<ProgressReport>> getProgressReports() async {
-    final allProjects = await isar.projectModels.where().findAll();
-    final validUuids = allProjects.map((e) => e.uuid).toSet();
-
     final models = await isar.progressModels.where().findAll();
-    final validModels = <ProgressModel>[];
-    final orphans = <Id>[];
-    final seenProjects = <String>{};
-
-    for (final model in models) {
-      if (validUuids.contains(model.projectUuid)) {
-        if (!seenProjects.contains(model.projectUuid)) {
-          seenProjects.add(model.projectUuid);
-          validModels.add(model);
-        } else {
-          orphans.add(model.id);
-        }
-      } else {
-        orphans.add(model.id);
-      }
-    }
-
-    if (orphans.isNotEmpty) {
-      await isar.writeTxn(() async {
-        await isar.progressModels.deleteAll(orphans);
-      });
-    }
-
-    return validModels.map(_mapToEntity).toList();
+    return models.map(_mapToEntity).toList();
   }
 
   @override
   Future<ProgressReport?> getProgressReportById(String uuid) async {
-    final model = await isar.progressModels
-        .where()
-        .uuidEqualTo(uuid)
-        .findFirst();
+    var model = await isar.progressModels.where().uuidEqualTo(uuid).findFirst();
+    model ??= await isar.progressModels.filter().projectUuidEqualTo(uuid).findFirst();
     if (model == null) return null;
     return _mapToEntity(model);
   }
@@ -73,7 +44,7 @@ class ProgressRepositoryImpl implements ProgressRepository {
           .uuidEqualTo(report.projectUuid)
           .findFirst();
       if (project != null) {
-        project.progress = report.overallProgress / 100.0;
+        project.progress = report.overallProgress;
         project.updatedAt = DateTime.now();
         await isar.projectModels.put(project);
       }

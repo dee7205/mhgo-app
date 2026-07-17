@@ -134,7 +134,6 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       for (var req in requirements) {
         req.requiredQuantity = 0.0;
         req.allocatedQuantity = 0.0;
-        req.estimatedCost = 0.0;
         await isar.projectMaterialRequirementModels.put(req);
       }
     });
@@ -181,8 +180,8 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       requiredQuantity: m.requiredQuantity,
       allocatedQuantity: m.allocatedQuantity,
       unit: m.unit,
-      estimatedCost: m.estimatedCost,
       status: m.status,
+      customName: m.customName,
     );
   }
 
@@ -194,8 +193,8 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       ..requiredQuantity = e.requiredQuantity
       ..allocatedQuantity = e.allocatedQuantity
       ..unit = e.unit
-      ..estimatedCost = e.estimatedCost
       ..status = e.status
+      ..customName = e.customName
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now()
       ..isSynced = false;

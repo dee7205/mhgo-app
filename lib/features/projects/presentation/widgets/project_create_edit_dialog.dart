@@ -11,6 +11,7 @@ import '../../../progress/presentation/providers/progress_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:isar_community/isar.dart';
 
+import '../../../materials/presentation/widgets/project_material_requirements_tab.dart';
 import '../../../materials/data/models/project_material_requirement_model.dart';
 
 class ProjectCreateEditDialog extends ConsumerStatefulWidget {
@@ -27,6 +28,7 @@ class _ProjectCreateEditDialogState
     extends ConsumerState<ProjectCreateEditDialog> {
   final _formKey = GlobalKey<FormState>();
   final _capacityController = TextEditingController();
+  final _totalCostController = TextEditingController();
 
   String _name = '';
   String _description = '';
@@ -41,6 +43,7 @@ class _ProjectCreateEditDialogState
   String _systemType = 'On-Grid';
   String _status = 'planning';
   String _stage = 'Engineering';
+  double _totalCost = 0.0;
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 90));
@@ -80,6 +83,10 @@ class _ProjectCreateEditDialogState
       _systemType = p.systemType ?? 'On-Grid';
       _status = p.status;
       _stage = p.stage ?? 'Engineering';
+      _totalCost = p.totalCost;
+      _totalCostController.text = _totalCost == _totalCost.roundToDouble() 
+          ? _totalCost.toInt().toString() 
+          : _totalCost.toStringAsFixed(2);
       _startDate = p.startDate;
       _endDate = p.endDate;
       if (p.bomSpecsJson != null) {
@@ -147,6 +154,8 @@ class _ProjectCreateEditDialogState
         project.isSynced = false;
       }
 
+      final typeChanged = widget.existingProject != null && widget.existingProject!.systemType != _systemType;
+
       project
         ..name = _name
         ..description = _description.isEmpty ? null : _description
@@ -159,6 +168,7 @@ class _ProjectCreateEditDialogState
         ..systemType = _systemType
         ..status = _status
         ..stage = _stage
+        ..totalCost = _totalCost
         ..startDate = _startDate
         ..endDate = _endDate
         ..bomSpecsJson = jsonEncode({
@@ -194,40 +204,28 @@ class _ProjectCreateEditDialogState
             report.projectName = project.name;
             await isar.progressModels.put(report);
           }
-        } else {
-          // SEED DEFAULT BOM.txt MATERIALS ON PROJECT CREATION
-          final defaultMaterials = [
-            ('JINKO 640W', 'pcs', 8.0, 49600.0),
-            ('PYLONTECH FIDUS 5.12KWH', 'pcs', 1.0, 42000.0),
-            ('S6-EH1P5K-L-PLUS', 'pcs', 1.0, 41000.0),
-            ('Twisted Wire #18', 'pcs', 1.0, 3700.0),
-            ('PV Cable Single Core 2-4mmsq Black', 'roll', 60.0, 3900.0),
-            ('PV Cable Single Core 2-4mmsq Red', 'roll', 60.0, 3900.0),
-            ('35mm2 Battery Cable Black', 'meters', 4.0, 2400.0),
-            ('35mm2 Battery Cable Red', 'meters', 4.0, 2400.0),
-            ('Terminal lugs', 'pcs', 28.0, 2520.0),
-            ('5.5mm2 THHN Supply Wire Black', 'meters', 60.0, 4800.0),
-            ('3.5mm2 THHN Ground', 'meters', 30.0, 2400.0),
-            ('5.5 mm2 THHN Black', 'meters', 60.0, 4800.0),
-            ('HDPE 25mm Flexible Conduit', 'meters', 60.0, 6000.0),
-            ('Plastic Box', 'pcs', 6.0, 6000.0),
-            ('2.4 Railing', 'length', 9.0, 4500.0),
-            ('Lfoot Long 17cm', 'pcs', 25.0, 8750.0),
-          ];
+        }
+        if (widget.existingProject == null || typeChanged) {
+          if (typeChanged) {
+            await isar.projectMaterialRequirementModels.filter().projectUuidEqualTo(project.uuid).deleteAll();
+          }
+          final defaultBom = _systemType.toLowerCase().contains('on-grid') || _systemType.toLowerCase().contains('ongrid') ? onGridBom : hybridBom;
           
-          for (final item in defaultMaterials) {
-            final reqModel = ProjectMaterialRequirementModel()
-              ..uuid = const Uuid().v4()
-              ..projectUuid = project.uuid
-              ..materialUuid = item.$1
-              ..unit = item.$2
-              ..requiredQuantity = item.$3
-              ..allocatedQuantity = 0.0
-              ..estimatedCost = item.$4
-              ..createdAt = DateTime.now()
-              ..updatedAt = DateTime.now()
-              ..isSynced = false;
-            await isar.projectMaterialRequirementModels.put(reqModel);
+          for (final section in bomSections) {
+            final items = defaultBom[section] ?? [];
+            for (final item in items) {
+              final reqModel = ProjectMaterialRequirementModel()
+                ..uuid = const Uuid().v4()
+                ..projectUuid = project.uuid
+                ..materialUuid = item.$1
+                ..unit = item.$2
+                ..requiredQuantity = item.$3
+                ..allocatedQuantity = 0.0
+                ..createdAt = DateTime.now()
+                ..updatedAt = DateTime.now()
+                ..isSynced = false;
+              await isar.projectMaterialRequirementModels.put(reqModel);
+            }
           }
         }
       });
@@ -336,6 +334,18 @@ class _ProjectCreateEditDialogState
                       ),
                       maxLines: 2,
                       onSaved: (val) => _description = val?.trim() ?? '',
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _totalCostController,
+                      decoration: const InputDecoration(
+                        labelText: 'Total Project Cost (PHP)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      validator: (val) =>
+                          val == null || val.trim().isEmpty ? 'Required' : null,
+                      onSaved: (val) => _totalCost = double.tryParse(val ?? '0') ?? 0.0,
                     ),
 
                     const SizedBox(height: 24),
