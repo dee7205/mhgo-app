@@ -1,133 +1,150 @@
 # MHGo
 
-**Built for MHG.**
+> **Built for MHG.**
 
-MHGo is an **offline Solar EPC Project Management Platform** built with Flutter. It is designed to replace spreadsheets, paper forms, and scattered project files with a centralized application that helps manage the lifecycle of engineering projects.
+MHGo is an **offline-first Solar EPC Project Management Platform** built with **Flutter** to streamline the complete lifecycle of solar engineering projects. It replaces spreadsheets, paper forms, and scattered communications with a centralized application for managing surveys, project execution, progress tracking, materials, and reporting.
 
-> **Project Status:** 🚧 Active Development (Work in Progress)
-
----
-
-## Overview
-
-MHGo is currently being developed as a **personal project management application** focused on Android-first deployment while maintaining Windows compatibility.
-
-The application follows an offline-first approach using a local database, allowing engineers to manage projects without requiring an internet connection.
+> **Project Status:** 🚧 Active Development
 
 ---
 
-## Tech Stack
+# Overview
+
+MHGo is a personal portfolio project inspired by real-world Solar EPC workflows. It is designed primarily for **Android** deployment while remaining compatible with **Windows** for desktop use.
+
+The application follows an **offline-first** architecture using **Isar** as its local database, allowing field engineers and project managers to continue working without an internet connection.
+
+Future versions will support optional cloud synchronization using **Laravel** and **PostgreSQL**.
+
+---
+
+# Tech Stack
 
 ### Frontend
 
-* Flutter
-* Material 3
+- Flutter
+- Material 3
 
 ### Architecture
 
-* Feature-first Clean Architecture
-* Riverpod
-* GoRouter
+- Feature-first Clean Architecture
+- Riverpod
+- GoRouter
 
 ### Local Database
 
-* Isar
+- Isar
 
-### Future Backend (Planned)
+### Planned Backend
 
-* Laravel
-* PostgreSQL
-
----
-
-## Current Features
-
-### ✅ Authentication
-
-* Login
-* Forgot Password
-* Theme support
-
-### ✅ Dashboard
-
-* Dynamic KPIs
-* Active Projects
-* Notifications
-* Quick Actions
-* Recent Activity
-
-### ✅ Projects
-
-* Portfolio Management
-* Project CRUD
-* Project Details
-* Responsive layouts
-
-### ✅ Daily Accomplishment Reports (DAR)
-
-* Create Reports
-* DAR History
-* PDF Preview
-* Responsive desktop/mobile UI
-
-### ✅ QA/QC Site Inspections
-
-* Inspection Management
-* Inspection History
-* Inspection Details
-
-### ✅ Progress Tracking
-
-* Project Progress
-* Progress Categories
-* Progress Analytics
-* Offline CRUD
-* Dashboard Synchronization
-
-### 🚧 Materials & Inventory
-
-Currently under development.
-
-Planned:
-
-* Inventory Management
-* Project Materials
-* Stock Monitoring
+- Laravel
+- PostgreSQL
 
 ---
 
-## Roadmap
+# Current Features
 
-* [x] Project Foundation
-* [x] Dashboard
-* [x] Projects
-* [x] Daily Accomplishment Reports
-* [x] QA/QC Inspections
-* [x] Progress Tracking
-* [ ] Materials & Inventory
-* [ ] Punch Lists
-* [ ] Documents
-* [ ] Commissioning
-* [ ] Settings & Offline Sync
-* [ ] Final UI/UX Polish
-* [ ] Backend Synchronization
+## Authentication
+
+- Login
+- Forgot Password
+- Theme Support
+
+## Dashboard
+
+- Dynamic KPIs
+- Active Projects
+- Portfolio Overview
+- Recent Activity
+- Notifications
+- Quick Actions
+- Live module synchronization
+
+## Survey Module
+
+Replaces the original QA/QC module with a client-focused pre-project workflow.
+
+- Survey CRUD
+- Client Management
+- Proposal Information
+- Technical Specifications
+- Survey-to-Project Conversion
+- PDF Preview & Export *(ongoing improvements)*
+
+## Projects
+
+- Portfolio Management
+- Project CRUD
+- Project Details
+- Responsive Project Profiles
+- Material Requirements
+- Progress Integration
+
+## Daily Accomplishment Reports (DAR)
+
+- Create Reports
+- DAR History
+- PDF Preview
+- Responsive Forms
+- Offline Storage
+
+## Progress Tracking
+
+- Progress Categories
+- Percentage Tracking
+- Dashboard Synchronization
+- Project Integration
+- Offline CRUD
+
+## Materials & Inventory
+
+Currently in development.
+
+Planned functionality includes:
+
+- Inventory Management
+- Material Requests
+- Deliveries
+- Stock Monitoring
+- Project Material Requirements
 
 ---
 
-## Design Principles
+# Development Roadmap
 
-* Offline-first
-* Android-first experience
-* Windows compatible
-* Responsive layouts
-* Material 3
-* Clean Architecture
-* Reusable components
-* Modern enterprise UI/UX
+| Module | Status |
+|---------|--------|
+| Project Foundation | ✅ Complete |
+| Dashboard | ✅ Complete |
+| Survey Module | ✅ Complete *(ongoing refinements)* |
+| Projects | ✅ Complete |
+| Daily Accomplishment Reports | ✅ Complete |
+| Progress Tracking | ✅ Complete |
+| Materials & Inventory | 🚧 In Progress |
+| Punch Lists | ⏳ Planned |
+| Documents | ⏳ Planned |
+| Commissioning | ⏳ Planned |
+| Settings | ⏳ Planned |
+| Offline Synchronization | ⏳ Planned |
+| UI/UX Polish | ⏳ Planned |
+| Laravel Backend | ⏳ Planned |
 
 ---
 
-## Project Structure
+# Design Principles
+
+- Offline-first
+- Android-first
+- Windows compatible
+- Material 3
+- Feature-first Clean Architecture
+- Responsive layouts
+- Reusable components
+- Enterprise-inspired UI/UX
+
+---
+
+# Project Structure
 
 ```text
 lib/
@@ -136,9 +153,9 @@ lib/
 ├── features/
 │   ├── authentication/
 │   ├── dashboard/
+│   ├── survey/
 │   ├── projects/
 │   ├── dar/
-│   ├── inspections/
 │   ├── progress/
 │   ├── materials/
 │   ├── punchlist/
@@ -149,23 +166,24 @@ lib/
 
 ---
 
-## Getting Started
+# Getting Started
 
-### Requirements
+## Requirements
 
-* Flutter (latest stable)
-* Dart SDK
-* Android Studio or VS Code
-* Android SDK
+- Flutter (latest stable)
+- Dart SDK
+- Android Studio or VS Code
+- Android SDK
 
-### Run
+## Run
 
 ```bash
 flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
 flutter run -d android
 ```
 
-### Build APK
+## Build APK
 
 ```bash
 flutter build apk
@@ -173,18 +191,45 @@ flutter build apk
 
 ---
 
-## Current Development Status
+# Current Development
 
-MHGo is under active development.
+Current priorities include:
 
-The application architecture is established, and the core project management workflow is functional. Remaining modules will be implemented incrementally while maintaining a consistent design system and offline-first architecture.
+- Completing the Materials & Inventory module
+- Improving PDF generation
+- Dashboard synchronization
+- Survey workflow refinements
+- Overall UI/UX polish
+- Performance optimization
 
 ---
 
-## License
+# Future Plans
 
-This project is currently developed as a personal portfolio and learning project.
+- Procurement Workflow
+- BOQ Integration
+- ROI Calculator
+- Monthly Savings Calculator
+- Document Management
+- Commissioning Module
+- Cloud Synchronization
+- Multi-user Support
+- Reporting & Analytics
 
 ---
 
-**MHGo — Built for MHG.**
+# License
+
+This project is currently developed as a **personal portfolio and learning project** and is not affiliated with MHG.
+
+---
+
+<div align="center">
+
+### MHGo
+
+**Built for MHG.**
+
+*Offline-first Solar EPC Project Management Platform.*
+
+</div>
