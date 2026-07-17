@@ -1,8 +1,9 @@
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 
-abstract class InspectionsRepository {
-  Future<List<InspectionReport>> getInspections();
-  Future<InspectionReport?> getInspectionById(String id);
-  Future<void> saveInspection(InspectionReport report);
-  Future<void> deleteInspection(String id);
+abstract class SurveyRepository {
+  Future<List<Survey>> getAllSurveys();
+  Future<Survey?> getSurveyByUuid(String uuid);
+  Future<void> saveSurvey(Survey survey);
+  Future<void> deleteSurvey(String uuid);
+  Future<String?> convertToProject(Survey survey);
 }

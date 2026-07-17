@@ -2,7 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
 import 'package:mhgo/features/materials/data/models/material_model.dart';
-import 'package:mhgo/core/database/models/inspection_model.dart';
+import 'package:mhgo/core/database/models/survey_model.dart';
 
 class DashboardLocalDatasource {
   final Isar _isar;
@@ -42,9 +42,9 @@ class DashboardLocalDatasource {
     return materials.where((m) => m.currentStock <= m.minimumStock).toList();
   }
 
-  Future<List<InspectionModel>> getRecentInspections() async {
-    final inspections = await _isar.inspectionModels.where().findAll();
-    inspections.sort((a, b) => b.inspectionDate.compareTo(a.inspectionDate)); // Newest first
-    return inspections;
+  Future<List<SurveyModel>> getRecentInspections() async {
+    final surveys = await _isar.surveyModels.where().findAll();
+    surveys.sort((a, b) => b.surveyDate.compareTo(a.surveyDate)); // Newest first
+    return surveys;
   }
 }

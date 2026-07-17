@@ -134,6 +134,32 @@ class ProjectTeamMember {
     required this.workload,
     required this.avatarInitials,
   });
+
+  factory ProjectTeamMember.fromJson(Map<String, dynamic> json) {
+    return ProjectTeamMember(
+      name: json['name'] as String? ?? '',
+      role: json['role'] as String? ?? '',
+      department: json['department'] as String? ?? '',
+      contactEmail: json['contactEmail'] as String? ?? '',
+      contactPhone: json['contactPhone'] as String? ?? '',
+      assignedTasksCount: json['assignedTasksCount'] as int? ?? 0,
+      workload: json['workload'] as String? ?? 'Optimal',
+      avatarInitials: json['avatarInitials'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'role': role,
+      'department': department,
+      'contactEmail': contactEmail,
+      'contactPhone': contactPhone,
+      'assignedTasksCount': assignedTasksCount,
+      'workload': workload,
+      'avatarInitials': avatarInitials,
+    };
+  }
 }
 
 class ProjectTimelineItem {

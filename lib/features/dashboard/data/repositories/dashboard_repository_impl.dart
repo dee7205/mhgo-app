@@ -3,7 +3,7 @@ import 'package:mhgo/core/database/isar_service.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
 import 'package:mhgo/features/materials/data/models/material_model.dart';
-import 'package:mhgo/core/database/models/inspection_model.dart';
+import 'package:mhgo/core/database/models/survey_model.dart';
 import 'package:mhgo/features/dashboard/data/datasources/dashboard_local_datasource.dart';
 import 'package:mhgo/features/dashboard/domain/repositories/dashboard_repository.dart';
 
@@ -40,7 +40,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   @override
-  Future<List<InspectionModel>> getRecentInspections() {
+  Future<List<SurveyModel>> getRecentInspections() {
     return _localDatasource.getRecentInspections();
   }
 }

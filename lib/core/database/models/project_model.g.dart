@@ -17,68 +17,78 @@ const ProjectModelSchema = CollectionSchema(
   name: r'ProjectModel',
   id: 1822059982794199752,
   properties: {
-    r'capacityMw': PropertySchema(
+    r'bomSpecsJson': PropertySchema(
       id: 0,
+      name: r'bomSpecsJson',
+      type: IsarType.string,
+    ),
+    r'capacityMw': PropertySchema(
+      id: 1,
       name: r'capacityMw',
       type: IsarType.double,
     ),
     r'capacityUnit': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'capacityUnit',
       type: IsarType.string,
     ),
-    r'client': PropertySchema(id: 2, name: r'client', type: IsarType.string),
+    r'client': PropertySchema(id: 3, name: r'client', type: IsarType.string),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'description': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'description',
       type: IsarType.string,
     ),
     r'endDate': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
-    r'isSynced': PropertySchema(id: 6, name: r'isSynced', type: IsarType.bool),
+    r'isSynced': PropertySchema(id: 7, name: r'isSynced', type: IsarType.bool),
     r'location': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'location',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 9, name: r'name', type: IsarType.string),
     r'progress': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'progress',
       type: IsarType.double,
     ),
-    r'stage': PropertySchema(id: 10, name: r'stage', type: IsarType.string),
+    r'stage': PropertySchema(id: 11, name: r'stage', type: IsarType.string),
     r'startDate': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
-    r'status': PropertySchema(id: 12, name: r'status', type: IsarType.string),
+    r'status': PropertySchema(id: 13, name: r'status', type: IsarType.string),
     r'supervisor': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'supervisor',
       type: IsarType.string,
     ),
     r'systemType': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'systemType',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 15, name: r'type', type: IsarType.string),
-    r'updatedAt': PropertySchema(
+    r'teamMembersJson': PropertySchema(
       id: 16,
+      name: r'teamMembersJson',
+      type: IsarType.string,
+    ),
+    r'type': PropertySchema(id: 17, name: r'type', type: IsarType.string),
+    r'updatedAt': PropertySchema(
+      id: 18,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'uuid': PropertySchema(id: 17, name: r'uuid', type: IsarType.string),
+    r'uuid': PropertySchema(id: 19, name: r'uuid', type: IsarType.string),
   },
 
   estimateSize: _projectModelEstimateSize,
@@ -117,6 +127,12 @@ int _projectModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.bomSpecsJson;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.capacityUnit;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -136,7 +152,12 @@ int _projectModelEstimateSize(
   }
   bytesCount += 3 + object.location.length * 3;
   bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.stage.length * 3;
+  {
+    final value = object.stage;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.status.length * 3;
   {
     final value = object.supervisor;
@@ -146,6 +167,12 @@ int _projectModelEstimateSize(
   }
   {
     final value = object.systemType;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.teamMembersJson;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -161,24 +188,26 @@ void _projectModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDouble(offsets[0], object.capacityMw);
-  writer.writeString(offsets[1], object.capacityUnit);
-  writer.writeString(offsets[2], object.client);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeString(offsets[4], object.description);
-  writer.writeDateTime(offsets[5], object.endDate);
-  writer.writeBool(offsets[6], object.isSynced);
-  writer.writeString(offsets[7], object.location);
-  writer.writeString(offsets[8], object.name);
-  writer.writeDouble(offsets[9], object.progress);
-  writer.writeString(offsets[10], object.stage);
-  writer.writeDateTime(offsets[11], object.startDate);
-  writer.writeString(offsets[12], object.status);
-  writer.writeString(offsets[13], object.supervisor);
-  writer.writeString(offsets[14], object.systemType);
-  writer.writeString(offsets[15], object.type);
-  writer.writeDateTime(offsets[16], object.updatedAt);
-  writer.writeString(offsets[17], object.uuid);
+  writer.writeString(offsets[0], object.bomSpecsJson);
+  writer.writeDouble(offsets[1], object.capacityMw);
+  writer.writeString(offsets[2], object.capacityUnit);
+  writer.writeString(offsets[3], object.client);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeString(offsets[5], object.description);
+  writer.writeDateTime(offsets[6], object.endDate);
+  writer.writeBool(offsets[7], object.isSynced);
+  writer.writeString(offsets[8], object.location);
+  writer.writeString(offsets[9], object.name);
+  writer.writeDouble(offsets[10], object.progress);
+  writer.writeString(offsets[11], object.stage);
+  writer.writeDateTime(offsets[12], object.startDate);
+  writer.writeString(offsets[13], object.status);
+  writer.writeString(offsets[14], object.supervisor);
+  writer.writeString(offsets[15], object.systemType);
+  writer.writeString(offsets[16], object.teamMembersJson);
+  writer.writeString(offsets[17], object.type);
+  writer.writeDateTime(offsets[18], object.updatedAt);
+  writer.writeString(offsets[19], object.uuid);
 }
 
 ProjectModel _projectModelDeserialize(
@@ -188,25 +217,27 @@ ProjectModel _projectModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = ProjectModel();
-  object.capacityMw = reader.readDouble(offsets[0]);
-  object.capacityUnit = reader.readStringOrNull(offsets[1]);
-  object.client = reader.readStringOrNull(offsets[2]);
-  object.createdAt = reader.readDateTime(offsets[3]);
-  object.description = reader.readStringOrNull(offsets[4]);
-  object.endDate = reader.readDateTime(offsets[5]);
+  object.bomSpecsJson = reader.readStringOrNull(offsets[0]);
+  object.capacityMw = reader.readDouble(offsets[1]);
+  object.capacityUnit = reader.readStringOrNull(offsets[2]);
+  object.client = reader.readStringOrNull(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[4]);
+  object.description = reader.readStringOrNull(offsets[5]);
+  object.endDate = reader.readDateTime(offsets[6]);
   object.id = id;
-  object.isSynced = reader.readBool(offsets[6]);
-  object.location = reader.readString(offsets[7]);
-  object.name = reader.readString(offsets[8]);
-  object.progress = reader.readDouble(offsets[9]);
-  object.stage = reader.readString(offsets[10]);
-  object.startDate = reader.readDateTime(offsets[11]);
-  object.status = reader.readString(offsets[12]);
-  object.supervisor = reader.readStringOrNull(offsets[13]);
-  object.systemType = reader.readStringOrNull(offsets[14]);
-  object.type = reader.readString(offsets[15]);
-  object.updatedAt = reader.readDateTime(offsets[16]);
-  object.uuid = reader.readString(offsets[17]);
+  object.isSynced = reader.readBool(offsets[7]);
+  object.location = reader.readString(offsets[8]);
+  object.name = reader.readString(offsets[9]);
+  object.progress = reader.readDouble(offsets[10]);
+  object.stage = reader.readStringOrNull(offsets[11]);
+  object.startDate = reader.readDateTime(offsets[12]);
+  object.status = reader.readString(offsets[13]);
+  object.supervisor = reader.readStringOrNull(offsets[14]);
+  object.systemType = reader.readStringOrNull(offsets[15]);
+  object.teamMembersJson = reader.readStringOrNull(offsets[16]);
+  object.type = reader.readString(offsets[17]);
+  object.updatedAt = reader.readDateTime(offsets[18]);
+  object.uuid = reader.readString(offsets[19]);
   return object;
 }
 
@@ -218,40 +249,44 @@ P _projectModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDouble(offset)) as P;
-    case 1:
       return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readDouble(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readDateTime(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 11:
-      return (reader.readDateTime(offset)) as P;
-    case 12:
-      return (reader.readString(offset)) as P;
-    case 13:
       return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readDateTime(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
     case 14:
       return (reader.readStringOrNull(offset)) as P;
     case 15:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 16:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 17:
+      return (reader.readString(offset)) as P;
+    case 18:
+      return (reader.readDateTime(offset)) as P;
+    case 19:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -469,6 +504,165 @@ extension ProjectModelQueryWhere
 
 extension ProjectModelQueryFilter
     on QueryBuilder<ProjectModel, ProjectModel, QFilterCondition> {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'bomSpecsJson'),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'bomSpecsJson'),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'bomSpecsJson',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'bomSpecsJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'bomSpecsJson',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'bomSpecsJson', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  bomSpecsJsonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'bomSpecsJson', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
   capacityMwEqualTo(double value, {double epsilon = Query.epsilon}) {
     return QueryBuilder.apply(this, (query) {
@@ -1565,8 +1759,26 @@ extension ProjectModelQueryFilter
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  stageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'stage'),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  stageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'stage'),
+      );
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition> stageEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1582,7 +1794,7 @@ extension ProjectModelQueryFilter
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
   stageGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1599,7 +1811,7 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition> stageLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1616,8 +1828,8 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition> stageBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -2229,6 +2441,165 @@ extension ProjectModelQueryFilter
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'teamMembersJson'),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'teamMembersJson'),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'teamMembersJson',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'teamMembersJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'teamMembersJson',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'teamMembersJson', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
+  teamMembersJsonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'teamMembersJson', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition> typeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2587,6 +2958,19 @@ extension ProjectModelQueryLinks
 
 extension ProjectModelQuerySortBy
     on QueryBuilder<ProjectModel, ProjectModel, QSortBy> {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByBomSpecsJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bomSpecsJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  sortByBomSpecsJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bomSpecsJson', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByCapacityMw() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.asc);
@@ -2772,6 +3156,20 @@ extension ProjectModelQuerySortBy
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  sortByTeamMembersJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'teamMembersJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  sortByTeamMembersJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'teamMembersJson', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -2811,6 +3209,19 @@ extension ProjectModelQuerySortBy
 
 extension ProjectModelQuerySortThenBy
     on QueryBuilder<ProjectModel, ProjectModel, QSortThenBy> {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByBomSpecsJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bomSpecsJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  thenByBomSpecsJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bomSpecsJson', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByCapacityMw() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.asc);
@@ -3008,6 +3419,20 @@ extension ProjectModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  thenByTeamMembersJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'teamMembersJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
+  thenByTeamMembersJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'teamMembersJson', Sort.desc);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -3047,6 +3472,14 @@ extension ProjectModelQuerySortThenBy
 
 extension ProjectModelQueryWhereDistinct
     on QueryBuilder<ProjectModel, ProjectModel, QDistinct> {
+  QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByBomSpecsJson({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'bomSpecsJson', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByCapacityMw() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'capacityMw');
@@ -3155,6 +3588,16 @@ extension ProjectModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ProjectModel, ProjectModel, QDistinct>
+  distinctByTeamMembersJson({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'teamMembersJson',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
   QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByType({
     bool caseSensitive = true,
   }) {
@@ -3183,6 +3626,12 @@ extension ProjectModelQueryProperty
   QueryBuilder<ProjectModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<ProjectModel, String?, QQueryOperations> bomSpecsJsonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'bomSpecsJson');
     });
   }
 
@@ -3246,7 +3695,7 @@ extension ProjectModelQueryProperty
     });
   }
 
-  QueryBuilder<ProjectModel, String, QQueryOperations> stageProperty() {
+  QueryBuilder<ProjectModel, String?, QQueryOperations> stageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'stage');
     });
@@ -3273,6 +3722,13 @@ extension ProjectModelQueryProperty
   QueryBuilder<ProjectModel, String?, QQueryOperations> systemTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'systemType');
+    });
+  }
+
+  QueryBuilder<ProjectModel, String?, QQueryOperations>
+  teamMembersJsonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'teamMembersJson');
     });
   }
 

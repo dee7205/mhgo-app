@@ -127,6 +127,19 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
     }
   }
 
+  @override
+  Future<void> forceResetAllRequirementsToZero() async {
+    final requirements = await isar.projectMaterialRequirementModels.where().findAll();
+    await isar.writeTxn(() async {
+      for (var req in requirements) {
+        req.requiredQuantity = 0.0;
+        req.allocatedQuantity = 0.0;
+        req.estimatedCost = 0.0;
+        await isar.projectMaterialRequirementModels.put(req);
+      }
+    });
+  }
+
   MaterialEntity _mapMaterialToEntity(MaterialModel m, double allocated) {
     return MaterialEntity(
       uuid: m.uuid,
@@ -168,6 +181,7 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       requiredQuantity: m.requiredQuantity,
       allocatedQuantity: m.allocatedQuantity,
       unit: m.unit,
+      estimatedCost: m.estimatedCost,
     );
   }
 
@@ -179,6 +193,7 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       ..requiredQuantity = e.requiredQuantity
       ..allocatedQuantity = e.allocatedQuantity
       ..unit = e.unit
+      ..estimatedCost = e.estimatedCost
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now()
       ..isSynced = false;

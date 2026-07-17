@@ -7,6 +7,7 @@ import 'package:mhgo/core/widgets/app_card.dart';
 import 'package:mhgo/core/widgets/app_button.dart';
 import 'package:mhgo/features/dar/domain/entities/dar_entities.dart';
 import 'package:mhgo/features/dar/presentation/providers/dar_provider.dart';
+import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
 
 class DarDetailsView extends ConsumerStatefulWidget {
   final String id;
@@ -179,6 +180,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                                 final repo = ref.read(darRepositoryProvider);
                                 await repo.deleteDar(report.id);
                                 ref.invalidate(darsListProvider);
+                                ref.invalidate(dashboardStateProvider);
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Report deleted successfully.')),
@@ -318,7 +320,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoRow('Project Portfolio', report.projectName, theme),
+                          _buildInfoRow('Projects', report.projectName, theme),
                           _buildInfoRow('Report Log Date', formattedDate, theme),
                         ],
                       ),
@@ -339,7 +341,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInfoRow('Project Portfolio', report.projectName, theme),
+                  _buildInfoRow('Project Name', report.projectName, theme),
                   _buildInfoRow('Report Log Date', formattedDate, theme),
                   _buildInfoRow('Prepared By', report.preparedBy, theme),
                   _buildInfoRow('Reporting Shift', report.reportingPeriod, theme),

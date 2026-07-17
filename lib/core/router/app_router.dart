@@ -12,15 +12,22 @@ import 'package:mhgo/features/dar/presentation/views/dar_list_view.dart';
 import 'package:mhgo/features/dar/presentation/views/dar_create_edit_view.dart';
 import 'package:mhgo/features/dar/presentation/views/dar_details_view.dart';
 import 'package:mhgo/features/dar/presentation/views/pdf_preview_view.dart';
-import 'package:mhgo/features/inspections/presentation/views/inspection_list_view.dart';
-import 'package:mhgo/features/inspections/presentation/views/inspection_create_edit_view.dart';
-import 'package:mhgo/features/inspections/presentation/views/inspection_details_view.dart';
-import 'package:mhgo/features/inspections/presentation/views/pdf_preview_view.dart' as insp_pdf;
-import 'package:mhgo/features/inspections/presentation/views/inspection_gallery_view.dart';
+import '../../features/projects/presentation/views/project_pdf_preview_view.dart';
+import 'package:mhgo/features/survey/presentation/views/survey_list_view.dart';
+import 'package:mhgo/features/survey/presentation/views/survey_create_edit_view.dart';
+import 'package:mhgo/features/survey/presentation/views/survey_details_view.dart';
+import 'package:mhgo/features/survey/presentation/views/pdf_preview_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_list_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_details_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_create_edit_view.dart';
 import '../../features/materials/presentation/router/materials_router.dart';
+
+abstract class AppRouteNames {
+  static const String surveyList = 'survey_list';
+  static const String surveyCreate = 'survey_create';
+  static const String surveyEdit = 'survey_edit';
+  static const String surveyDetails = 'survey_details';
+}
 
 // A listenable that notifies GoRouter when auth state changes
 class RouterNotifier extends ChangeNotifier {
@@ -41,6 +48,9 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
     initialLocation: '/login',
     debugLogDiagnostics: true,
     refreshListenable: notifier,
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(child: Text('Route Boundary Catch: ${state.error}')),
+    ),
     redirect: (context, state) {
       final isLoggedIn = ref.read(authProvider).isAuthenticated;
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/forgot-password';
@@ -121,6 +131,14 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) => ProjectDetailsView(
                       uuid: state.pathParameters['id']!,
                     ),
+                    routes: [
+                      GoRoute(
+                        path: 'pdf',
+                        builder: (context, state) => ProjectPdfPreviewView(
+                          uuid: state.pathParameters['id']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -153,40 +171,37 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: MaterialsRouter.routes,
           ),
-          // QA/QC Inspections Branch (Index 4)
+          // Survey Branch (Index 4)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/inspections',
-                builder: (context, state) => const InspectionListView(),
+                name: AppRouteNames.surveyList,
+                path: '/survey',
+                builder: (context, state) => const SurveyListView(),
                 routes: [
                   GoRoute(
-                    path: 'create',
-                    builder: (context, state) => const InspectionCreateEditView(mode: InspectionFormMode.create),
+                    name: AppRouteNames.surveyCreate,
+                    path: 'new',
+                    builder: (context, state) => const SurveyCreateEditView(),
                   ),
                   GoRoute(
-                    path: 'edit/:id',
-                    builder: (context, state) => InspectionCreateEditView(
-                      mode: InspectionFormMode.edit,
-                      id: state.pathParameters['id'],
+                    name: AppRouteNames.surveyEdit,
+                    path: 'edit/:uuid',
+                    builder: (context, state) => SurveyCreateEditView(
+                      uuid: state.pathParameters['uuid'],
                     ),
                   ),
                   GoRoute(
-                    path: 'details/:id',
-                    builder: (context, state) => InspectionDetailsView(
-                      id: state.pathParameters['id']!,
+                    name: AppRouteNames.surveyDetails,
+                    path: 'details/:uuid',
+                    builder: (context, state) => SurveyDetailsView(
+                      uuid: state.pathParameters['uuid']!,
                     ),
                   ),
                   GoRoute(
-                    path: 'pdf/:id',
-                    builder: (context, state) => insp_pdf.InspectionPdfPreviewView(
-                      id: state.pathParameters['id']!,
-                    ),
-                  ),
-                  GoRoute(
-                    path: 'gallery/:id',
-                    builder: (context, state) => InspectionGalleryView(
-                      id: state.pathParameters['id']!,
+                    path: 'pdf/:uuid',
+                    builder: (context, state) => SurveyPdfPreviewView(
+                      id: state.pathParameters['uuid']!,
                     ),
                   ),
                 ],

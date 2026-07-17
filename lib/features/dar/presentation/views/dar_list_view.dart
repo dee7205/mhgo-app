@@ -61,6 +61,7 @@ class _DarListViewState extends ConsumerState<DarListView> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'dar-list-fab',
         onPressed: () => context.push('/dar/create'),
         label: const Text('New Daily Report', style: TextStyle(fontWeight: FontWeight.bold)),
         icon: const Icon(Icons.add),

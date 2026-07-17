@@ -71,8 +71,8 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
 
     // Fetch actual progress report from Isar to populate engineering progress accurately
     final progressModel = await _isar.progressModels
-        .where()
-        .uuidEqualTo(projectUuid)
+        .filter()
+        .projectUuidEqualTo(projectUuid)
         .findFirst();
     List<ProjectCategoryProgress> categoryProgresses = [];
     if (progressModel != null && progressModel.categoriesJson.isNotEmpty) {
@@ -96,8 +96,32 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
       qualityComplianceRate: 0.0,
     );
     final activityLogs = <ProjectActivityLog>[];
-    final timeline = <ProjectTimelineItem>[];
-    final team = <ProjectTeamMember>[];
+    
+    // Timeline auto-updated from progress entries
+    final timeline = categoryProgresses.map((c) {
+      String status = 'upcoming';
+      if (c.progress >= 100.0) status = 'completed';
+      else if (c.progress > 0.0) status = 'delayed'; // or 'in-progress', but Timeline handles 'delayed' and 'completed' and 'upcoming'
+
+      return ProjectTimelineItem(
+        milestoneName: c.name,
+        date: progressModel?.updatedAt ?? DateTime.now(),
+        owner: 'Project Manager',
+        status: status,
+        progress: c.progress,
+      );
+    }).toList();
+
+    List<ProjectTeamMember> team = [];
+    if (project.teamMembersJson != null && project.teamMembersJson!.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(project.teamMembersJson!) as List<dynamic>;
+        team = decoded.map((e) => ProjectTeamMember.fromJson(e as Map<String, dynamic>)).toList();
+      } catch (e) {
+        team = [];
+      }
+    }
+
     final documents = <DocumentSummary>[];
     final materials = <MaterialSummaryItem>[];
 
@@ -132,5 +156,22 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
       darSummary: darSummary,
       punchListSummary: punchListSummary,
     );
+  }
+
+  @override
+  Future<void> updateProjectTeam(String projectUuid, List<ProjectTeamMember> team) async {
+    final project = await _isar.projectModels
+        .filter()
+        .uuidEqualTo(projectUuid)
+        .findFirst();
+    if (project == null) return;
+
+    project.teamMembersJson = jsonEncode(team.map((e) => e.toJson()).toList());
+    project.updatedAt = DateTime.now();
+    project.isSynced = false;
+
+    await _isar.writeTxn(() async {
+      await _isar.projectModels.put(project);
+    });
   }
 }

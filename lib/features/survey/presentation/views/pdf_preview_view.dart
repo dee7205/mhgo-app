@@ -1,34 +1,30 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:mhgo/core/theme/app_theme.dart';
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/presentation/providers/inspections_provider.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/survey/presentation/providers/survey_provider.dart';
 
-class InspectionPdfPreviewView extends ConsumerWidget {
+class SurveyPdfPreviewView extends ConsumerWidget {
   final String id;
 
-  const InspectionPdfPreviewView({
-    super.key,
-    required this.id,
-  });
+  const SurveyPdfPreviewView({super.key, required this.id});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final detailsAsync = ref.watch(inspectionDetailsProvider(id));
+
+    final detailsAsync = ref.watch(surveyDetailsProvider(id));
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       appBar: AppBar(
-        title: Text(
-          'Inspection Report PDF Preview',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
+        title: const Text('Survey Report PDF'),
       ),
       body: SafeArea(
         child: detailsAsync.when(
@@ -39,86 +35,26 @@ class InspectionPdfPreviewView extends ConsumerWidget {
               style: const TextStyle(color: Colors.red),
             ),
           ),
-          data: (report) {
-            if (report == null) {
-              return const Center(child: Text('Inspection report not found.'));
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-              child: Center(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double availableWidth = constraints.maxWidth;
-                    final double targetWidth = 794.0;
-
-                    Widget pageContent = Hero(
-                      tag: 'pdf_page_${report.id}',
-                      child: Material(
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Container(
-                          width: targetWidth,
-                          padding: const EdgeInsets.all(40.0),
-                          color: Colors.white, // Always white background for printable design
-                          child: DefaultTextStyle(
-                            style: const TextStyle(color: Colors.black87, fontFamily: 'Courier'),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // 1. Header
-                                _buildHeader(report),
-                                const SizedBox(height: 12),
-                                const Divider(color: Colors.black54, thickness: 1.5),
-                                const SizedBox(height: 12),
-
-                                // 2. Metadata Info Grid
-                                _buildMetadataGrid(report),
-                                const SizedBox(height: 20),
-
-                                // 3. Checklist Table
-                                _buildChecklistSection(report.checklist),
-                                const SizedBox(height: 24),
-
-                                // 4. Non-Conformance Section
-                                if (report.nonConformance.isNotEmpty) ...[
-                                  _buildNcrSection(report.nonConformance),
-                                  const SizedBox(height: 24),
-                                ],
-
-                                // 5. Photos Section
-                                if (report.photos.isNotEmpty) ...[
-                                  _buildPhotosSection(report.photos),
-                                  const SizedBox(height: 32),
-                                ],
-
-                                const SizedBox(height: 40),
-
-                                // 6. Signatures Row
-                                _buildSignaturesRow(report),
-                                const SizedBox(height: 32),
-
-                                // 7. Footer
-                                const Divider(color: Colors.black26),
-                                const SizedBox(height: 8),
-                                _buildFooter(report),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                    if (availableWidth < targetWidth) {
-                      return FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: pageContent,
-                      );
-                    }
-                    return pageContent;
-                  },
+          data: (survey) {
+            if (survey == null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, size: 60, color: Colors.orange),
+                    const SizedBox(height: 16),
+                    Text('Survey data not found.', style: theme.textTheme.titleMedium),
+                  ],
                 ),
-              ),
+              );
+            }
+            return PdfPreview(
+              build: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format),
+              pdfFileName: 'survey_report_${survey.uuid}.pdf',
+              canChangeOrientation: false,
+              canChangePageFormat: false,
+              allowPrinting: true,
+              allowSharing: true,
             );
           },
         ),
@@ -126,363 +62,210 @@ class InspectionPdfPreviewView extends ConsumerWidget {
     );
   }
 
-  // --- HEADER ---
-  Widget _buildHeader(InspectionReport report) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  static Future<Uint8List> generatePdfDocument(Survey survey, PdfPageFormat format, {Uint8List? logoBytes}) async {
+    final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
+    final formattedDate = DateFormat('EEEE, MMMM dd, yyyy').format(survey.surveyDate);
+
+    final pw.ImageProvider? logoImage = logoBytes != null ? pw.MemoryImage(logoBytes) : null;
+
+    // Helper to draw a type-safe vector Philippine Peso symbol that never throws font missing exceptions
+    pw.Widget pesoSymbol(double fontSize, PdfColor color) {
+      return pw.CustomPaint(
+        size: PdfPoint(fontSize * 0.6, fontSize),
+        painter: (PdfGraphics canvas, PdfPoint size) {
+          canvas
+            ..setColor(color)
+            ..setLineWidth(fontSize * 0.08)
+            ..moveTo(0, size.y * 0.2)
+            ..lineTo(0, size.y * 0.85)
+            ..drawEllipse(size.x * 0.45, size.y * 0.67, size.x * 0.45, size.y * 0.2)
+            ..strokePath()
+          // Horizontal double bars matching the strict ₱ configuration
+            ..moveTo(-size.x * 0.1, size.y * 0.62)
+            ..lineTo(size.x * 0.8, size.y * 0.62)
+            ..strokePath()
+            ..moveTo(-size.x * 0.1, size.y * 0.48)
+            ..lineTo(size.x * 0.8, size.y * 0.48)
+            ..strokePath();
+        },
+      );
+    }
+
+    // Standardized row builder for formal two-column technical layouts
+    pw.Widget buildFormalRow(String label, pw.Widget valueWidget) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 4),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            const Text(
-              'MHG ENERGY EPC CORP',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+            pw.Expanded(
+              flex: 3,
+              child: pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.grey800, fontSize: 10)),
             ),
-            const SizedBox(height: 2),
-            Text(
-              'Built for MHG.',
-              style: TextStyle(fontSize: 10, color: Colors.blue.shade800, fontWeight: FontWeight.bold),
+            pw.Expanded(
+              flex: 5,
+              child: valueWidget,
             ),
           ],
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+      );
+    }
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: format.copyWith(
+          marginTop: 1.5 * PdfPageFormat.cm,
+          marginBottom: 1.5 * PdfPageFormat.cm,
+          marginLeft: 1.5 * PdfPageFormat.cm,
+          marginRight: 1.5 * PdfPageFormat.cm,
+        ),
+        // Running structural header repeated across pages
+        header: (context) => pw.Column(
           children: [
-            const Text(
-              'QUALITY CONTROL REPORT',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('MHGO ENGG - FIELD OPERATIONS', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+                pw.Text('CONFIDENTIAL', style: const pw.TextStyle(fontSize: 8, color: PdfColors.red500)),
+              ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              'STATUS: ${report.status.toUpperCase()}',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: report.status.toLowerCase() == 'approved'
-                    ? Colors.green.shade800
-                    : (report.status.toLowerCase() == 'rejected'
-                        ? Colors.red.shade800
-                        : Colors.orange.shade800),
+            pw.SizedBox(height: 4),
+            pw.Divider(thickness: 0.5, color: PdfColors.grey300),
+          ],
+        ),
+        // Running structural footer calculating pagination elements and branding dynamically
+        footer: (context) => pw.Column(
+          children: [
+            pw.Divider(thickness: 0.5, color: PdfColors.grey300),
+            pw.SizedBox(height: 4),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Site Assessment Report', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+                pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+              ],
+            ),
+            pw.SizedBox(height: 4),
+            pw.Align(
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                'Created using MHGO - Built for MHG',
+                style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey600, fontStyle: pw.FontStyle.italic),
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
+        build: (context) => [
+          pw.SizedBox(height: 10),
 
-  // --- METADATA GRID ---
-  Widget _buildMetadataGrid(InspectionReport report) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black26),
-        color: const Color(0xFFF5F5F5),
-      ),
-      child: Row(
-        children: [
-          _buildInfoItem('INSPECTION ID:', report.inspectionId),
-          _buildInfoItem('PROJECT:', report.projectName),
-          _buildInfoItem('DATE/TIME:', '${DateFormat('yyyy-MM-dd').format(report.inspectionDate)} ${report.time}'),
-          _buildInfoItem('INSPECTOR:', report.inspectorName),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- CHECKLIST TABLE ---
-  Widget _buildChecklistSection(List<ChecklistItem> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '1. INSPECTION CHECKLIST RESULTS',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        Table(
-          border: TableBorder.all(color: Colors.black26),
-          columnWidths: const {
-            0: FlexColumnWidth(4),
-            1: FixedColumnWidth(60),
-            2: FlexColumnWidth(3),
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            TableRow(
-              decoration: const BoxDecoration(color: Color(0xFFEBEBEB)),
-              children: [
-                _tableHeaderCell('Checklist Item / Specification'),
-                _tableHeaderCell('Result', center: true),
-                _tableHeaderCell('Remarks / Comments'),
-              ],
-            ),
-            ...items.map((item) => TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      child: Text(item.name, style: const TextStyle(fontSize: 9)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
-                      child: Text(
-                        item.result,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: item.result.toLowerCase() == 'pass'
-                              ? Colors.green.shade800
-                              : (item.result.toLowerCase() == 'fail' ? Colors.red.shade800 : Colors.grey),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      child: Text(
-                        item.remarks.isEmpty ? 'Conforms to specs' : item.remarks,
-                        style: const TextStyle(fontSize: 8, fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ],
-                )),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // --- NCR SECTION ---
-  Widget _buildNcrSection(List<NonConformance> ncrList) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '2. NON-CONFORMANCE & CORRECTIVE ACTIONS SUMMARY',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
-        ),
-        const SizedBox(height: 8),
-        Table(
-          border: TableBorder.all(color: Colors.black26),
-          columnWidths: const {
-            0: FlexColumnWidth(3),
-            1: FixedColumnWidth(60),
-            2: FlexColumnWidth(3),
-            3: FixedColumnWidth(80),
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            TableRow(
-              decoration: const BoxDecoration(color: Color(0xFFFDEDEC)),
-              children: [
-                _tableHeaderCell('Defect Description'),
-                _tableHeaderCell('Severity', center: true),
-                _tableHeaderCell('Recommended Action / Owner'),
-                _tableHeaderCell('Target Date', center: true),
-              ],
-            ),
-            ...ncrList.map((ncr) => TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      child: Text(ncr.description, style: const TextStyle(fontSize: 8)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
-                      child: Text(
-                        ncr.severity,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: ncr.severity.toLowerCase() == 'high' ? Colors.red.shade800 : Colors.orange.shade800,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      child: Text(
-                        '${ncr.recommendedAction} \n[Owner: ${ncr.responsiblePerson}]',
-                        style: const TextStyle(fontSize: 8),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
-                      child: Text(
-                        ncr.targetCompletionDate != null
-                            ? DateFormat('yyyy-MM-dd').format(ncr.targetCompletionDate!)
-                            : 'N/A',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 8),
-                      ),
-                    ),
-                  ],
-                )),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // --- PHOTOS ---
-  Widget _buildPhotosSection(List<InspectionPhoto> photos) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '3. SITE ATTACHMENTS & VISUAL EVIDENCE',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.1,
-          ),
-          itemCount: photos.length,
-          itemBuilder: (context, index) {
-            final photo = photos[index];
-            return Container(
-              decoration: BoxDecoration(border: Border.all(color: Colors.black26)),
-              child: Column(
+          // Formal Corporate Header Block
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              logoImage != null
+                  ? pw.Image(logoImage, width: 75, height: 75, fit: pw.BoxFit.contain)
+                  : pw.Container(
+                width: 75,
+                height: 75,
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.grey100,
+                  border: pw.Border.fromBorderSide(pw.BorderSide(color: PdfColors.grey300, width: 1)),
+                ),
+                alignment: pw.Alignment.center,
+                child: pw.Text('COMPANY\nLOGO', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+              ),
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: Container(
-                      color: const Color(0xFFF0F0F0),
-                      child: const Center(
-                        child: Icon(Icons.image, size: 24, color: Colors.grey),
-                      ),
+                  pw.Text('SITE ASSESSMENT LOG', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                  pw.SizedBox(height: 4),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: const pw.BoxDecoration(
+                      color: PdfColors.blue50,
+                      borderRadius: pw.BorderRadius.all(pw.Radius.circular(2)),
                     ),
+                    child: pw.Text(survey.status.toUpperCase(), style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold, fontSize: 10)),
                   ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(4),
-                    color: const Color(0xFFFAFAFA),
-                    child: Text(
-                      photo.caption.isEmpty ? 'Photo evidence #${index + 1}' : photo.caption,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 7),
-                    ),
-                  ),
+                  pw.SizedBox(height: 6),
+                  pw.Text('Date: $formattedDate', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                 ],
               ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // --- SIGNATURES ---
-  Widget _buildSignaturesRow(InspectionReport report) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _signatureBlock('INSPECTED BY (Inspector):', report.signatures.inspector, 'MHG QA/QC Lead'),
-        _signatureBlock('WITNESSED BY (Contractor):', report.signatures.contractor, 'EPC Site Representative'),
-        _signatureBlock('APPROVED BY (QA/QC Engr):', report.signatures.qaqc, 'MHG Quality Manager'),
-      ],
-    );
-  }
-
-  Widget _signatureBlock(String label, String signature, String role) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.black54),
+            ],
           ),
-          const SizedBox(height: 16),
-          Container(
-            height: 32,
-            width: 140,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.black38)),
+
+          pw.SizedBox(height: 25),
+
+          // Section I: Client Particulars
+          pw.Text('1. SITE ASSESSMENT PARTICULARS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.SizedBox(height: 4),
+          buildFormalRow('Client Name', pw.Text(survey.clientName, style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow('Contact Number', pw.Text(survey.contactNumber, style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow('Email Address', pw.Text(survey.email, style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow('Site Address', pw.Text(survey.address, style: const pw.TextStyle(fontSize: 10))),
+          if (survey.coordinates != null)
+            buildFormalRow('Geographical Coordinates', pw.Text(survey.coordinates!, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey800))),
+
+          pw.SizedBox(height: 20),
+
+          // Section II: Technical Analysis
+          pw.Text('2. SITE TECHNICAL SPECIFICATIONS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.SizedBox(height: 4),
+          if (survey.technicalSpecs.isEmpty)
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 4),
+              child: pw.Text('No clear technical specifications structural parameters logged.', style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
+            )
+          else
+            ...survey.technicalSpecs.entries.map((e) => buildFormalRow(e.key, pw.Text(e.value, style: const pw.TextStyle(fontSize: 10)))),
+
+          pw.SizedBox(height: 20),
+
+          // Section III: Engineering Proposal
+          pw.Text('3. PROPOSED SYSTEM ARCHITECTURE', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.SizedBox(height: 4),
+          buildFormalRow('System Configuration', pw.Text(survey.proposedSystem, style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow('Target Array Capacity', pw.Text('${survey.proposedCapacityKw.toStringAsFixed(2)} kW', style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow(
+            'Estimated Financial Budget',
+            pw.Row(
+              mainAxisSize: pw.MainAxisSize.min,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pesoSymbol(10, PdfColors.black),
+                pw.SizedBox(width: 2),
+                pw.Text(
+                  NumberFormat.currency(symbol: '', decimalDigits: 2).format(survey.proposedBudget),
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                ),
+              ],
             ),
-            child: signature.isNotEmpty
-                ? Text(
-                    signature,
-                    style: const TextStyle(
-                      fontFamily: 'Courier',
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.blueGrey,
-                    ),
-                  )
-                : const Text(
-                    'UNSIGNED',
-                    style: TextStyle(color: Colors.red, fontSize: 8, fontWeight: FontWeight.bold),
-                  ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            role,
-            style: const TextStyle(fontSize: 7, color: Colors.black54),
-          ),
+
+          // Section IV: Remarks
+          if (survey.notes != null && survey.notes!.isNotEmpty) ...[
+            pw.SizedBox(height: 20),
+            pw.Text('4. FIELD SURVEY REMARKS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+            pw.Divider(thickness: 1, color: PdfColors.blue900),
+            pw.SizedBox(height: 6),
+            pw.Container(
+              width: double.infinity,
+              padding: const pw.EdgeInsets.all(8),
+              decoration: const pw.BoxDecoration(
+                color: PdfColors.grey50,
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
+              ),
+              child: pw.Text(survey.notes!, style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey900)),
+            ),
+          ],
         ],
       ),
     );
-  }
 
-  // --- FOOTER ---
-  Widget _buildFooter(InspectionReport report) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Document ID: ${report.id.toUpperCase()}',
-          style: const TextStyle(fontSize: 7, color: Colors.black45),
-        ),
-        Text(
-          'Date Printed: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}',
-          style: const TextStyle(fontSize: 7, color: Colors.black45),
-        ),
-        const Text(
-          'Page 1 of 1',
-          style: TextStyle(fontSize: 7, color: Colors.black45),
-        ),
-      ],
-    );
-  }
-
-  Widget _tableHeaderCell(String text, {bool center = false}) {
-    return Padding(
-      padding: const EdgeInsets.all(6.0),
-      child: Text(
-        text,
-        textAlign: center ? TextAlign.center : TextAlign.left,
-        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black87),
-      ),
-    );
+    return pdf.save();
   }
 }

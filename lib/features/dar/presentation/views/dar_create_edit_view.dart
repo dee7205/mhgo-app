@@ -11,6 +11,7 @@ import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/features/dar/domain/entities/dar_entities.dart';
 import 'package:mhgo/features/dar/presentation/providers/dar_provider.dart';
 import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
+import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
 
 enum DarFormMode { create, edit }
 
@@ -221,7 +222,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
 
   Future<void> _submitReport() async {
     if (_selectedProjectUuid == null) {
-      _showSnackBar('Please select a project portfolio.', isError: true);
+      _showSnackBar('Please select a project.', isError: true);
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -234,6 +235,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     final report = _assembleReport('Submitted');
     await ref.read(saveDarUseCaseProvider).execute(report);
     ref.invalidate(darsListProvider);
+    ref.invalidate(dashboardStateProvider);
 
     if (mounted) {
       setState(() => _isSubmitting = false);
@@ -244,7 +246,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
 
   Future<void> _saveDraft() async {
     if (_selectedProjectUuid == null) {
-      _showSnackBar('Please select a project portfolio before saving draft.', isError: true);
+      _showSnackBar('Please select a project before saving draft.', isError: true);
       return;
     }
     if (_preparedByController.text.trim().isEmpty) {
@@ -254,6 +256,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     final report = _assembleReport('Draft');
     await ref.read(saveDarUseCaseProvider).execute(report);
     ref.invalidate(darsListProvider);
+    ref.invalidate(dashboardStateProvider);
     if (mounted) _showSnackBar('Draft saved.');
   }
 
@@ -396,7 +399,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 value: _selectedProjectUuid,
                 isExpanded: true,
                 decoration: const InputDecoration(
-                  labelText: 'Select Project Portfolio',
+                  labelText: 'Select Project',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.folder_open_outlined),
                 ),

@@ -225,7 +225,7 @@ class PdfPreviewView extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildInfoItem('PROJECT PORTFOLIO:', report.projectName),
+          _buildInfoItem('PROJECT NAME:', report.projectName),
           _buildInfoItem('REPORT DATE:', DateFormat('MMMM dd, yyyy').format(report.reportDate)),
           _buildInfoItem('PREPARED BY:', report.preparedBy),
           _buildInfoItem('PERIOD SHIFT:', report.reportingPeriod),
@@ -726,7 +726,7 @@ class PdfPreviewView extends ConsumerWidget {
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                _pwInfoItem('PROJECT PORTFOLIO:', report.projectName),
+                _pwInfoItem('PROJECT NAME:', report.projectName),
                 _pwInfoItem('REPORT DATE:', DateFormat('MMMM dd, yyyy').format(report.reportDate)),
                 _pwInfoItem('PREPARED BY:', report.preparedBy),
                 _pwInfoItem('PERIOD SHIFT:', report.reportingPeriod),

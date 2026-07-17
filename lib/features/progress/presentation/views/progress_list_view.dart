@@ -42,6 +42,7 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'progress-list-fab',
         onPressed: () => _showCreateProgressDialog(context),
         icon: const Icon(Icons.add),
         label: const Text('Track New Project', style: TextStyle(fontWeight: FontWeight.bold)),

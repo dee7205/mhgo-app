@@ -144,6 +144,7 @@ class ProgressDetailsView extends ConsumerWidget {
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(
+            heroTag: 'progress-details-fab',
             onPressed: () => context.push('/progress/update/$id'),
             icon: const Icon(Icons.add),
             label: const Text('Add Category'),

@@ -75,7 +75,7 @@ const List<_NavItem> _navItems = [
     selectedIcon: Icons.inventory_2,
   ),
   _NavItem(
-    label: 'QA/QC',
+    label: 'Survey',
     icon: Icons.verified_user_outlined,
     selectedIcon: Icons.verified_user,
   ),

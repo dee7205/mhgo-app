@@ -1,12 +1,12 @@
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/domain/repositories/inspections_repository.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/survey/domain/repositories/survey_repository.dart';
 
-class SaveInspectionUseCase {
-  final InspectionsRepository repository;
+class SaveSurveyUseCase {
+  final SurveyRepository repository;
 
-  SaveInspectionUseCase(this.repository);
+  SaveSurveyUseCase(this.repository);
 
-  Future<void> execute(InspectionReport report) {
-    return repository.saveInspection(report);
+  Future<void> execute(Survey survey) {
+    return repository.saveSurvey(survey);
   }
 }

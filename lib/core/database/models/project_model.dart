@@ -14,7 +14,7 @@ class ProjectModel {
   late double capacityMw;
   String? capacityUnit; // 'MWp' | 'kWp'
   late String status; // 'planning' | 'construction' | 'commissioning' | 'om' | 'completed' | 'on_hold'
-  late String stage; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'Commissioning' | 'Grid Tie'
+  String? stage; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'Commissioning' | 'Grid Tie'
   late String type; // 'Rooftop' | 'Ground Mounted' | 'Floating'
   String? systemType; // 'On-Grid' | 'Off-Grid' | 'Hybrid'
   late String location;
@@ -25,6 +25,9 @@ class ProjectModel {
 
   late DateTime startDate;
   late DateTime endDate;
+
+  String? teamMembersJson;
+  String? bomSpecsJson;
 
   late DateTime createdAt;
   late DateTime updatedAt;

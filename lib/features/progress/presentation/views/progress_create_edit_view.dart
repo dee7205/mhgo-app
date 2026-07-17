@@ -257,7 +257,7 @@ class _ProgressCreateEditViewState extends ConsumerState<ProgressCreateEditView>
                           children: [
                             Text('Progress: ${(_progress.isNaN || _progress.isInfinite ? 0 : _progress).toStringAsFixed(1)}%', style: theme.textTheme.bodyMedium),
                             Slider(
-                              value: _progress,
+                              value: (_progress.isNaN || _progress.isInfinite ? 0.0 : _progress).clamp(0.0, 100.0),
                               min: 0,
                               max: 100,
                               divisions: 100,

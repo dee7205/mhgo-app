@@ -28,29 +28,34 @@ const ProjectMaterialRequirementModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'isSynced': PropertySchema(id: 2, name: r'isSynced', type: IsarType.bool),
+    r'estimatedCost': PropertySchema(
+      id: 2,
+      name: r'estimatedCost',
+      type: IsarType.double,
+    ),
+    r'isSynced': PropertySchema(id: 3, name: r'isSynced', type: IsarType.bool),
     r'materialUuid': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'materialUuid',
       type: IsarType.string,
     ),
     r'projectUuid': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'projectUuid',
       type: IsarType.string,
     ),
     r'requiredQuantity': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'requiredQuantity',
       type: IsarType.double,
     ),
-    r'unit': PropertySchema(id: 6, name: r'unit', type: IsarType.string),
+    r'unit': PropertySchema(id: 7, name: r'unit', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'uuid': PropertySchema(id: 8, name: r'uuid', type: IsarType.string),
+    r'uuid': PropertySchema(id: 9, name: r'uuid', type: IsarType.string),
   },
 
   estimateSize: _projectMaterialRequirementModelEstimateSize,
@@ -129,13 +134,14 @@ void _projectMaterialRequirementModelSerialize(
 ) {
   writer.writeDouble(offsets[0], object.allocatedQuantity);
   writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.isSynced);
-  writer.writeString(offsets[3], object.materialUuid);
-  writer.writeString(offsets[4], object.projectUuid);
-  writer.writeDouble(offsets[5], object.requiredQuantity);
-  writer.writeString(offsets[6], object.unit);
-  writer.writeDateTime(offsets[7], object.updatedAt);
-  writer.writeString(offsets[8], object.uuid);
+  writer.writeDouble(offsets[2], object.estimatedCost);
+  writer.writeBool(offsets[3], object.isSynced);
+  writer.writeString(offsets[4], object.materialUuid);
+  writer.writeString(offsets[5], object.projectUuid);
+  writer.writeDouble(offsets[6], object.requiredQuantity);
+  writer.writeString(offsets[7], object.unit);
+  writer.writeDateTime(offsets[8], object.updatedAt);
+  writer.writeString(offsets[9], object.uuid);
 }
 
 ProjectMaterialRequirementModel _projectMaterialRequirementModelDeserialize(
@@ -147,14 +153,15 @@ ProjectMaterialRequirementModel _projectMaterialRequirementModelDeserialize(
   final object = ProjectMaterialRequirementModel();
   object.allocatedQuantity = reader.readDouble(offsets[0]);
   object.createdAt = reader.readDateTime(offsets[1]);
+  object.estimatedCost = reader.readDoubleOrNull(offsets[2]);
   object.id = id;
-  object.isSynced = reader.readBool(offsets[2]);
-  object.materialUuid = reader.readString(offsets[3]);
-  object.projectUuid = reader.readString(offsets[4]);
-  object.requiredQuantity = reader.readDouble(offsets[5]);
-  object.unit = reader.readString(offsets[6]);
-  object.updatedAt = reader.readDateTime(offsets[7]);
-  object.uuid = reader.readString(offsets[8]);
+  object.isSynced = reader.readBool(offsets[3]);
+  object.materialUuid = reader.readString(offsets[4]);
+  object.projectUuid = reader.readString(offsets[5]);
+  object.requiredQuantity = reader.readDouble(offsets[6]);
+  object.unit = reader.readString(offsets[7]);
+  object.updatedAt = reader.readDateTime(offsets[8]);
+  object.uuid = reader.readString(offsets[9]);
   return object;
 }
 
@@ -170,18 +177,20 @@ P _projectMaterialRequirementModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readDouble(offset)) as P;
-    case 6:
       return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readDouble(offset)) as P;
     case 7:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readDateTime(offset)) as P;
+    case 9:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -737,6 +746,123 @@ extension ProjectMaterialRequirementModelQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'estimatedCost'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'estimatedCost'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostEqualTo(double? value, {double epsilon = Query.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'estimatedCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'estimatedCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'estimatedCost',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  estimatedCostBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'estimatedCost',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
         ),
       );
     });
@@ -1785,6 +1911,28 @@ extension ProjectMaterialRequirementModelQuerySortBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
+  sortByEstimatedCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estimatedCost', Sort.asc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
+  sortByEstimatedCostDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estimatedCost', Sort.desc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
   sortByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -1983,6 +2131,28 @@ extension ProjectMaterialRequirementModelQuerySortThenBy
   thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
+  thenByEstimatedCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estimatedCost', Sort.asc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
+  thenByEstimatedCostDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estimatedCost', Sort.desc);
     });
   }
 
@@ -2197,6 +2367,17 @@ extension ProjectMaterialRequirementModelQueryWhereDistinct
     ProjectMaterialRequirementModel,
     QDistinct
   >
+  distinctByEstimatedCost() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'estimatedCost');
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QDistinct
+  >
   distinctByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isSynced');
@@ -2295,6 +2476,13 @@ extension ProjectMaterialRequirementModelQueryProperty
   createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ProjectMaterialRequirementModel, double?, QQueryOperations>
+  estimatedCostProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'estimatedCost');
     });
   }
 

@@ -12,4 +12,5 @@ abstract class MaterialsRepository {
   Future<List<ProjectMaterialRequirementEntity>> getRequirementsForMaterial(String materialUuid);
   Future<void> saveRequirement(ProjectMaterialRequirementEntity requirement);
   Future<void> deleteRequirement(String uuid);
+  Future<void> forceResetAllRequirementsToZero();
 }

@@ -1,19 +1,19 @@
-class ProgressReport {
-  String uuid;
-  ProgressReport(this.uuid);
-}
-
 void main() {
-  List<ProgressReport> reports = [];
+  try {
+    "".substring(0, 8);
+  } catch(e) {
+    print("Substring error: $e");
+  }
   
   try {
-    final report = reports.cast<ProgressReport?>().firstWhere(
-      (r) => r?.uuid == '456',
-      orElse: () => null,
-    );
-    print('Report is: $report');
-  } catch (e, stack) {
-    print('Exception: $e');
-    print(stack);
+    [][0];
+  } catch(e) {
+    print("List error: $e");
+  }
+
+  try {
+    ""[0];
+  } catch(e) {
+    print("String index error: $e");
   }
 }

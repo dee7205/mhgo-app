@@ -1,71 +1,66 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:mhgo/core/database/models/survey_model.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 import 'package:mhgo/features/survey/domain/repositories/survey_repository.dart';
 
-class InspectionsRepositoryImpl implements InspectionsRepository {
+class SurveyRepositoryImpl implements SurveyRepository {
   final Isar _isar;
 
-  InspectionsRepositoryImpl(this._isar);
+  SurveyRepositoryImpl(this._isar);
 
   @override
-  Future<List<InspectionReport>> getInspections() async {
-    final models = await _isar.surveyModels.where().sortByInspectionDateDesc().findAll();
-    
-    // Fetch projects to map project names
-    final projects = await _isar.projectModels.where().findAll();
-    final projectMap = {for (var p in projects) p.uuid: p.name};
-
-    return models.map((m) => _modelToReport(m, projectMap[m.projectUuid] ?? 'Unknown Project')).toList();
+  Future<List<Survey>> getAllSurveys() async {
+    // Queries Isar and sorts natively by client name
+    final models = await _isar.surveyModels.where().sortByClientName().findAll();
+    return models.map((m) => _modelToEntity(m)).toList();
   }
 
   @override
-  Future<InspectionReport?> getInspectionById(String id) async {
-    final model = await _isar.surveyModels.filter().uuidEqualTo(id).findFirst();
+  Future<Survey?> getSurveyByUuid(String uuid) async {
+    final model = await _isar.surveyModels.filter().uuidEqualTo(uuid).findFirst();
     if (model == null) return null;
-
-    final project = await _isar.projectModels.filter().uuidEqualTo(model.projectUuid).findFirst();
-    return _modelToReport(model, project?.name ?? 'Unknown Project');
+    
+    return _modelToEntity(model);
   }
 
   @override
-  Future<void> saveInspection(InspectionReport report) async {
-    final existing = await _isar.surveyModels.filter().uuidEqualTo(report.id).findFirst();
+  Future<void> saveSurvey(Survey survey) async {
+    final existing = await _isar.surveyModels.filter().uuidEqualTo(survey.uuid).findFirst();
 
     await _isar.writeTxn(() async {
       final model = existing ?? SurveyModel();
-      model.uuid = report.id;
-      model.inspectionId = report.inspectionId;
-      model.projectUuid = report.projectUuid;
-      model.title = report.title;
-      model.inspectorName = report.inspectorName;
-      model.status = report.status;
-      model.inspectionDate = report.inspectionDate;
-      model.inspectionType = report.inspectionType;
-      model.time = report.time;
-      model.area = report.area;
-      model.location = report.location;
-      model.witness = report.witness;
-      model.priority = report.priority;
-      model.overallResult = report.overallResult;
-      model.checklistJson = json.encode(report.checklist.map((e) => e.toJson()).toList());
-      model.nonConformanceJson = json.encode(report.nonConformance.map((e) => e.toJson()).toList());
-      model.photosJson = json.encode(report.photos.map((e) => e.toJson()).toList());
-      model.signaturesJson = json.encode(report.signatures.toJson());
-      model.notes = report.title;
-      model.createdAt = existing?.createdAt ?? report.createdAt;
+      
+      // Strict 1:1 mapping based on modern fields
+      model.uuid = survey.uuid;
+      model.clientName = survey.clientName;
+      model.contactNumber = survey.contactNumber;
+      model.email = survey.email;
+      model.address = survey.address;
+      model.coordinates = survey.coordinates;
+      model.surveyDate = survey.surveyDate;
+      model.technicalSpecsJson = jsonEncode(survey.technicalSpecs);
+      model.proposedSystem = survey.proposedSystem;
+      model.proposedCapacityKw = survey.proposedCapacityKw;
+      model.proposedBudget = survey.proposedBudget;
+      model.status = survey.status;
+      model.notes = survey.notes;
+      model.convertedProjectUuid = survey.convertedProjectUuid;
+      
+      model.createdAt = existing?.createdAt ?? DateTime.now();
       model.updatedAt = DateTime.now();
-      model.isSynced = report.isSynced;
+      model.isSynced = false;
 
       await _isar.surveyModels.put(model);
     });
   }
 
   @override
-  Future<void> deleteInspection(String id) async {
-    final model = await _isar.surveyModels.filter().uuidEqualTo(id).findFirst();
+  Future<void> deleteSurvey(String uuid) async {
+    final model = await _isar.surveyModels.filter().uuidEqualTo(uuid).findFirst();
     if (model != null) {
       await _isar.writeTxn(() async {
         await _isar.surveyModels.delete(model.id);
@@ -73,87 +68,79 @@ class InspectionsRepositoryImpl implements InspectionsRepository {
     }
   }
 
-  // --- Model-to-Entity Mapping Helpers ---
+  @override
+  Future<String?> convertToProject(Survey survey) async {
+    final model = await _isar.surveyModels.filter().uuidEqualTo(survey.uuid).findFirst();
+    
+    if (model == null) throw Exception('Survey not found in local database.');
+    if (model.convertedProjectUuid != null) return model.convertedProjectUuid; // Already converted
 
-  InspectionReport _modelToReport(SurveyModel m, String projectName) {
-    return InspectionReport(
-      id: m.uuid,
-      inspectionId: m.inspectionId,
-      projectUuid: m.projectUuid,
-      projectName: projectName,
-      title: m.title,
-      inspectorName: m.inspectorName,
-      witness: m.witness,
-      status: m.status,
-      priority: m.priority,
-      overallResult: m.overallResult,
-      inspectionDate: m.inspectionDate,
-      inspectionType: m.inspectionType,
-      checklist: _parseChecklist(m.checklistJson),
-      nonConformance: _parseNonConformance(m.nonConformanceJson),
-      photos: _parsePhotos(m.photosJson),
-      signatures: _parseSignatures(m.signaturesJson),
-      time: m.time,
-      area: m.area,
-      location: m.location,
-      createdAt: m.createdAt,
-      updatedAt: m.updatedAt,
-      isSynced: m.isSynced,
-    );
+    final newProjectUuid = 'p-${const Uuid().v4()}';
+    
+    // Architecting the Project Entity from Survey Context
+    final project = ProjectModel()
+      ..uuid = newProjectUuid
+      ..name = '${model.clientName} - ${model.proposedSystem}'
+      ..client = model.clientName
+      ..location = model.address
+      ..type = 'Rooftop' // Or mapped dynamically if needed
+      ..capacityMw = model.proposedCapacityKw / 1000 // Convert kW to MW safely
+      ..status = 'planning'
+      ..stage = 'Engineering'
+      ..progress = 0.0
+      ..startDate = DateTime.now()
+      ..endDate = DateTime.now().add(const Duration(days: 30))
+      ..description = 'Converted from Survey: ${model.notes ?? ""}'
+      ..createdAt = DateTime.now()
+      ..updatedAt = DateTime.now()
+      ..isSynced = false;
+
+    // Single Atomic Transaction Guarantee
+    await _isar.writeTxn(() async {
+      // 1. Persist the newly born project
+      await _isar.projectModels.put(project);
+      
+      // 2. Lock the survey by updating its status and link
+      model.status = 'Converted';
+      model.convertedProjectUuid = newProjectUuid;
+      model.updatedAt = DateTime.now();
+      
+      await _isar.surveyModels.put(model);
+    });
+
+    return newProjectUuid;
   }
 
-  List<ChecklistItem> _parseChecklist(String? jsonStr) {
-    if (jsonStr == null || jsonStr.isEmpty) return [];
+  // --- Entity Mapping Helper ---
+
+  Survey _modelToEntity(SurveyModel m) {
+    Map<String, String> parsedSpecs = {};
     try {
-      final decoded = json.decode(jsonStr);
-      if (decoded is List) {
-        return decoded.map((item) => ChecklistItem.fromJson(item as Map<String, dynamic>)).toList();
-      } else if (decoded is Map) {
-        // Fallback for key-value pair map stored in seed data
-        return decoded.entries.map((entry) {
-          return ChecklistItem(
-            name: entry.key.toString(),
-            result: entry.value.toString(),
-            remarks: '',
-          );
-        }).toList();
+      if (m.technicalSpecsJson.isNotEmpty) {
+        final decoded = jsonDecode(m.technicalSpecsJson);
+        if (decoded is Map) {
+          parsedSpecs = decoded.map((key, value) => MapEntry(key.toString(), value.toString()));
+        }
       }
-    } catch (_) {}
-    return [];
-  }
-
-  List<NonConformance> _parseNonConformance(String? jsonStr) {
-    if (jsonStr == null || jsonStr.isEmpty) return [];
-    try {
-      final decoded = json.decode(jsonStr);
-      if (decoded is List) {
-        return decoded.map((item) => NonConformance.fromJson(item as Map<String, dynamic>)).toList();
-      }
-    } catch (_) {}
-    return [];
-  }
-
-  List<InspectionPhoto> _parsePhotos(String? jsonStr) {
-    if (jsonStr == null || jsonStr.isEmpty) return [];
-    try {
-      final decoded = json.decode(jsonStr);
-      if (decoded is List) {
-        return decoded.map((item) => InspectionPhoto.fromJson(item as Map<String, dynamic>)).toList();
-      }
-    } catch (_) {}
-    return [];
-  }
-
-  InspectionSignatures _parseSignatures(String? jsonStr) {
-    if (jsonStr == null || jsonStr.isEmpty) {
-      return const InspectionSignatures(inspector: '', contractor: '', qaqc: '');
+    } catch (e) {
+      // Ignore
     }
-    try {
-      final decoded = json.decode(jsonStr);
-      if (decoded is Map<String, dynamic>) {
-        return InspectionSignatures.fromJson(decoded);
-      }
-    } catch (_) {}
-    return const InspectionSignatures(inspector: '', contractor: '', qaqc: '');
+
+    return Survey(
+      uuid: m.uuid,
+      clientName: m.clientName,
+      contactNumber: m.contactNumber,
+      email: m.email,
+      address: m.address,
+      coordinates: m.coordinates,
+      surveyDate: m.surveyDate,
+      technicalSpecs: parsedSpecs,
+      proposedSystem: m.proposedSystem,
+      proposedCapacityKw: m.proposedCapacityKw,
+      proposedBudget: m.proposedBudget,
+      status: m.status,
+      notes: m.notes,
+      convertedProjectUuid: m.convertedProjectUuid,
+    );
   }
 }

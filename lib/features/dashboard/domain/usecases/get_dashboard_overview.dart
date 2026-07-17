@@ -42,16 +42,26 @@ class GetDashboardOverview {
       overallProgress = totalProgressSum / activeOrComp.length;
     }
 
+    // 4. Calculate stage distribution
+    final Map<String, int> projectsByStage = {};
+    for (final p in projects) {
+      if (p.stage != null && p.stage!.isNotEmpty) {
+        projectsByStage[p.stage!] = (projectsByStage[p.stage!] ?? 0) + 1;
+      }
+    }
+
     return DashboardOverview(
       totalProjectsCount: totalProjectsCount,
       activeProjectsCount: activeProjectsCount,
       planningProjectsCount: planningProjectsCount,
       totalCapacityMw: totalCapacityMw,
       overallProgress: overallProgress,
+      projectsByStage: projectsByStage,
+      recentDarCount: 0,
       projects: projects,
       urgentTasks: urgentTasks,
-      lowStockMaterials: lowStockMaterials,
-      recentInspections: recentInspections,
+      lowStockMaterials: const [],
+      recentInspections: const [],
     );
   }
 }

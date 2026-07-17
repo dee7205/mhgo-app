@@ -18,6 +18,7 @@ class ProjectMaterialRequirementModel {
   late double requiredQuantity;
   late double allocatedQuantity;
   late String unit;
+  double? estimatedCost; // Added for BOM costing
 
   late DateTime createdAt;
   late DateTime updatedAt;

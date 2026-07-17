@@ -35,6 +35,7 @@ class ProjectMaterialRequirementEntity {
   final double requiredQuantity;
   final double allocatedQuantity;
   final String unit;
+  final double? estimatedCost;
 
   ProjectMaterialRequirementEntity({
     required this.uuid,
@@ -43,5 +44,6 @@ class ProjectMaterialRequirementEntity {
     required this.requiredQuantity,
     required this.allocatedQuantity,
     required this.unit,
+    this.estimatedCost,
   });
 }

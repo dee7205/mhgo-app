@@ -77,6 +77,7 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'inventory-fab',
         onPressed: () {
           showDialog(
             context: context,

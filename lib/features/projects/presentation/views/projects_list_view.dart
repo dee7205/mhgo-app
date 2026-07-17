@@ -40,7 +40,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       appBar: AppBar(
         title: Text(
-          'Engineering Portfolios',
+          'Engineering Projects',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: -0.5,
@@ -54,15 +54,16 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
               ref.read(projectsGridViewProvider.notifier).toggle();
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           AppButton(
-            text: 'New Portfolio',
+            text: 'New Project',
             icon: Icons.add,
             variant: AppButtonVariant.primary,
             height: 36,
+            width: 110,
             onPressed: () => _showAddProjectDialog(context, ref),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
         ],
       ),
       body: SafeArea(
@@ -165,7 +166,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
             ref.read(projectsSearchQueryProvider.notifier).set(val);
           },
           decoration: InputDecoration(
-            hintText: 'Search portfolios by name, client, or site location...',
+            hintText: 'Search projects by name, client, or site location...',
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
@@ -246,7 +247,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
     final activeFilter = ref.watch(projectsFilterStatusProvider);
     
     final filters = [
-      {'label': 'All Portfolios', 'value': null},
+      {'label': 'All Projects', 'value': null},
       {'label': 'Active Sites', 'value': 'active'},
       {'label': 'Planning', 'value': 'planning'},
       {'label': 'Construction', 'value': 'construction'},
@@ -359,7 +360,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
         children: [
           Icon(Icons.inventory_2_outlined, size: 56, color: Theme.of(context).disabledColor),
           const SizedBox(height: 16),
-          Text('No portfolios matched your filters', style: Theme.of(context).textTheme.titleMedium),
+          Text('No projects matched your filters', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const Text('Try adjusting your search criteria or filter status.'),
         ],
@@ -621,7 +622,7 @@ class _ProjectListCard extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      project.stage,
+                      project.stage ?? 'Planning',
                       style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),

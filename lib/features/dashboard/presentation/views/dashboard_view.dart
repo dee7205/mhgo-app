@@ -14,7 +14,8 @@ import 'package:mhgo/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
 import 'package:mhgo/features/materials/data/models/material_model.dart';
-import 'package:mhgo/core/database/models/inspection_model.dart';
+import 'package:mhgo/features/materials/domain/entities/materials_entities.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -99,9 +100,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       if (actionTitle.toLowerCase().contains('new') || 
           actionTitle.toLowerCase().contains('create') ||
           actionTitle.toLowerCase().contains('checklist')) {
-        context.push('/inspections/create');
+        context.push('/survey/new');
       } else {
-        context.push('/inspections');
+        context.push('/survey');
       }
     } else if (actionTitle.toLowerCase().contains('progress')) {
       context.push('/progress');
@@ -141,7 +142,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                 const Icon(Icons.solar_power_outlined, size: 24, color: Color(0xFF2E7D32)),
                 const SizedBox(width: 10),
                 Text(
-                  'MHGo Solar EPC Center',
+                  'MHGo - Built for MHG',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
@@ -225,6 +226,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                   _buildWelcomeHeader(theme, isDark, data),
                                   const SizedBox(height: 28),
 
+                                  _buildActiveProjects(data.projects),
+                                  const SizedBox(height: 32),
+
                                   // Summary stats grids
                                   _buildKpiGrid(data),
                                   const SizedBox(height: 32),
@@ -234,8 +238,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                     mobile: Column(
                                       children: [
                                         _buildQuickActionsPanel(theme, isDark),
-                                        const SizedBox(height: 24),
-                                        _buildActiveProjects(data.projects),
                                         const SizedBox(height: 24),
                                         _buildUrgentTasks(data.urgentTasks),
                                         const SizedBox(height: 24),
@@ -258,8 +260,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                             Expanded(child: _buildUrgentTasks(data.urgentTasks)),
                                           ],
                                         ),
-                                        const SizedBox(height: 24),
-                                        _buildActiveProjects(data.projects),
                                         const SizedBox(height: 24),
                                         Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,8 +288,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                                           flex: 3,
                                           child: Column(
                                             children: [
-                                              _buildActiveProjects(data.projects),
-                                              const SizedBox(height: 28),
                                               _buildProjectDistribution(data.projects),
                                               const SizedBox(height: 28),
                                               _buildQCFeed(data.recentInspections, data.projects),
@@ -548,7 +546,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       _KpiCard(
         title: 'PROJECT TRACKING',
         value: '${data.activeProjectsCount} Active',
-        subtitle: '${data.totalProjectsCount} Total portfolios managed',
+        subtitle: '${data.totalProjectsCount} Total projects managed',
         icon: Icons.folder_copy_outlined,
         accentColor: theme.colorScheme.primary,
         theme: theme,
@@ -556,7 +554,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       ),
       _KpiCard(
         title: 'CAPACITY IMPLEMENTED',
-        value: '${data.totalCapacityMw.toStringAsFixed(1)} MWp',
+        value: '${data.totalCapacityMw.toStringAsFixed(1)} kWp',
         subtitle: 'EPC solar generation target',
         icon: Icons.wb_sunny_rounded,
         accentColor: const Color(0xFFFFB300), // Amber
@@ -564,14 +562,34 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         isDark: isDark,
       ),
       _KpiCard(
-        title: 'CONSTRUCTION HEALTH',
-        value: '${(data.overallProgress.isNaN || data.overallProgress.isInfinite ? 0 : data.overallProgress * 100).toStringAsFixed(0)}%',
-        subtitle: 'Avg execution progress',
-        icon: Icons.trending_up,
+        title: 'PROJECT PHASES',
+        value: '',
+        subtitle: 'Distribution across stages',
+        icon: Icons.engineering,
         accentColor: const Color(0xFF2196F3), // Accent Sky Blue
-        progressValue: data.overallProgress,
         theme: theme,
         isDark: isDark,
+        customBody: data.projectsByStage.isEmpty 
+            ? Text('No project data', style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor))
+            : Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: data.projectsByStage.entries.map((e) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2196F3).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.2)),
+                  ),
+                  child: Text(
+                    '${e.key}: ${e.value}', 
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold, 
+                      color: isDark ? const Color(0xFF64B5F6) : const Color(0xFF1976D2),
+                    ),
+                  ),
+                )).toList(),
+              ),
       ),
       _KpiCard(
         title: 'LOGISTICS & SHORTAGES',
@@ -594,6 +612,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
     }
 
     if (crossAxisCount == 2) {
+      if (cards.length < 4) {
+        return Column(
+          children: cards.map((c) => Padding(
+            padding: EdgeInsets.only(bottom: spacing),
+            child: c,
+          )).toList(),
+        );
+      }
       return Column(
         children: [
           Row(
@@ -612,6 +638,15 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
             ],
           ),
         ],
+      );
+    }
+
+    if (cards.length < 4) {
+      return Column(
+        children: cards.map((c) => Padding(
+          padding: EdgeInsets.only(bottom: spacing),
+          child: c,
+        )).toList(),
       );
     }
 
@@ -646,11 +681,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         onTap: () => _handleQuickAction('View Daily Activity Report (DAR)'),
       ),
       _QuickActionItem(
-        title: 'New Inspection',
-        subtitle: 'QA/QC check',
+        title: 'New Survey',
+        subtitle: 'Create a client site assessment',
         icon: Icons.playlist_add_check,
         color: const Color(0xFFFFB300), // Amber
-        onTap: () => _handleQuickAction('QA/QC Site Inspection Checklist'),
+        onTap: () => _handleQuickAction('New Survey'),
       ),
       _QuickActionItem(
         title: 'Update Progress',
@@ -779,7 +814,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Solar Portfolios Execution',
+                      'Solar Projects Execution',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
@@ -798,7 +833,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               const SizedBox(width: 8),
               TextButton.icon(
                 icon: const Icon(Icons.arrow_forward, size: 16),
-                label: const Text('All Portfolios'),
+                label: const Text('All Projects'),
                 onPressed: () => context.go('/projects'),
               ),
             ],
@@ -807,7 +842,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
           if (projects.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32.0),
-              child: Center(child: Text('No active solar portfolios found.')),
+              child: Center(child: Text('No active solar projects found.')),
             )
           else
             ListView.separated(
@@ -825,7 +860,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
     );
   }
 
-  // --- PROJECT PORTFOLIO DISTRIBUTION CHART ---
+  // --- PROJECT PROJECTS DISTRIBUTION CHART ---
   Widget _buildProjectDistribution(List<ProjectModel> projects) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -854,7 +889,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'EPC Site Type Breakdown',
+            'Site Type Breakdown',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: -0.2,
@@ -1071,7 +1106,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
   }
 
   // --- MATERIAL WAREHOUSE SHORTAGES ---
-  Widget _buildInventoryAlerts(List<MaterialModel> lowStock) {
+  Widget _buildInventoryAlerts(List<MaterialEntity> lowStock) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -1171,7 +1206,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'ID: ${mat.uuid.substring(0, 8)} • Location: ${mat.storageLocation ?? "Unassigned"}',
+                              'ID: ${mat.uuid.length >= 8 ? mat.uuid.substring(0, 8) : mat.uuid} • Location: ${mat.storageLocation ?? "Unassigned"}',
                               style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                             ),
                           ],
@@ -1205,11 +1240,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
   }
 
   // --- QA/QC CHECKLIST FEED ---
-  Widget _buildQCFeed(List<InspectionModel> inspections, List<ProjectModel> projects) {
+  Widget _buildQCFeed(List<Survey> inspections, List<ProjectModel> projects) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final projectMap = {for (var p in projects) p.uuid: p.name};
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -1225,7 +1258,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Supervision Sign-offs & QA/QC Logs',
+                      'Field Survey Operations',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
@@ -1233,7 +1266,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Field checklist status logs and structural audits',
+                      'Active site proposals',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
                       ),
@@ -1263,8 +1296,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
               separatorBuilder: (context, index) => const Divider(height: 24),
               itemBuilder: (context, index) {
                 final audit = inspections[index];
-                final pName = projectMap[audit.projectUuid] ?? 'Solar EPC Site';
-                return _QCListItem(audit: audit, projectName: pName, theme: theme, isDark: isDark);
+                return _QCListItem(audit: audit, theme: theme, isDark: isDark);
               },
             ),
         ],
@@ -1280,7 +1312,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
     for (final p in data.projects.take(2)) {
       activities.add(_ActivityItem(
         time: DateFormat('MMM d, h:mm a').format(p.createdAt),
-        title: 'Portfolio Created',
+        title: 'Project Created',
         description: '${p.name} was successfully registered.',
         icon: Icons.folder_open,
         color: theme.colorScheme.primary,
@@ -1292,12 +1324,12 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
     for (final insp in data.recentInspections.take(3)) {
       final isRejected = insp.status.toLowerCase() == 'rejected';
       activities.add(_ActivityItem(
-        time: DateFormat('MMM d, h:mm a').format(insp.createdAt),
+        time: DateFormat('MMM d, h:mm a').format(insp.surveyDate),
         title: 'QC Inspection Logged',
-        description: isRejected ? '${insp.title} flagged an issue at ${insp.location}.' : '${insp.title} passed QA/QC.',
+        description: isRejected ? '${insp.clientName} flagged an issue at ${insp.address}.' : '${insp.clientName} passed QA/QC.',
         icon: isRejected ? Icons.cancel_outlined : Icons.check_circle_outline,
         color: isRejected ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32),
-        timestamp: insp.createdAt,
+        timestamp: insp.surveyDate,
       ));
     }
 
@@ -1397,7 +1429,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
   Widget _buildRightNotificationPanel(ThemeData theme, bool isDark) {
     final notifications = [
       _AlertItem(
-        title: 'Cavite building #4 QC alert',
+        title: 'Test Alert Title',
         message: 'PV array structural clamp torque check failed at sector C.',
         time: '1h ago',
         type: 'error',
@@ -1573,6 +1605,7 @@ class _KpiCard extends StatelessWidget {
   final double? progressValue;
   final ThemeData theme;
   final bool isDark;
+  final Widget? customBody;
 
   const _KpiCard({
     required this.title,
@@ -1583,6 +1616,7 @@ class _KpiCard extends StatelessWidget {
     this.progressValue,
     required this.theme,
     required this.isDark,
+    this.customBody,
   });
 
   @override
@@ -1593,32 +1627,35 @@ class _KpiCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 10,
-                      letterSpacing: 0.8,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                    letterSpacing: 0.8,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: accentColor, size: 16),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
+                child: Icon(icon, color: accentColor, size: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (customBody != null)
+            customBody!
+          else ...[
             Text(
               value,
               style: theme.textTheme.headlineMedium?.copyWith(
@@ -1650,8 +1687,9 @@ class _KpiCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      );
+        ],
+      ),
+    );
   }
 }
 
@@ -1693,15 +1731,6 @@ class _ProjectExpandedListItem extends StatelessWidget {
 
     // Milestones definition based on mock data
     final List<String> milestones;
-    if (project.uuid.contains('bulacan')) {
-      milestones = ['Civil: 65%', 'Structures: 0%', 'Inverters: Oct 26'];
-    } else if (project.uuid.contains('cavite')) {
-      milestones = ['Roof Reinforce: Done', 'PV Installation: 85%', 'Grid Tie: Sep 26'];
-    } else if (project.uuid.contains('laguna')) {
-      milestones = ['Geotech Survey: 40%', 'Denr EIA Clearance: Dec 26'];
-    } else {
-      milestones = ['Breaker Test: Done', 'Grid Tie: Done'];
-    }
 
     // Engineer Avatar initials
     final engineerInitials = project.uuid.contains('bulacan')
@@ -1777,7 +1806,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                             border: Border.all(color: statusFg.withOpacity(0.2)),
                           ),
                           child: Text(
-                            project.stage,
+                            project.stage ?? 'Planning',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 9,
                               color: statusFg,
@@ -1830,37 +1859,37 @@ class _ProjectExpandedListItem extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Milestones Chips & Assignments
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              // Milestones Scroll Panel
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: milestones.map((milestone) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
-                      ),
-                    ),
-                    child: Text(
-                      milestone,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white54 : Colors.black54,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+          // Wrap(
+          //   alignment: WrapAlignment.spaceBetween,
+          //   crossAxisAlignment: WrapCrossAlignment.center,
+          //   spacing: 12,
+          //   runSpacing: 8,
+          //   children: [
+          //     // Milestones Scroll Panel
+          //     Wrap(
+          //       spacing: 6,
+          //       runSpacing: 4,
+          //       children: milestones.map((milestone) {
+          //         return Container(
+          //           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          //           decoration: BoxDecoration(
+          //             color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+          //             borderRadius: BorderRadius.circular(6),
+          //             border: Border.all(
+          //               color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+          //             ),
+          //           ),
+          //           child: Text(
+          //             milestone,
+          //             style: theme.textTheme.bodySmall?.copyWith(
+          //               fontSize: 9,
+          //               fontWeight: FontWeight.w600,
+          //               color: isDark ? Colors.white54 : Colors.black54,
+          //             ),
+          //           ),
+          //         );
+          //       }).toList(),
+          //     ),
 
               // Engr Team Avatars
               Row(
@@ -1898,9 +1927,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
               ),
             ],
           ),
-        ],
       ),
-    ),
     );
   }
 }
@@ -2050,14 +2077,12 @@ class _TaskListItem extends StatelessWidget {
 
 // --- QA/QC CHECKLIST LIST ITEM ---
 class _QCListItem extends StatelessWidget {
-  final InspectionModel audit;
-  final String projectName;
+  final Survey audit;
   final ThemeData theme;
   final bool isDark;
 
   const _QCListItem({
     required this.audit,
-    required this.projectName,
     required this.theme,
     required this.isDark,
   });
@@ -2082,7 +2107,7 @@ class _QCListItem extends StatelessWidget {
         break;
     }
 
-    final dateStr = DateFormat('MMM d, y').format(audit.inspectionDate);
+    final dateStr = DateFormat('MMM d, y').format(audit.surveyDate);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -2100,7 +2125,7 @@ class _QCListItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        audit.title,
+                        audit.clientName,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -2130,7 +2155,7 @@ class _QCListItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  projectName,
+                  audit.address,
                   style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2151,11 +2176,6 @@ class _QCListItem extends StatelessWidget {
                 ],
                 Row(
                   children: [
-                    Text(
-                      'Inspector: ${audit.inspectorName}',
-                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
-                    ),
-                    const SizedBox(width: 8),
                     Text(
                       '•  $dateStr',
                       style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),

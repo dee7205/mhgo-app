@@ -6,4 +6,5 @@ abstract class ProjectsRepository {
   Future<DetailedProjectData> getProjectDetails(String projectUuid);
   Future<void> addProject(ProjectModel project);
   Future<void> deleteProject(String projectUuid);
+  Future<void> updateProjectTeam(String projectUuid, List<ProjectTeamMember> team);
 }

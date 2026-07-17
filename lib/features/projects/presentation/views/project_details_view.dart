@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,9 @@ import 'package:mhgo/features/materials/presentation/widgets/project_material_re
 
 class ProjectDetailsView extends ConsumerStatefulWidget {
   final String uuid;
+
+  // Add getter for projectUuid aliases
+  String get projectUuid => uuid;
 
   const ProjectDetailsView({
     super.key,
@@ -77,11 +81,13 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   context: context,
                   builder: (ctx) => ProjectCreateEditDialog(existingProject: project),
                 );
+              } else if (value == 'pdf') {
+                context.push('/projects/${project.uuid}/pdf');
               } else if (value == 'delete') {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Portfolio?'),
+                    title: const Text('Delete Project?'),
                     content: Text('Are you sure you want to delete ${project.name}? This action cannot be undone.'),
                     actions: [
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
@@ -107,13 +113,15 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'edit', child: Text('Edit Portfolio')),
-              const PopupMenuItem(value: 'delete', child: Text('Delete Portfolio', style: TextStyle(color: Colors.red))),
+              const PopupMenuItem(value: 'pdf', child: Text('Export PDF Specs')),
+              const PopupMenuItem(value: 'edit', child: Text('Edit Project')),
+              const PopupMenuItem(value: 'delete', child: Text('Delete Project', style: TextStyle(color: Colors.red))),
             ],
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'project-details-fab',
         onPressed: () {
           context.push('/progress/details/${project.uuid}');
         },
@@ -278,7 +286,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               _buildOverviewTab(data, theme, isDark),
               _buildTimelineTab(data, theme, isDark),
               _buildTeamTab(data, theme, isDark),
-              ProjectMaterialRequirementsTab(projectUuid: widget.uuid),
+              ProjectMaterialRequirementsTab(projectUuid: widget.uuid, projectType: data.project.type),
             ],
           ),
         ),
@@ -301,9 +309,10 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
             children: [
               _buildProjectInfoCard(data.project, theme, isDark),
               const SizedBox(height: 20),
+              _buildBomCard(data.project, theme, isDark),
+              const SizedBox(height: 20),
               _buildCategoryProgressCard(data.categoryProgresses, theme, isDark),
               const SizedBox(height: 20),
-              _buildKpiCard(data.kpis, theme, isDark),
             ],
           );
 
@@ -312,7 +321,6 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
             children: [
               _buildRecentActivityCard(data.activityLogs, theme, isDark),
               const SizedBox(height: 20),
-              _buildSummaryRegistersCard(data, theme, isDark),
             ],
           );
 
@@ -366,13 +374,64 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          _buildInfoRow('Client Entity', project.client ?? 'MHG Internals', theme, isDark),
+          _buildInfoRow('Client Name', project.client ?? 'MHG Internals', theme, isDark),
           _buildInfoRow('Contract Reference', 'CONTR-${project.uuid.toUpperCase().substring(0, 6)}', theme, isDark),
           _buildInfoRow('Site Location', project.location, theme, isDark),
-          _buildInfoRow('Target Capacity', '${project.capacityMw.toStringAsFixed(2)} MWp', theme, isDark),
+          _buildInfoRow('Target Capacity', '${project.capacityMw.toStringAsFixed(2)} ${project.capacityUnit ?? 'MWp'}', theme, isDark),
           _buildInfoRow('Arrangement Type', project.type, theme, isDark),
           _buildInfoRow('Contract Start', formattedStart, theme, isDark),
           _buildInfoRow('Expected Completion', formattedEnd, theme, isDark),
+        ],
+      ),
+    );
+  }
+
+  // --- SUB-CARD: BOM SPECS ---
+  Widget _buildBomCard(ProjectModel project, ThemeData theme, bool isDark) {
+    Map<String, dynamic> solar = {};
+    Map<String, dynamic> battery = {};
+    Map<String, dynamic> inverter = {};
+
+    if (project.bomSpecsJson != null) {
+      try {
+        final bom = jsonDecode(project.bomSpecsJson!);
+        solar = bom['solar'] as Map<String, dynamic>? ?? {};
+        battery = bom['battery'] as Map<String, dynamic>? ?? {};
+        inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
+        
+        // Backward compatibility
+        if (solar.isEmpty && bom['panels'] != null) solar['brand'] = bom['panels'];
+        if (battery.isEmpty && bom['battery'] != null) battery['brand'] = bom['battery'];
+        if (inverter.isEmpty && bom['inverter'] != null) inverter['brand'] = bom['inverter'];
+      } catch (_) {}
+    }
+
+    String formatSpecs(Map<String, dynamic> specs) {
+      final entries = specs.entries.where((e) => e.value.toString().isNotEmpty);
+      if (entries.isEmpty) return 'N/A';
+      return entries.map((e) => '${e.key.toUpperCase()}: ${e.value}').join(' | ');
+    }
+
+    return AppCard(
+      variant: AppCardVariant.elevated,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.inventory_2, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'BOM Specifications',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow('Solar Panels', formatSpecs(solar), theme, isDark),
+          _buildInfoRow('Inverter', formatSpecs(inverter), theme, isDark),
+          _buildInfoRow('Battery System', formatSpecs(battery), theme, isDark),
         ],
       ),
     );
@@ -471,65 +530,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
     );
   }
 
-  // --- SUB-CARD: SAFETY & OPERATIONS KPIS ---
-  Widget _buildKpiCard(ProjectKpis kpis, ThemeData theme, bool isDark) {
-    return AppCard(
-      variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'HSE & Compliance Metrics',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 16),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            childAspectRatio: 1.6,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            children: [
-              _buildKpiGridItem(
-                'Total Safe Man-Hours',
-                '${NumberFormat.decimalPattern().format(kpis.totalManHours)} hrs',
-                Icons.health_and_safety_outlined,
-                const Color(0xFF2E7D32),
-                theme,
-                isDark,
-              ),
-              _buildKpiGridItem(
-                'LTI-Free Safe Days',
-                '${kpis.safeDays} Days',
-                Icons.calendar_today_outlined,
-                const Color(0xFF2E7D32),
-                theme,
-                isDark,
-              ),
-              _buildKpiGridItem(
-                'Weather Down-Hours',
-                '${kpis.weatherDowntimeHours.toStringAsFixed(1)} hrs',
-                Icons.cloudy_snowing,
-                const Color(0xFFFFB300),
-                theme,
-                isDark,
-              ),
-              _buildKpiGridItem(
-                'QA/QC Compliance Rate',
-                '${(kpis.qualityComplianceRate * 100).toStringAsFixed(1)}%',
-                Icons.assignment_turned_in_outlined,
-                const Color(0xFF2196F3),
-                theme,
-                isDark,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // --- SUB-CARD: SAFETY & OPERATIONS KPIS ----
 
   Widget _buildKpiGridItem(
     String title,
@@ -660,69 +661,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
     );
   }
 
-  // --- SUB-CARD: SUMMARY REGISTER METRICS ---
-  Widget _buildSummaryRegistersCard(DetailedProjectData data, ThemeData theme, bool isDark) {
-    return AppCard(
-      variant: AppCardVariant.outlined,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Engineering Register Summaries',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryListItem(
-            'Documents Catalog',
-            '${data.documents.length} Engineering drawings uploaded',
-            '${data.documents.where((d) => d.status == 'Approved').length} Drawings Approved',
-            Icons.article_outlined,
-            theme,
-            isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryListItem(
-            'Stock Materials Procurement',
-            '${data.materials.length} Critical equipment trackers',
-            data.materials.isEmpty 
-                ? 'Average receipt delivery: 0%' 
-                : 'Average receipt delivery: ${(data.materials.map((m) => m.deliveryProgress).reduce((a, b) => a + b) / data.materials.length * 100).toStringAsFixed(0)}%',
-            Icons.inventory_2_outlined,
-            theme,
-            isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryListItem(
-            'Field QA/QC Inspections',
-            '${data.inspectionSummary.totalInspections} Inspections logged',
-            'Approved: ${data.inspectionSummary.approved} | Rejected: ${data.inspectionSummary.rejected}',
-            Icons.checklist_rtl_outlined,
-            theme,
-            isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryListItem(
-            'Daily Accomplishment Reports (DAR)',
-            '${data.darSummary.reportsFiled} Reports submitted',
-            'Personnel count on-site: ${data.darSummary.totalWorkersOnSite}',
-            Icons.history_edu_outlined,
-            theme,
-            isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryListItem(
-            'EPC Punch Items list',
-            '${data.punchListSummary.totalItems} Items identified',
-            'Open: ${data.punchListSummary.openItems} | Closed: ${data.punchListSummary.closedItems}',
-            Icons.fact_check_outlined,
-            theme,
-            isDark,
-          ),
-        ],
-      ),
-    );
-  }
+  // --- SUB-CARD: SUMMARY REGISTER METRICS --
 
   Widget _buildSummaryListItem(
     String title,
@@ -954,135 +893,240 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   // TAB 3: TEAM MEMBERS
   // ==========================================
   Widget _buildTeamTab(DetailedProjectData data, ThemeData theme, bool isDark) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double width = constraints.maxWidth;
-        int crossAxisCount = 1;
-        if (width >= 1100) {
-          crossAxisCount = 3;
-        } else if (width >= 700) {
-          crossAxisCount = 2;
-        }
-
-        return GridView.builder(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
           padding: const EdgeInsets.all(24.0),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.5,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Project Team',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              AppButton(
+                text: 'Add Member',
+                icon: Icons.person_add,
+                width: 110,
+                onPressed: () => _showTeamMemberDialog(data, null),
+              ),
+            ],
           ),
-          itemCount: data.team.length,
-          itemBuilder: (context, index) {
-            final member = data.team[index];
-            final workloadColor = _getWorkloadColor(member.workload);
+        ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double width = constraints.maxWidth;
+              int crossAxisCount = 1;
+              if (width >= 1100) {
+                crossAxisCount = 3;
+              } else if (width >= 700) {
+                crossAxisCount = 2;
+              }
 
-            return AppCard(
-              variant: AppCardVariant.outlined,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      // Avatar
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        child: Text(
-                          member.avatarInitials,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              if (data.team.isEmpty) {
+                return Center(
+                  child: Text('No team members added yet.', style: theme.textTheme.bodyMedium),
+                );
+              }
+
+              return GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 2.0,
+                ),
+                itemCount: data.team.length,
+                itemBuilder: (context, index) {
+                  final member = data.team[index];
+
+                  return AppCard(
+                    variant: AppCardVariant.outlined,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              member.name,
-                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: theme.colorScheme.primaryContainer,
+                              child: Text(
+                                member.avatarInitials,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            Text(
-                              '${member.role} (${member.department})',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: theme.disabledColor),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    member.name,
+                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '${member.role} (${member.department})',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: theme.disabledColor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 16),
+                              onPressed: () => _showTeamMemberDialog(data, index),
+                              tooltip: 'Edit',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                              onPressed: () => _deleteTeamMember(data, index),
+                              tooltip: 'Delete',
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  const Divider(),
-                  const Spacer(),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      Text(
-                        'Assigned Tasks: ${member.assignedTasksCount}',
-                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: workloadColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: workloadColor.withOpacity(0.15)),
+                        const Spacer(),
+                        const Divider(),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            const Icon(Icons.email_outlined, size: 12, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                member.contactEmail,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          '${member.workload} Workload',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: workloadColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9,
-                          ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 12, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                member.contactPhone,
+                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      const Icon(Icons.email_outlined, size: 12, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          member.contactEmail,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      const Icon(Icons.phone_outlined, size: 12, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          member.contactPhone,
-                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showTeamMemberDialog(DetailedProjectData data, int? editIndex) async {
+    final isEdit = editIndex != null;
+    final member = isEdit ? data.team[editIndex] : null;
+
+    final nameController = TextEditingController(text: member?.name);
+    final roleController = TextEditingController(text: member?.role);
+    final deptController = TextEditingController(text: member?.department);
+    final emailController = TextEditingController(text: member?.contactEmail);
+    final phoneController = TextEditingController(text: member?.contactPhone);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(isEdit ? 'Edit Team Member' : 'Add Team Member'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: roleController,
+                  decoration: const InputDecoration(labelText: 'Role', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: deptController,
+                  decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(labelText: 'Phone', border: OutlineInputBorder()),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final newMember = ProjectTeamMember(
+                  name: nameController.text.trim(),
+                  role: roleController.text.trim(),
+                  department: deptController.text.trim(),
+                  contactEmail: emailController.text.trim(),
+                  contactPhone: phoneController.text.trim(),
+                  assignedTasksCount: member?.assignedTasksCount ?? 0,
+                  workload: member?.workload ?? 'Optimal',
+                  avatarInitials: nameController.text.trim().isNotEmpty 
+                      ? nameController.text.trim().substring(0, 1).toUpperCase() 
+                      : '?',
+                );
+
+                final updatedTeam = List<ProjectTeamMember>.from(data.team);
+                if (isEdit) {
+                  updatedTeam[editIndex] = newMember;
+                } else {
+                  updatedTeam.add(newMember);
+                }
+
+                await ref.read(projectsRepositoryProvider).updateProjectTeam(widget.projectUuid, updatedTeam);
+                ref.invalidate(projectDetailsProvider(widget.projectUuid));
+                if (context.mounted) Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
         );
       },
     );
+  }
+
+  Future<void> _deleteTeamMember(DetailedProjectData data, int index) async {
+    final updatedTeam = List<ProjectTeamMember>.from(data.team);
+    updatedTeam.removeAt(index);
+    await ref.read(projectsRepositoryProvider).updateProjectTeam(widget.projectUuid, updatedTeam);
+    ref.invalidate(projectDetailsProvider(widget.projectUuid));
   }
 
   // --- SKELETON / ERROR ---
@@ -1098,7 +1142,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
           AppButton(
-            text: 'Return to Portfolios',
+            text: 'Return to Projects',
             onPressed: () => context.pop(),
           ),
         ],

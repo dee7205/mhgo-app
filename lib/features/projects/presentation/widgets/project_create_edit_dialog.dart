@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,8 @@ import '../providers/projects_provider.dart';
 import '../../../progress/presentation/providers/progress_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:isar_community/isar.dart';
+
+import '../../../materials/data/models/project_material_requirement_model.dart';
 
 class ProjectCreateEditDialog extends ConsumerStatefulWidget {
   final ProjectModel? existingProject;
@@ -23,6 +26,7 @@ class ProjectCreateEditDialog extends ConsumerStatefulWidget {
 class _ProjectCreateEditDialogState
     extends ConsumerState<ProjectCreateEditDialog> {
   final _formKey = GlobalKey<FormState>();
+  final _capacityController = TextEditingController();
 
   String _name = '';
   String _description = '';
@@ -31,7 +35,7 @@ class _ProjectCreateEditDialogState
   String _supervisor = '';
 
   double _capacityMw = 0.0;
-  String _capacityUnit = 'MWp';
+  String _capacityUnit = 'kWp';
 
   String _type = 'Ground Mounted';
   String _systemType = 'On-Grid';
@@ -40,6 +44,20 @@ class _ProjectCreateEditDialogState
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 90));
+
+  String _solarBrand = '';
+  String _solarWatts = '';
+  String _solarVolts = '';
+
+  String _inverterBrand = '';
+  String _inverterWattage = '';
+  String _inverterSerial = '';
+
+  String _batteryBrand = '';
+  String _batteryWattage = '';
+  String _batteryVoltage = '';
+  String _batterySerial = '';
+  String _batteryAh = '';
 
   bool _isLoading = false;
 
@@ -55,12 +73,37 @@ class _ProjectCreateEditDialogState
       _supervisor = p.supervisor ?? '';
       _capacityMw = p.capacityMw;
       _capacityUnit = p.capacityUnit ?? 'MWp';
+      _capacityController.text = _capacityMw == _capacityMw.roundToDouble() 
+          ? _capacityMw.toInt().toString() 
+          : _capacityMw.toString();
       _type = p.type;
       _systemType = p.systemType ?? 'On-Grid';
       _status = p.status;
-      _stage = p.stage;
+      _stage = p.stage ?? 'Engineering';
       _startDate = p.startDate;
       _endDate = p.endDate;
+      if (p.bomSpecsJson != null) {
+        try {
+          final bom = jsonDecode(p.bomSpecsJson!);
+          final solar = bom['solar'] as Map<String, dynamic>? ?? {};
+          final inv = bom['inverter'] as Map<String, dynamic>? ?? {};
+          final bat = bom['battery'] as Map<String, dynamic>? ?? {};
+
+          _solarBrand = solar['brand'] ?? bom['panels']?.toString() ?? '';
+          _solarWatts = solar['watts'] ?? '';
+          _solarVolts = solar['volts'] ?? '';
+
+          _inverterBrand = inv['brand'] ?? bom['inverter']?.toString() ?? '';
+          _inverterWattage = inv['wattage'] ?? '';
+          _inverterSerial = inv['serial'] ?? '';
+
+          _batteryBrand = bat['brand'] ?? bom['battery']?.toString() ?? '';
+          _batteryWattage = bat['wattage'] ?? '';
+          _batteryVoltage = bat['voltage'] ?? '';
+          _batterySerial = bat['serial'] ?? '';
+          _batteryAh = bat['ah'] ?? '';
+        } catch (_) {}
+      }
     }
   }
 
@@ -110,7 +153,7 @@ class _ProjectCreateEditDialogState
         ..client = _client.isEmpty ? null : _client
         ..location = _location
         ..supervisor = _supervisor.isEmpty ? null : _supervisor
-        ..capacityMw = _capacityMw
+        ..capacityMw = double.tryParse(_capacityController.text) ?? 0.0
         ..capacityUnit = _capacityUnit
         ..type = _type
         ..systemType = _systemType
@@ -118,6 +161,25 @@ class _ProjectCreateEditDialogState
         ..stage = _stage
         ..startDate = _startDate
         ..endDate = _endDate
+        ..bomSpecsJson = jsonEncode({
+          'solar': {
+            'brand': _solarBrand,
+            'watts': _solarWatts,
+            'volts': _solarVolts,
+          },
+          'inverter': {
+            'brand': _inverterBrand,
+            'wattage': _inverterWattage,
+            'serial': _inverterSerial,
+          },
+          'battery': {
+            'brand': _batteryBrand,
+            'wattage': _batteryWattage,
+            'voltage': _batteryVoltage,
+            'serial': _batterySerial,
+            'ah': _batteryAh,
+          },
+        })
         ..updatedAt = DateTime.now()
         ..isSynced = false;
 
@@ -131,6 +193,41 @@ class _ProjectCreateEditDialogState
           for (final report in progressReports) {
             report.projectName = project.name;
             await isar.progressModels.put(report);
+          }
+        } else {
+          // SEED DEFAULT BOM.txt MATERIALS ON PROJECT CREATION
+          final defaultMaterials = [
+            ('JINKO 640W', 'pcs', 8.0, 49600.0),
+            ('PYLONTECH FIDUS 5.12KWH', 'pcs', 1.0, 42000.0),
+            ('S6-EH1P5K-L-PLUS', 'pcs', 1.0, 41000.0),
+            ('Twisted Wire #18', 'pcs', 1.0, 3700.0),
+            ('PV Cable Single Core 2-4mmsq Black', 'roll', 60.0, 3900.0),
+            ('PV Cable Single Core 2-4mmsq Red', 'roll', 60.0, 3900.0),
+            ('35mm2 Battery Cable Black', 'meters', 4.0, 2400.0),
+            ('35mm2 Battery Cable Red', 'meters', 4.0, 2400.0),
+            ('Terminal lugs', 'pcs', 28.0, 2520.0),
+            ('5.5mm2 THHN Supply Wire Black', 'meters', 60.0, 4800.0),
+            ('3.5mm2 THHN Ground', 'meters', 30.0, 2400.0),
+            ('5.5 mm2 THHN Black', 'meters', 60.0, 4800.0),
+            ('HDPE 25mm Flexible Conduit', 'meters', 60.0, 6000.0),
+            ('Plastic Box', 'pcs', 6.0, 6000.0),
+            ('2.4 Railing', 'length', 9.0, 4500.0),
+            ('Lfoot Long 17cm', 'pcs', 25.0, 8750.0),
+          ];
+          
+          for (final item in defaultMaterials) {
+            final reqModel = ProjectMaterialRequirementModel()
+              ..uuid = const Uuid().v4()
+              ..projectUuid = project.uuid
+              ..materialUuid = item.$1
+              ..unit = item.$2
+              ..requiredQuantity = item.$3
+              ..allocatedQuantity = 0.0
+              ..estimatedCost = item.$4
+              ..createdAt = DateTime.now()
+              ..updatedAt = DateTime.now()
+              ..isSynced = false;
+            await isar.projectMaterialRequirementModels.put(reqModel);
           }
         }
       });
@@ -253,9 +350,7 @@ class _ProjectCreateEditDialogState
                     const SizedBox(height: 12),
                     buildResponsiveRow(
                       TextFormField(
-                        initialValue: _capacityMw > 0
-                            ? _capacityMw.toString()
-                            : '',
+                        controller: _capacityController,
                         decoration: const InputDecoration(
                           labelText: 'Capacity',
                           border: OutlineInputBorder(),
@@ -286,8 +381,10 @@ class _ProjectCreateEditDialogState
                               ),
                             )
                             .toList(),
-                        onChanged: (val) =>
-                            setState(() => _capacityUnit = val!),
+                        onChanged: (val) {
+                          if (val == null) return;
+                          setState(() => _capacityUnit = val);
+                        },
                       ),
                       2,
                       1,
@@ -347,6 +444,98 @@ class _ProjectCreateEditDialogState
                             .toList(),
                         onChanged: (val) => setState(() => _systemType = val!),
                       ),
+                    ),
+
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const SizedBox(height: 12),
+
+                    // BOM SPECS
+                    const Text(
+                      'BOM Specifications: Solar Panels',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    buildResponsiveRow(
+                      TextFormField(
+                        initialValue: _solarBrand,
+                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        onChanged: (v) => _solarBrand = v,
+                      ),
+                      TextFormField(
+                        initialValue: _solarWatts,
+                        decoration: const InputDecoration(labelText: 'Watts', border: OutlineInputBorder()),
+                        onChanged: (v) => _solarWatts = v,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      initialValue: _solarVolts,
+                      decoration: const InputDecoration(labelText: 'Volts', border: OutlineInputBorder()),
+                      onChanged: (v) => _solarVolts = v,
+                    ),
+
+                    const SizedBox(height: 24),
+                    const Text(
+                      'BOM Specifications: Inverter',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    buildResponsiveRow(
+                      TextFormField(
+                        initialValue: _inverterBrand,
+                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        onChanged: (v) => _inverterBrand = v,
+                      ),
+                      TextFormField(
+                        initialValue: _inverterWattage,
+                        decoration: const InputDecoration(labelText: 'Wattage', border: OutlineInputBorder()),
+                        onChanged: (v) => _inverterWattage = v,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      initialValue: _inverterSerial,
+                      decoration: const InputDecoration(labelText: 'Serial No.', border: OutlineInputBorder()),
+                      onChanged: (v) => _inverterSerial = v,
+                    ),
+
+                    const SizedBox(height: 24),
+                    const Text(
+                      'BOM Specifications: Battery',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    buildResponsiveRow(
+                      TextFormField(
+                        initialValue: _batteryBrand,
+                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        onChanged: (v) => _batteryBrand = v,
+                      ),
+                      TextFormField(
+                        initialValue: _batteryWattage,
+                        decoration: const InputDecoration(labelText: 'Wattage', border: OutlineInputBorder()),
+                        onChanged: (v) => _batteryWattage = v,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    buildResponsiveRow(
+                      TextFormField(
+                        initialValue: _batteryVoltage,
+                        decoration: const InputDecoration(labelText: 'Voltage', border: OutlineInputBorder()),
+                        onChanged: (v) => _batteryVoltage = v,
+                      ),
+                      TextFormField(
+                        initialValue: _batteryAh,
+                        decoration: const InputDecoration(labelText: 'Ah', border: OutlineInputBorder()),
+                        onChanged: (v) => _batteryAh = v,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      initialValue: _batterySerial,
+                      decoration: const InputDecoration(labelText: 'Serial No.', border: OutlineInputBorder()),
+                      onChanged: (v) => _batterySerial = v,
                     ),
 
                     const SizedBox(height: 24),
