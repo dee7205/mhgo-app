@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mhgo/core/theme/app_theme.dart';
 import 'package:mhgo/core/widgets/app_card.dart';
-import 'package:mhgo/features/inspections/presentation/providers/inspections_provider.dart';
+import 'package:mhgo/features/inspections/presentation/providers/survey_provider.dart';
 
 class InspectionGalleryView extends ConsumerWidget {
   final String id;

@@ -1,5 +1,5 @@
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/domain/repositories/inspections_repository.dart';
+import 'package:mhgo/features/survey/domain/entities/inspection_entities.dart';
+import 'package:mhgo/features/survey/domain/repositories/inspections_repository.dart';
 
 class GetInspectionsUseCase {
   final InspectionsRepository repository;

@@ -1,0 +1,32 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+    <!-- Background Squircle -->
+    <rect width="1024" height="1024" rx="220" fill="#E2E8F0" />
+    <rect width="1024" height="1024" rx="220" fill="none" stroke="white" stroke-width="4" stroke-opacity="0.5" />
+
+    <g transform="translate(132, 312)">
+        <!-- Main Structural Frame (Engineering Blue) -->
+        <path d="M 0,400 V 0 L 150,200 L 300,0 V 400 M 300,200 H 500 M 500,0 V 400"
+            fill="none" stroke="#0061A4" stroke-width="110" stroke-linejoin="round" stroke-linecap="round" />
+
+        <!-- Dynamic Forward Arrow (Solar Gold) -->
+        <path d="M 500,200 L 760,200 L 610,50 M 760,200 L 610,350"
+            fill="none" stroke="#FFC107" stroke-width="110" stroke-linejoin="round" stroke-linecap="round" />
+
+        <!-- Solar Grid Accents -->
+        <g opacity="0.8">
+            <path d="M 0,0 L 150,200 L 300,0" fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-opacity="0.4" />
+            <path d="M 0,0 L 150,200 L 300,0" fill="none" stroke="#FFC107" stroke-width="8" stroke-linecap="round" />
+            <line x1="520" y1="180" x2="720" y2="180" stroke="white" stroke-width="4" stroke-opacity="0.3" />
+            <line x1="520" y1="220" x2="720" y2="220" stroke="white" stroke-width="4" stroke-opacity="0.3" />
+        </g>
+
+        <!-- Structural Nodes -->
+        <circle cx="0" cy="0" r="15" fill="#FFC107" />
+        <circle cx="150" cy="200" r="15" fill="#FFC107" />
+        <circle cx="300" cy="0" r="15" fill="#FFC107" />
+        <circle cx="500" cy="200" r="15" fill="#0061A4" stroke="#FFC107" stroke-width="6" />
+    </g>
+
+    <!-- Arrow Tip Highlight -->
+    <circle cx="892" cy="512" r="25" fill="#FFC107" />
+</svg>

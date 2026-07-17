@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mhgo/core/database/isar_service.dart';
-import 'package:mhgo/features/inspections/data/repositories/inspections_repository_impl.dart';
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/domain/repositories/inspections_repository.dart';
-import 'package:mhgo/features/inspections/domain/usecases/get_inspections_usecase.dart';
-import 'package:mhgo/features/inspections/domain/usecases/save_inspection_usecase.dart';
+import 'package:mhgo/features/survey/data/repositories/inspections_repository_impl.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/survey/domain/repositories/survey_repository.dart';
+import 'package:mhgo/features/survey/domain/usecases/get_survey_usecase.dart';
+import 'package:mhgo/features/survey/domain/usecases/save_survey_usecase.dart';
 
 final inspectionsRepositoryProvider = Provider<InspectionsRepository>((ref) {
   final isar = ref.watch(isarServiceProvider).isar;

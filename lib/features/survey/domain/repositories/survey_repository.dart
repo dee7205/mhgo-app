@@ -1,4 +1,4 @@
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 
 abstract class InspectionsRepository {
   Future<List<InspectionReport>> getInspections();

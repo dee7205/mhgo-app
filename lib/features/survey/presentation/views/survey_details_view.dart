@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:mhgo/core/theme/app_theme.dart';
 import 'package:mhgo/core/widgets/app_card.dart';
 import 'package:mhgo/core/widgets/app_button.dart';
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/presentation/providers/inspections_provider.dart';
+import 'package:mhgo/features/inspections/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/inspections/presentation/providers/survey_provider.dart';
 
 class InspectionDetailsView extends ConsumerStatefulWidget {
   final String id;

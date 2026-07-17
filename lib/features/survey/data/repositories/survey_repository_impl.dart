@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
-import 'package:mhgo/core/database/models/inspection_model.dart';
+import 'package:mhgo/core/database/models/survey_model.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
-import 'package:mhgo/features/inspections/domain/entities/inspection_entities.dart';
-import 'package:mhgo/features/inspections/domain/repositories/inspections_repository.dart';
+import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/survey/domain/repositories/survey_repository.dart';
 
 class InspectionsRepositoryImpl implements InspectionsRepository {
   final Isar _isar;
@@ -12,7 +12,7 @@ class InspectionsRepositoryImpl implements InspectionsRepository {
 
   @override
   Future<List<InspectionReport>> getInspections() async {
-    final models = await _isar.inspectionModels.where().sortByInspectionDateDesc().findAll();
+    final models = await _isar.surveyModels.where().sortByInspectionDateDesc().findAll();
     
     // Fetch projects to map project names
     final projects = await _isar.projectModels.where().findAll();
@@ -23,7 +23,7 @@ class InspectionsRepositoryImpl implements InspectionsRepository {
 
   @override
   Future<InspectionReport?> getInspectionById(String id) async {
-    final model = await _isar.inspectionModels.filter().uuidEqualTo(id).findFirst();
+    final model = await _isar.surveyModels.filter().uuidEqualTo(id).findFirst();
     if (model == null) return null;
 
     final project = await _isar.projectModels.filter().uuidEqualTo(model.projectUuid).findFirst();
@@ -32,10 +32,10 @@ class InspectionsRepositoryImpl implements InspectionsRepository {
 
   @override
   Future<void> saveInspection(InspectionReport report) async {
-    final existing = await _isar.inspectionModels.filter().uuidEqualTo(report.id).findFirst();
+    final existing = await _isar.surveyModels.filter().uuidEqualTo(report.id).findFirst();
 
     await _isar.writeTxn(() async {
-      final model = existing ?? InspectionModel();
+      final model = existing ?? SurveyModel();
       model.uuid = report.id;
       model.inspectionId = report.inspectionId;
       model.projectUuid = report.projectUuid;
@@ -59,23 +59,23 @@ class InspectionsRepositoryImpl implements InspectionsRepository {
       model.updatedAt = DateTime.now();
       model.isSynced = report.isSynced;
 
-      await _isar.inspectionModels.put(model);
+      await _isar.surveyModels.put(model);
     });
   }
 
   @override
   Future<void> deleteInspection(String id) async {
-    final model = await _isar.inspectionModels.filter().uuidEqualTo(id).findFirst();
+    final model = await _isar.surveyModels.filter().uuidEqualTo(id).findFirst();
     if (model != null) {
       await _isar.writeTxn(() async {
-        await _isar.inspectionModels.delete(model.id);
+        await _isar.surveyModels.delete(model.id);
       });
     }
   }
 
   // --- Model-to-Entity Mapping Helpers ---
 
-  InspectionReport _modelToReport(InspectionModel m, String projectName) {
+  InspectionReport _modelToReport(SurveyModel m, String projectName) {
     return InspectionReport(
       id: m.uuid,
       inspectionId: m.inspectionId,
