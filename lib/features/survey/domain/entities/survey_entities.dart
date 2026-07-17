@@ -9,7 +9,6 @@ class Survey {
   final Map<String, String> technicalSpecs;
   final String proposedSystem;
   final double proposedCapacityKw;
-  final double proposedBudget;
   final String status;
   final String? notes;
   final String? convertedProjectUuid;
@@ -25,7 +24,6 @@ class Survey {
     required this.technicalSpecs,
     required this.proposedSystem,
     required this.proposedCapacityKw,
-    required this.proposedBudget,
     required this.status,
     this.notes,
     this.convertedProjectUuid,
@@ -42,7 +40,6 @@ class Survey {
     Map<String, String>? technicalSpecs,
     String? proposedSystem,
     double? proposedCapacityKw,
-    double? proposedBudget,
     String? status,
     String? notes,
     String? convertedProjectUuid,
@@ -58,7 +55,6 @@ class Survey {
       technicalSpecs: technicalSpecs ?? this.technicalSpecs,
       proposedSystem: proposedSystem ?? this.proposedSystem,
       proposedCapacityKw: proposedCapacityKw ?? this.proposedCapacityKw,
-      proposedBudget: proposedBudget ?? this.proposedBudget,
       status: status ?? this.status,
       notes: notes ?? this.notes,
       convertedProjectUuid: convertedProjectUuid ?? this.convertedProjectUuid,

@@ -49,13 +49,14 @@ const ProjectMaterialRequirementModelSchema = CollectionSchema(
       name: r'requiredQuantity',
       type: IsarType.double,
     ),
-    r'unit': PropertySchema(id: 7, name: r'unit', type: IsarType.string),
+    r'status': PropertySchema(id: 7, name: r'status', type: IsarType.string),
+    r'unit': PropertySchema(id: 8, name: r'unit', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'uuid': PropertySchema(id: 9, name: r'uuid', type: IsarType.string),
+    r'uuid': PropertySchema(id: 10, name: r'uuid', type: IsarType.string),
   },
 
   estimateSize: _projectMaterialRequirementModelEstimateSize,
@@ -121,6 +122,7 @@ int _projectMaterialRequirementModelEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.materialUuid.length * 3;
   bytesCount += 3 + object.projectUuid.length * 3;
+  bytesCount += 3 + object.status.length * 3;
   bytesCount += 3 + object.unit.length * 3;
   bytesCount += 3 + object.uuid.length * 3;
   return bytesCount;
@@ -139,9 +141,10 @@ void _projectMaterialRequirementModelSerialize(
   writer.writeString(offsets[4], object.materialUuid);
   writer.writeString(offsets[5], object.projectUuid);
   writer.writeDouble(offsets[6], object.requiredQuantity);
-  writer.writeString(offsets[7], object.unit);
-  writer.writeDateTime(offsets[8], object.updatedAt);
-  writer.writeString(offsets[9], object.uuid);
+  writer.writeString(offsets[7], object.status);
+  writer.writeString(offsets[8], object.unit);
+  writer.writeDateTime(offsets[9], object.updatedAt);
+  writer.writeString(offsets[10], object.uuid);
 }
 
 ProjectMaterialRequirementModel _projectMaterialRequirementModelDeserialize(
@@ -159,9 +162,10 @@ ProjectMaterialRequirementModel _projectMaterialRequirementModelDeserialize(
   object.materialUuid = reader.readString(offsets[4]);
   object.projectUuid = reader.readString(offsets[5]);
   object.requiredQuantity = reader.readDouble(offsets[6]);
-  object.unit = reader.readString(offsets[7]);
-  object.updatedAt = reader.readDateTime(offsets[8]);
-  object.uuid = reader.readString(offsets[9]);
+  object.status = reader.readString(offsets[7]);
+  object.unit = reader.readString(offsets[8]);
+  object.updatedAt = reader.readDateTime(offsets[9]);
+  object.uuid = reader.readString(offsets[10]);
   return object;
 }
 
@@ -189,8 +193,10 @@ P _projectMaterialRequirementModelDeserializeProp<P>(
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readDateTime(offset)) as P;
+    case 10:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1410,6 +1416,187 @@ extension ProjectMaterialRequirementModelQueryFilter
     ProjectMaterialRequirementModel,
     QAfterFilterCondition
   >
+  statusEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'status',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'status',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'status', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
+  statusIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'status', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterFilterCondition
+  >
   unitEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2021,6 +2208,28 @@ extension ProjectMaterialRequirementModelQuerySortBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
+  sortByStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.asc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
+  sortByStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.desc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
   sortByUnit() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'unit', Sort.asc);
@@ -2271,6 +2480,28 @@ extension ProjectMaterialRequirementModelQuerySortThenBy
     ProjectMaterialRequirementModel,
     QAfterSortBy
   >
+  thenByStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.asc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
+  thenByStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.desc);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QAfterSortBy
+  >
   thenByUnit() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'unit', Sort.asc);
@@ -2422,6 +2653,17 @@ extension ProjectMaterialRequirementModelQueryWhereDistinct
     ProjectMaterialRequirementModel,
     QDistinct
   >
+  distinctByStatus({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'status', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<
+    ProjectMaterialRequirementModel,
+    ProjectMaterialRequirementModel,
+    QDistinct
+  >
   distinctByUnit({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'unit', caseSensitive: caseSensitive);
@@ -2511,6 +2753,13 @@ extension ProjectMaterialRequirementModelQueryProperty
   requiredQuantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'requiredQuantity');
+    });
+  }
+
+  QueryBuilder<ProjectMaterialRequirementModel, String, QQueryOperations>
+  statusProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'status');
     });
   }
 

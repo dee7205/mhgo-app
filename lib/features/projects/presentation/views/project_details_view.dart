@@ -745,7 +745,8 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   itemBuilder: (context, index) {
                     final item = data.timeline[index];
                     final isLast = index == data.timeline.length - 1;
-                    
+
+                    // this is for the "status" color on the project & milestones tab
                     Color dotColor;
                     IconData statusIcon;
                     switch (item.status) {

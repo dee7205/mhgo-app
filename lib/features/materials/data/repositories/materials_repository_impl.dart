@@ -182,6 +182,7 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       allocatedQuantity: m.allocatedQuantity,
       unit: m.unit,
       estimatedCost: m.estimatedCost,
+      status: m.status,
     );
   }
 
@@ -194,6 +195,7 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       ..allocatedQuantity = e.allocatedQuantity
       ..unit = e.unit
       ..estimatedCost = e.estimatedCost
+      ..status = e.status
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now()
       ..isSynced = false;

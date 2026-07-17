@@ -45,7 +45,6 @@ class SurveyRepositoryImpl implements SurveyRepository {
       model.technicalSpecsJson = jsonEncode(survey.technicalSpecs);
       model.proposedSystem = survey.proposedSystem;
       model.proposedCapacityKw = survey.proposedCapacityKw;
-      model.proposedBudget = survey.proposedBudget;
       model.status = survey.status;
       model.notes = survey.notes;
       model.convertedProjectUuid = survey.convertedProjectUuid;
@@ -137,7 +136,6 @@ class SurveyRepositoryImpl implements SurveyRepository {
       technicalSpecs: parsedSpecs,
       proposedSystem: m.proposedSystem,
       proposedCapacityKw: m.proposedCapacityKw,
-      proposedBudget: m.proposedBudget,
       status: m.status,
       notes: m.notes,
       convertedProjectUuid: m.convertedProjectUuid,

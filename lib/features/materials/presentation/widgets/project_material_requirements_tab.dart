@@ -157,36 +157,75 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   ),
                 );
               }
-              final grandTotal = requirements.fold<double>(0, (sum, req) => sum + ((req.estimatedCost ?? 0) * req.requiredQuantity));
+              final grandTotal = requirements.fold<double>(0, (sum, req) => sum + (req.estimatedCost ?? 0));
 
               return Column(
                 children: [
-                  if (grandTotal > 0)
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('BOM Grand Total', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)),
-                          Text('₱${grandTotal.toStringAsFixed(2)}', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)),
-                        ],
-                      ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                      itemCount: requirements.length,
-                      itemBuilder: (context, index) {
-                        final req = requirements[index];
-                        return _RequirementCard(requirement: req);
-                      },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Grand Total', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('₱${grandTotal.toStringAsFixed(2)}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)),
+                      ],
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: requirements.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final requirement = requirements[index];
+                      return AppCard(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.category, color: Colors.grey),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      Text(requirement.materialUuid, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      _buildStatusChip(requirement.status),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Wrap(
+                                    spacing: 12,
+                                    children: [
+                                      Text('Required: ${requirement.requiredQuantity} ${requirement.unit}'),
+                                      Text('Allocated: ${requirement.allocatedQuantity} ${requirement.unit}'),
+                                      if (requirement.estimatedCost != null) ...[
+                                        Text(
+                                          'Total: ₱${requirement.estimatedCost!.toStringAsFixed(2)}', 
+                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _showAddRequirementDialog(context, existingRequirement: requirement),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               );
@@ -197,51 +236,31 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
     );
   }
 
-  void _showAddRequirementDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _AddRequirementDialog(projectUuid: widget.projectUuid),
+  Widget _buildStatusChip(String status) {
+    Color color;
+    switch (status) {
+      case 'Approved': color = Colors.green; break;
+      case 'Procured': color = Colors.blue; break;
+      case 'Delivered': color = Colors.purple; break;
+      default: color = Colors.orange;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        border: Border.all(color: color),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(status, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
     );
   }
-}
 
-class _RequirementCard extends ConsumerWidget {
-  final ProjectMaterialRequirementEntity requirement;
-
-  const _RequirementCard({required this.requirement});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(requirement.materialUuid, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Required: ${requirement.requiredQuantity} ${requirement.unit}'),
-            Text('Allocated: ${requirement.allocatedQuantity} ${requirement.unit}'),
-            if (requirement.estimatedCost != null) ...[
-              Text('Cost: ₱${requirement.estimatedCost!.toStringAsFixed(2)}'),
-              Text(
-                'Total: ₱${(requirement.estimatedCost! * requirement.requiredQuantity).toStringAsFixed(2)}', 
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
-              ),
-            ],
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.edit, size: 20),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => _AddRequirementDialog(
-                projectUuid: requirement.projectUuid,
-                existingRequirement: requirement,
-              ),
-            );
-          },
-        ),
+  void _showAddRequirementDialog(BuildContext context, {ProjectMaterialRequirementEntity? existingRequirement}) {
+    showDialog(
+      context: context,
+      builder: (context) => _AddRequirementDialog(
+        projectUuid: widget.projectUuid,
+        existingRequirement: existingRequirement,
       ),
     );
   }
@@ -266,13 +285,11 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
   TextEditingController _unitController = TextEditingController();
   TextEditingController _requiredController = TextEditingController();
   TextEditingController _allocatedController = TextEditingController();
-  TextEditingController _costController = TextEditingController();
   TextEditingController _totalCostController = TextEditingController();
-  bool _isUpdating = false;
+  String _status = 'Pending';
 
   final FocusNode _qtyFocus = FocusNode();
   final FocusNode _allocFocus = FocusNode();
-  final FocusNode _costFocus = FocusNode();
   final FocusNode _totalFocus = FocusNode();
 
   void _setupZeroClear(TextEditingController controller, FocusNode node, {bool isCurrency = false}) {
@@ -292,68 +309,32 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
   @override
   void initState() {
     super.initState();
+    _status = widget.existingRequirement?.status ?? 'Pending';
     _nameController.text = widget.existingRequirement?.materialUuid ?? '';
     _unitController.text = widget.existingRequirement?.unit ?? '';
     _requiredController.text = widget.existingRequirement?.requiredQuantity.toString() ?? '0';
     _allocatedController.text = widget.existingRequirement?.allocatedQuantity.toString() ?? '0';
     final cost = widget.existingRequirement?.estimatedCost;
     if (cost != null) {
-      _costController.text = cost.toStringAsFixed(2);
-      final qty = widget.existingRequirement?.requiredQuantity ?? 0;
-      _totalCostController.text = (cost * qty).toStringAsFixed(2);
+      _totalCostController.text = cost.toStringAsFixed(2);
     } else {
-      _costController.text = '0.00';
       _totalCostController.text = '0.00';
     }
 
     _setupZeroClear(_requiredController, _qtyFocus);
     _setupZeroClear(_allocatedController, _allocFocus);
-    _setupZeroClear(_costController, _costFocus, isCurrency: true);
     _setupZeroClear(_totalCostController, _totalFocus, isCurrency: true);
-
-    _requiredController.addListener(_onQtyOrUnitCostChanged);
-    _costController.addListener(_onQtyOrUnitCostChanged);
-    _totalCostController.addListener(_onTotalCostChanged);
-  }
-
-  void _onQtyOrUnitCostChanged() {
-    if (_isUpdating) return;
-    final qty = double.tryParse(_requiredController.text) ?? 0.0;
-    final unitCost = double.tryParse(_costController.text) ?? 0.0;
-    _isUpdating = true;
-    if (_totalFocus.hasFocus == false) {
-      _totalCostController.text = (qty * unitCost).toStringAsFixed(2);
-    }
-    _isUpdating = false;
-  }
-
-  void _onTotalCostChanged() {
-    if (_isUpdating) return;
-    final qty = double.tryParse(_requiredController.text) ?? 0.0;
-    final totalCost = double.tryParse(_totalCostController.text) ?? 0.0;
-    if (qty > 0) {
-      _isUpdating = true;
-      if (_costFocus.hasFocus == false) {
-        _costController.text = (totalCost / qty).toStringAsFixed(2);
-      }
-      _isUpdating = false;
-    }
   }
 
   @override
   void dispose() {
     _qtyFocus.dispose();
     _allocFocus.dispose();
-    _costFocus.dispose();
     _totalFocus.dispose();
-    _requiredController.removeListener(_onQtyOrUnitCostChanged);
-    _costController.removeListener(_onQtyOrUnitCostChanged);
-    _totalCostController.removeListener(_onTotalCostChanged);
     _nameController.dispose();
     _unitController.dispose();
     _requiredController.dispose();
     _allocatedController.dispose();
-    _costController.dispose();
     _totalCostController.dispose();
     super.dispose();
   }
@@ -370,6 +351,18 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                DropdownButtonFormField<String>(
+                  value: _status,
+                  decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
+                  items: ['Pending', 'Approved', 'Procured', 'Delivered']
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _status = val);
+                  },
+                  isExpanded: true,
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Material Name (BOM item)', border: OutlineInputBorder()),
@@ -406,38 +399,17 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _costController,
-                        focusNode: _costFocus,
-                        decoration: const InputDecoration(labelText: 'Unit Cost (₱)', border: OutlineInputBorder()),
-                        keyboardType: TextInputType.number,
-                        validator: (val) {
-                          if (val != null && val.isNotEmpty) {
-                            if (double.tryParse(val) == null) return 'Must be a number';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _totalCostController,
-                        focusNode: _totalFocus,
-                        decoration: const InputDecoration(labelText: 'Total Cost (₱)', border: OutlineInputBorder()),
-                        keyboardType: TextInputType.number,
-                        validator: (val) {
-                          if (val != null && val.isNotEmpty) {
-                            if (double.tryParse(val) == null) return 'Must be a number';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
+                TextFormField(
+                  controller: _totalCostController,
+                  focusNode: _totalFocus,
+                  decoration: const InputDecoration(labelText: 'Total Cost (₱)', border: OutlineInputBorder()),
+                  keyboardType: TextInputType.number,
+                  validator: (val) {
+                    if (val != null && val.isNotEmpty) {
+                      if (double.tryParse(val) == null) return 'Must be a number';
+                    }
+                    return null;
+                  },
                 ),
               ],
             ),
@@ -464,7 +436,8 @@ class _AddRequirementDialogState extends ConsumerState<_AddRequirementDialog> {
                 requiredQuantity: double.parse(_requiredController.text),
                 allocatedQuantity: double.parse(_allocatedController.text),
                 unit: _unitController.text.trim(),
-                estimatedCost: _costController.text.isNotEmpty ? double.parse(_costController.text) : null,
+                estimatedCost: _totalCostController.text.isNotEmpty ? double.parse(_totalCostController.text) : null,
+                status: _status,
               );
               ref.read(materialsNotifierProvider.notifier).saveRequirement(req);
               Navigator.pop(context);

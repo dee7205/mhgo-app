@@ -19,7 +19,7 @@ class ProjectMaterialRequirementModel {
   late double allocatedQuantity;
   late String unit;
   double? estimatedCost; // Added for BOM costing
-
+  String status = 'Pending';
   late DateTime createdAt;
   late DateTime updatedAt;
   late bool isSynced;

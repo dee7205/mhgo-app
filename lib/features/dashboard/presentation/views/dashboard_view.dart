@@ -95,14 +95,21 @@ class _DashboardViewState extends ConsumerState<DashboardView> with TickerProvid
       } else {
         context.push('/dar');
       }
+    } else if (actionTitle.toLowerCase().contains('survey')) {
+      if (actionTitle.toLowerCase().contains('new') || 
+          actionTitle.toLowerCase().contains('create')) {
+        context.push('/survey/new');
+      } else {
+        context.push('/survey');
+      }
     } else if (actionTitle.toLowerCase().contains('inspection') ||
         actionTitle.toLowerCase().contains('qa/qc')) {
       if (actionTitle.toLowerCase().contains('new') || 
           actionTitle.toLowerCase().contains('create') ||
           actionTitle.toLowerCase().contains('checklist')) {
-        context.push('/survey/new');
+        context.push('/inspections/new');
       } else {
-        context.push('/survey');
+        context.push('/inspections');
       }
     } else if (actionTitle.toLowerCase().contains('progress')) {
       context.push('/progress');

@@ -330,15 +330,14 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                     Expanded(flex: 3, child: Text('DESCRIPTION', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                     Expanded(flex: 1, child: Text('QTY', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                     Expanded(flex: 1, child: Text('UNIT', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('EST. COST', textAlign: TextAlign.right, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
+                    Expanded(flex: 2, child: Text('STATUS', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                     Expanded(flex: 2, child: Text('TOTAL', textAlign: TextAlign.right, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
                   ],
                 ),
               ),
               const Divider(height: 1, thickness: 1, color: Colors.black54),
               ...materials.map((m) {
-                final cost = m.estimatedCost ?? 0.0;
-                final total = cost * m.requiredQuantity;
+                final total = m.estimatedCost ?? 0.0;
                 grandTotal += total;
                 return Container(
                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -350,7 +349,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                       Expanded(flex: 3, child: Text(m.materialUuid, style: const TextStyle(fontSize: 9))),
                       Expanded(flex: 1, child: Text(m.requiredQuantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
                       Expanded(flex: 1, child: Text(m.unit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
-                      Expanded(flex: 2, child: Text(cost > 0 ? '₱${cost.toStringAsFixed(2)}' : '-', textAlign: TextAlign.right, style: const TextStyle(fontSize: 9))),
+                      Expanded(flex: 2, child: Text(m.status, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
                       Expanded(flex: 2, child: Text(total > 0 ? '₱${total.toStringAsFixed(2)}' : '-', textAlign: TextAlign.right, style: const TextStyle(fontSize: 9))),
                     ],
                   ),
@@ -586,21 +585,20 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('DESCRIPTION', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('QTY', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('UNIT', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('EST. COST', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
+            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('STATUS', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('TOTAL', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
           ],
         ),
         // Rows
         ...materials.map((m) {
-          final cost = m.estimatedCost ?? 0.0;
-          final total = cost * m.requiredQuantity;
+          final total = m.estimatedCost ?? 0.0;
           grandTotal += total;
           return pw.TableRow(
             children: [
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.materialUuid, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.requiredQuantity.toString(), textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.unit, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(cost > 0 ? 'PHP ${cost.toStringAsFixed(2)}' : '-', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9))),
+              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.status, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
               pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(total > 0 ? 'PHP ${total.toStringAsFixed(2)}' : '-', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9))),
             ],
           );

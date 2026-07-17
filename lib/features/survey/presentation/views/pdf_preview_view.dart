@@ -230,22 +230,6 @@ class SurveyPdfPreviewView extends ConsumerWidget {
           pw.SizedBox(height: 4),
           buildFormalRow('System Configuration', pw.Text(survey.proposedSystem, style: const pw.TextStyle(fontSize: 10))),
           buildFormalRow('Target Array Capacity', pw.Text('${survey.proposedCapacityKw.toStringAsFixed(2)} kW', style: const pw.TextStyle(fontSize: 10))),
-          buildFormalRow(
-            'Estimated Financial Budget',
-            pw.Row(
-              mainAxisSize: pw.MainAxisSize.min,
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
-                pesoSymbol(10, PdfColors.black),
-                pw.SizedBox(width: 2),
-                pw.Text(
-                  NumberFormat.currency(symbol: '', decimalDigits: 2).format(survey.proposedBudget),
-                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-
           // Section IV: Remarks
           if (survey.notes != null && survey.notes!.isNotEmpty) ...[
             pw.SizedBox(height: 20),

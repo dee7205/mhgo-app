@@ -55,7 +55,6 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
   
   String _proposedSystem = 'On-Grid';
   final _proposedCapacityKwController = TextEditingController();
-  final _proposedBudgetController = TextEditingController();
   
   String _status = 'Pending Survey';
   final _notesController = TextEditingController();
@@ -102,7 +101,6 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
       spec.dispose();
     }
     _proposedCapacityKwController.dispose();
-    _proposedBudgetController.dispose();
     _notesController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -133,7 +131,6 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
               ? survey.proposedSystem 
               : 'On-Grid';
           _proposedCapacityKwController.text = survey.proposedCapacityKw.toString();
-          _proposedBudgetController.text = survey.proposedBudget.toString();
           _status = _statusOptions.contains(survey.status) 
               ? survey.status 
               : 'Pending Survey';
@@ -171,7 +168,6 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
         technicalSpecs: technicalSpecs,
       proposedSystem: _proposedSystem,
       proposedCapacityKw: double.tryParse(_proposedCapacityKwController.text) ?? 0.0,
-      proposedBudget: double.tryParse(_proposedBudgetController.text) ?? 0.0,
       status: _status,
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       convertedProjectUuid: _convertedProjectUuid,
@@ -397,7 +393,6 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
               (val) { if (val != null) setState(() => _proposedSystem = val); },
             ),
             _buildTextField(_proposedCapacityKwController, 'Proposed Capacity (kW)', required: true, keyboardType: TextInputType.number),
-            _buildTextField(_proposedBudgetController, 'Proposed Budget', required: true, keyboardType: TextInputType.number),
             _buildDropdown(
               'Survey Status *',
               _status,

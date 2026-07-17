@@ -28,7 +28,6 @@ class SurveyModel {
   // Proposal Context
   late String proposedSystem; // 'On-Grid', 'Off-Grid', 'Hybrid'
   late double proposedCapacityKw;
-  late double proposedBudget;
 
   // Workflow Status
   @Index()

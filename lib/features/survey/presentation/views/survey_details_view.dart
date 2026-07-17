@@ -278,7 +278,6 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                       const SizedBox(height: 12),
                       _buildInfoRow('System', survey.proposedSystem, theme, isDark),
                       _buildInfoRow('Capacity', '${survey.proposedCapacityKw.toStringAsFixed(2)} kW', theme, isDark),
-                      _buildInfoRow('Budget', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(survey.proposedBudget), theme, isDark),
 
                       if (survey.notes != null && survey.notes!.isNotEmpty) ...[
                         const SizedBox(height: 24),
