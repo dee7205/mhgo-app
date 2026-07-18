@@ -5,8 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import 'package:mhgo/core/theme/app_theme.dart';
 import 'package:mhgo/core/widgets/app_button.dart';
+import 'package:mhgo/core/widgets/pdf_export_dialog.dart';
 import 'package:mhgo/features/survey/presentation/providers/survey_provider.dart';
-
+import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 import 'package:mhgo/features/survey/presentation/views/pdf_preview_view.dart';
@@ -34,6 +35,7 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
       ref.invalidate(surveyListProvider);
       ref.invalidate(surveyDetailsProvider(survey.uuid));
       ref.invalidate(projectsListProvider);
+      ref.invalidate(dashboardStateProvider);
       
       if (mounted && newProjectUuid != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -42,7 +44,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
             duration: Duration(seconds: 4),
           ),
         );
-        context.push('/projects/$newProjectUuid');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.push('/projects/$newProjectUuid');
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -85,7 +89,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Survey deleted successfully')),
           );
-          context.pop();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.pop();
+          });
         }
       } catch (e) {
         if (mounted) {
@@ -101,7 +107,7 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
     switch (status) {
       case 'Approved':
         return Colors.green;
-      case 'Pending Survey':
+      case 'Surveyed':
         return Colors.orange;
       case 'Waiting Client':
         return Colors.blue;
@@ -228,10 +234,15 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                             text: 'View PDF',
                             icon: Icons.picture_as_pdf,
                             onPressed: () async {
-                              await Printing.layoutPdf(
-                                onLayout: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format),
-                                name: 'survey_report_${survey.uuid}.pdf',
-                              );
+                              final options = await showPdfExportDialog(context);
+                              if (!context.mounted) return;
+                              if (options == null) return;
+                              Future.microtask(() async {
+                                await Printing.layoutPdf(
+                                  onLayout: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format, options: options),
+                                  name: 'survey_report_${survey.uuid}.pdf',
+                                );
+                              });
                             },
                           ),
                           AppButton(
@@ -277,7 +288,7 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                       _buildSectionHeader('Proposed System', Icons.solar_power, theme),
                       const SizedBox(height: 12),
                       _buildInfoRow('System', survey.proposedSystem, theme, isDark),
-                      _buildInfoRow('Capacity', '${survey.proposedCapacityKw.toStringAsFixed(2)} kW', theme, isDark),
+                      _buildInfoRow('Capacity', '${(survey.proposedCapacityKw.isNaN || survey.proposedCapacityKw.isInfinite ? 0.0 : survey.proposedCapacityKw).toStringAsFixed(2)} kW', theme, isDark),
 
                       if (survey.notes != null && survey.notes!.isNotEmpty) ...[
                         const SizedBox(height: 24),

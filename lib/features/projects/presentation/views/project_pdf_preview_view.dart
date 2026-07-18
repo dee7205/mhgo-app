@@ -10,7 +10,9 @@ import 'package:mhgo/features/projects/presentation/providers/projects_provider.
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../../../core/database/models/project_model.dart';
+import 'package:mhgo/core/widgets/pdf_export_dialog.dart';
 
 class ProjectPdfPreviewView extends ConsumerWidget {
   final String uuid;
@@ -38,9 +40,14 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             tooltip: 'Print Report',
             onPressed: () async {
               if (projectAsync.value != null && materialsAsync.value != null) {
-                await Printing.layoutPdf(
-                  onLayout: (PdfPageFormat format) async => _generatePdf(projectAsync.value!.project, materialsAsync.value!),
-                );
+                final options = await showPdfExportDialog(context);
+                if (!context.mounted) return;
+                if (options == null) return;
+                Future.microtask(() async {
+                  await Printing.layoutPdf(
+                    onLayout: (PdfPageFormat format) async => _generatePdf(projectAsync.value!.project, materialsAsync.value!, options),
+                  );
+                });
               }
             },
           ),
@@ -49,11 +56,16 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             tooltip: 'Download PDF',
             onPressed: () async {
               if (projectAsync.value != null && materialsAsync.value != null) {
-                final bytes = await _generatePdf(projectAsync.value!.project, materialsAsync.value!);
-                await Printing.sharePdf(
-                  bytes: bytes, 
-                  filename: 'Project_BOM_${projectAsync.value!.project.name.replaceAll(' ', '_')}.pdf',
-                );
+                final options = await showPdfExportDialog(context);
+                if (!context.mounted) return;
+                if (options == null) return;
+                Future.microtask(() async {
+                  final bytes = await _generatePdf(projectAsync.value!.project, materialsAsync.value!, options);
+                  await Printing.sharePdf(
+                    bytes: bytes, 
+                    filename: 'Project_BOM_${projectAsync.value!.project.name.replaceAll(' ', '_')}.pdf',
+                  );
+                });
               }
             },
           ),
@@ -151,7 +163,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'MHG SOLAR EPC SOLUTIONS INC.',
+              'Made by MHGo',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
@@ -160,11 +172,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 2),
-            const Text(
-              'EPC Project Site Operations & Engineering Division',
-              style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
+            // const Text(
+            //   'PROJ',
+            //   style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 6),
             Text(
               'PROJECT SPECIFICATIONS & BOM',
               style: TextStyle(
@@ -201,7 +213,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
           _buildInfoItem('PROJECT NAME:', project.name),
           _buildInfoItem('CLIENT:', project.client ?? 'N/A'),
           _buildInfoItem('LOCATION:', project.location),
-          _buildInfoItem('CAPACITY:', '${project.capacityMw} ${project.capacityUnit}'),
+          _buildInfoItem('CAPACITY:', '${project.capacity} ${project.capacityUnit ?? 'kWp'}'),
         ],
       ),
     );
@@ -376,7 +388,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
   }
 
   // --- PDF GENERATION LOGIC ---
-  Future<Uint8List> _generatePdf(ProjectModel project, List<ProjectMaterialRequirementEntity> materials) async {
+  Future<Uint8List> _generatePdf(ProjectModel project, List<ProjectMaterialRequirementEntity> materials, [PdfExportOptions options = const PdfExportOptions()]) async {
     final pdf = pw.Document();
 
     Map<String, dynamic> solar = {};
@@ -401,50 +413,56 @@ class ProjectPdfPreviewView extends ConsumerWidget {
       return entries.map((e) => '${e.key.toUpperCase()}: ${e.value}').join(' | ');
     }
 
+    pw.ImageProvider? logoImage;
+    try {
+      final ByteData logoData = await rootBundle.load('assets/images/company_logo.png');
+      final Uint8List logoBytes = logoData.buffer.asUint8List();
+      logoImage = pw.MemoryImage(logoBytes);
+    } catch (_) {
+      logoImage = null;
+    }
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        header: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  if (logoImage != null)
+                    pw.Image(logoImage, width: 90, height: 45, fit: pw.BoxFit.contain)
+                  else
+                    pw.Text('COMPANY LOGO', style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey500)),
+                  
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'PROJECT SPECIFICATIONS',
+                        style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'DATE: ${DateFormat('MMM dd, yyyy').format(DateTime.now())}',
+                        style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Divider(color: const PdfColor.fromInt(0xFF0F172A), thickness: 1.0),
+              pw.SizedBox(height: 16),
+            ],
+          );
+        },
         build: (pw.Context context) {
           return [
-            // HEADER
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'MHG SOLAR EPC SOLUTIONS INC.',
-                      style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1B5E20)),
-                    ),
-                    pw.SizedBox(height: 2),
-                    pw.Text(
-                      'EPC Project Site Operations & Engineering Division',
-                      style: pw.TextStyle(fontSize: 10, color: const PdfColor.fromInt(0xFF757575), fontWeight: pw.FontWeight.bold),
-                    ),
-                    pw.SizedBox(height: 6),
-                    pw.Text(
-                      'PROJECT SPECIFICATIONS & BOM',
-                      style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-                    ),
-                  ],
-                ),
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    pw.Text(
-                      'GENERATED: ${DateFormat('MMM dd, yyyy').format(DateTime.now())}',
-                      style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            pw.SizedBox(height: 12),
-            pw.Divider(color: const PdfColor.fromInt(0xFF000000), thickness: 1.5),
-            pw.SizedBox(height: 12),
 
             // INFO
             pw.Container(
@@ -459,7 +477,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                   _pdfInfoItem('PROJECT NAME:', project.name),
                   _pdfInfoItem('CLIENT:', project.client ?? 'N/A'),
                   _pdfInfoItem('LOCATION:', project.location),
-                  _pdfInfoItem('CAPACITY:', '${project.capacityMw} ${project.capacityUnit}'),
+                  _pdfInfoItem('CAPACITY:', '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '').replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}'),
                 ],
               ),
             ),
@@ -468,7 +486,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             // SPECS
             pw.Text(
               'EQUIPMENT SPECIFICATIONS',
-              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
             ),
             pw.SizedBox(height: 8),
             pw.Table(
@@ -490,27 +508,76 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             if (materials.isNotEmpty) ...[
               pw.Text(
                 'BILL OF MATERIALS',
-                style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
               ),
               pw.SizedBox(height: 8),
               _buildRealPdfMaterialsTable(materials, project.totalCost),
-              pw.SizedBox(height: 24),
+            ],
+            
+            // Signatory Block
+            if (options.includeSignatures) ...[
+              pw.SizedBox(height: 35),
+              pw.Text('AUTHORIZATION & SIGN-OFF', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+              pw.SizedBox(height: 8),
+              pw.Column(
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      // Left Column
+                      pw.Expanded(
+                        child: pw.SizedBox(
+                          width: 180,
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.SizedBox(height: 24),
+                              pw.Text(options.engineerName.isEmpty ? '_______________________' : options.engineerName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                              pw.SizedBox(height: 2),
+                              pw.Text(options.engineerTitle, style: const pw.TextStyle(fontSize: 9)),
+                              pw.SizedBox(height: 4),
+                              pw.Divider(thickness: 1, color: PdfColors.black),
+                              pw.SizedBox(height: 4),
+                              pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Right Column
+                      pw.Expanded(
+                        child: pw.SizedBox(
+                          width: 180,
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.SizedBox(height: 24),
+                              pw.Text(options.clientName.isEmpty ? '_______________________' : options.clientName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                              pw.SizedBox(height: 2),
+                              pw.Text(options.clientTitle, style: const pw.TextStyle(fontSize: 9)),
+                              pw.SizedBox(height: 4),
+                              pw.Divider(thickness: 1, color: PdfColors.black),
+                              pw.SizedBox(height: 4),
+                              pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ];
         },
         footer: (pw.Context context) {
-          return pw.Column(
-            children: [
-              pw.Divider(color: const PdfColor.fromInt(0xFFBDBDBD)),
-              pw.SizedBox(height: 4),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Confidential - Internal Use Only', style: const pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF757575))),
-                  pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF757575))),
-                ],
-              ),
-            ],
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(top: 10.0),
+            child: pw.Text(
+              'Page ${context.pageNumber} of ${context.pagesCount}',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+            ),
           );
         },
       ),
@@ -592,7 +659,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('TOTAL PROJECT COST', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
             pw.Container(),
             pw.Container(),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('PHP ${totalCost.toStringAsFixed(2)}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('PHP ${(totalCost.isNaN || totalCost.isInfinite ? 0.0 : totalCost).toStringAsFixed(2)}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
           ],
         ),
       ],

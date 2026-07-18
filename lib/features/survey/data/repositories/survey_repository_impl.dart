@@ -83,7 +83,8 @@ class SurveyRepositoryImpl implements SurveyRepository {
       ..client = model.clientName
       ..location = model.address
       ..type = 'Rooftop' // Or mapped dynamically if needed
-      ..capacityMw = model.proposedCapacityKw / 1000 // Convert kW to MW safely
+      ..capacity = model.proposedCapacityKw // Map directly as kWp
+      ..capacityUnit = 'kWp'
       ..status = 'planning'
       ..stage = 'Engineering'
       ..progress = 0.0

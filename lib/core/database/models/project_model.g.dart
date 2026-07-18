@@ -194,7 +194,7 @@ void _projectModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.bomSpecsJson);
-  writer.writeDouble(offsets[1], object.capacityMw);
+  writer.writeDouble(offsets[1], object.capacity);
   writer.writeString(offsets[2], object.capacityUnit);
   writer.writeString(offsets[3], object.client);
   writer.writeDateTime(offsets[4], object.createdAt);
@@ -224,7 +224,7 @@ ProjectModel _projectModelDeserialize(
 ) {
   final object = ProjectModel();
   object.bomSpecsJson = reader.readStringOrNull(offsets[0]);
-  object.capacityMw = reader.readDouble(offsets[1]);
+  object.capacity = reader.readDouble(offsets[1]);
   object.capacityUnit = reader.readStringOrNull(offsets[2]);
   object.client = reader.readStringOrNull(offsets[3]);
   object.createdAt = reader.readDateTime(offsets[4]);
@@ -673,7 +673,7 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
-  capacityMwEqualTo(double value, {double epsilon = Query.epsilon}) {
+  capacityEqualTo(double value, {double epsilon = Query.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.equalTo(
@@ -687,7 +687,7 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
-  capacityMwGreaterThan(
+  capacityGreaterThan(
     double value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -706,7 +706,7 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
-  capacityMwLessThan(
+  capacityLessThan(
     double value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -725,7 +725,7 @@ extension ProjectModelQueryFilter
   }
 
   QueryBuilder<ProjectModel, ProjectModel, QAfterFilterCondition>
-  capacityMwBetween(
+  capacityBetween(
     double lower,
     double upper, {
     bool includeLower = true,
@@ -3055,14 +3055,13 @@ extension ProjectModelQuerySortBy
     });
   }
 
-  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByCapacityMw() {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByCapacity() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.asc);
     });
   }
 
-  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
-  sortByCapacityMwDesc() {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> sortByCapacityDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.desc);
     });
@@ -3318,14 +3317,13 @@ extension ProjectModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByCapacityMw() {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByCapacity() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.asc);
     });
   }
 
-  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy>
-  thenByCapacityMwDesc() {
+  QueryBuilder<ProjectModel, ProjectModel, QAfterSortBy> thenByCapacityDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'capacityMw', Sort.desc);
     });
@@ -3588,7 +3586,7 @@ extension ProjectModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByCapacityMw() {
+  QueryBuilder<ProjectModel, ProjectModel, QDistinct> distinctByCapacity() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'capacityMw');
     });
@@ -3749,7 +3747,7 @@ extension ProjectModelQueryProperty
     });
   }
 
-  QueryBuilder<ProjectModel, double, QQueryOperations> capacityMwProperty() {
+  QueryBuilder<ProjectModel, double, QQueryOperations> capacityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'capacityMw');
     });

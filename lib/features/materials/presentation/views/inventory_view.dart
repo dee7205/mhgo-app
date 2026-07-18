@@ -109,15 +109,13 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                       labelText: 'Category',
                       border: OutlineInputBorder(),
                     ),
-                    value: _selectedCategory,
+                    value: [null, 'Raw', 'Electrical', 'Structural', 'Misc'].contains(_selectedCategory) ? _selectedCategory : null,
                     items: [null, 'Raw', 'Electrical', 'Structural', 'Misc']
+                        .toSet()
                         .map(
-                          (c) => DropdownMenuItem(
+                          (c) => DropdownMenuItem<String?>(
                             value: c,
-                            child: Text(
-                              c ?? 'All Categories',
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            child: Row(children: [Expanded(child: Text(c ?? 'All Categories', overflow: TextOverflow.ellipsis))]),
                           ),
                         )
                         .toList(),
@@ -130,7 +128,7 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                       labelText: 'Sort By',
                       border: OutlineInputBorder(),
                     ),
-                    value: _sortOption,
+                    value: ['Name A-Z', 'Name Z-A', 'Stock: Low to High', 'Stock: High to Low'].contains(_sortOption) ? _sortOption : null,
                     items:
                         [
                               'Name A-Z',
@@ -138,14 +136,17 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                               'Stock: Low to High',
                               'Stock: High to Low',
                             ]
+                            .toSet()
                             .map(
-                              (s) => DropdownMenuItem(
+                              (s) => DropdownMenuItem<String>(
                                 value: s,
-                                child: Text(s, overflow: TextOverflow.ellipsis),
+                                child: Row(children: [Expanded(child: Text(s, overflow: TextOverflow.ellipsis))]),
                               ),
                             )
                             .toList(),
-                    onChanged: (val) => setState(() => _sortOption = val!),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _sortOption = val);
+                    },
                   ),
               ],
             ),

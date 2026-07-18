@@ -67,7 +67,7 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
           final deduplicatedReports = uniqueReports.values.toList();
 
           int totalProjects = deduplicatedReports.length;
-          double totalProgress = deduplicatedReports.isEmpty ? 0 : deduplicatedReports.fold(0.0, (sum, r) => sum + r.overallProgress) / deduplicatedReports.length;
+          double totalProgress = deduplicatedReports.isEmpty ? 0.0 : deduplicatedReports.fold(0.0, (sum, r) => sum + (r.overallProgress.isNaN || r.overallProgress.isInfinite ? 0.0 : r.overallProgress)) / deduplicatedReports.length;
           int autoCalculated = deduplicatedReports.where((r) => r.isAutoCalculated).length;
 
           return Column(
@@ -184,7 +184,7 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
           children: [
             _KpiCard(
               title: 'Avg Overall Progress',
-              value: '${(totalProgress.isNaN || totalProgress.isInfinite ? 0 : totalProgress).toStringAsFixed(1)}%',
+              value: '${(totalProgress.isNaN || totalProgress.isInfinite ? 0.0 : totalProgress).toStringAsFixed(1)}%',
               icon: Icons.pie_chart,
               color: Colors.blue,
               width: _getKpiWidth(constraints.maxWidth),
@@ -332,7 +332,7 @@ class _ProjectCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Overall Progress', style: theme.textTheme.bodySmall),
-                  Text('${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0 : report.overallProgress).toStringAsFixed(1)}%', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0.0 : report.overallProgress).toStringAsFixed(1)}%', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
                 ],
               ),
               const SizedBox(height: 8),

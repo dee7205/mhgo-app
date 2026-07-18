@@ -64,7 +64,7 @@ class _ProgressCreateEditViewState
           _name = category.name;
           _description = category.description ?? '';
           _progress = category.progress;
-          _progressController.text = _progress.toStringAsFixed(0);
+          _progressController.text = (_progress.isNaN || _progress.isInfinite ? 0.0 : _progress).toStringAsFixed(0);
           _status = category.status;
           _targetDate = category.targetDate;
           _notes = category.notes ?? '';
@@ -290,7 +290,7 @@ class _ProgressCreateEditViewState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Progress: ${(_progress.isNaN || _progress.isInfinite ? 0 : _progress).toStringAsFixed(1)}%',
+                              'Progress: ${(_progress.isNaN || _progress.isInfinite ? 0.0 : _progress).toStringAsFixed(1)}%',
                               style: theme.textTheme.bodyMedium,
                             ),
                             Slider(
@@ -304,7 +304,7 @@ class _ProgressCreateEditViewState
                               divisions: 100,
                               onChanged: (val) {
                                 setState(() => _progress = val);
-                                final formatted = val.toStringAsFixed(0);
+                                final formatted = (val.isNaN || val.isInfinite ? 0.0 : val).toStringAsFixed(0);
                                 if (_progressController.text != formatted) {
                                   _progressController.value =
                                       _progressController.value.copyWith(

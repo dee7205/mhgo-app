@@ -36,7 +36,7 @@ class _ProjectCreateEditDialogState
   String _location = '';
   String _supervisor = '';
 
-  double _capacityMw = 0.0;
+  double _capacity = 0.0;
   String _capacityUnit = 'kWp';
 
   String _type = 'Ground Mounted';
@@ -74,11 +74,11 @@ class _ProjectCreateEditDialogState
       _client = p.client ?? '';
       _location = p.location;
       _supervisor = p.supervisor ?? '';
-      _capacityMw = p.capacityMw;
-      _capacityUnit = p.capacityUnit ?? 'MWp';
-      _capacityController.text = _capacityMw == _capacityMw.roundToDouble() 
-          ? _capacityMw.toInt().toString() 
-          : _capacityMw.toString();
+      _capacity = p.capacity;
+      _capacityUnit = p.capacityUnit ?? 'kWp';
+      _capacityController.text = _capacity == _capacity.roundToDouble() 
+          ? _capacity.toInt().toString() 
+          : _capacity.toString();
       _type = p.type;
       _systemType = p.systemType ?? 'On-Grid';
       _status = p.status;
@@ -86,7 +86,7 @@ class _ProjectCreateEditDialogState
       _totalCost = p.totalCost;
       _totalCostController.text = _totalCost == _totalCost.roundToDouble() 
           ? _totalCost.toInt().toString() 
-          : _totalCost.toStringAsFixed(2);
+          : (_totalCost.isNaN || _totalCost.isInfinite ? 0.0 : _totalCost).toStringAsFixed(2);
       _startDate = p.startDate;
       _endDate = p.endDate;
       if (p.bomSpecsJson != null) {
@@ -162,7 +162,7 @@ class _ProjectCreateEditDialogState
         ..client = _client.isEmpty ? null : _client
         ..location = _location
         ..supervisor = _supervisor.isEmpty ? null : _supervisor
-        ..capacityMw = double.tryParse(_capacityController.text) ?? 0.0
+        ..capacity = double.tryParse(_capacityController.text) ?? 0.0
         ..capacityUnit = _capacityUnit
         ..type = _type
         ..systemType = _systemType
@@ -372,7 +372,7 @@ class _ProjectCreateEditDialogState
                             ? 'Required'
                             : null,
                         onSaved: (val) =>
-                            _capacityMw = double.tryParse(val ?? '0') ?? 0.0,
+                            _capacity = double.tryParse(val ?? '0') ?? 0.0,
                       ),
                       DropdownButtonFormField<String>(
                         isExpanded: true,

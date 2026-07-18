@@ -199,7 +199,7 @@ class ProgressDetailsView extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0 : report.overallProgress).toStringAsFixed(1)}%',
+                  '${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0.0 : report.overallProgress).toStringAsFixed(1)}%',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -335,7 +335,7 @@ class ProgressDetailsView extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          '${(cat.progress.isNaN || cat.progress.isInfinite ? 0 : cat.progress).toStringAsFixed(1)}%',
+                          '${(cat.progress.isNaN || cat.progress.isInfinite ? 0.0 : cat.progress).toStringAsFixed(1)}%',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],

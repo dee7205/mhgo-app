@@ -56,7 +56,7 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
   String _proposedSystem = 'On-Grid';
   final _proposedCapacityKwController = TextEditingController();
   
-  String _status = 'Pending Survey';
+  String _status = 'Surveyed';
   final _notesController = TextEditingController();
 
   String? _convertedProjectUuid;
@@ -68,7 +68,7 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
   ];
 
   final List<String> _statusOptions = [
-    'Pending Survey',
+    'Surveyed',
     'Quoted',
     'Waiting Client',
     'Approved',
@@ -133,7 +133,7 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
           _proposedCapacityKwController.text = survey.proposedCapacityKw.toString();
           _status = _statusOptions.contains(survey.status) 
               ? survey.status 
-              : 'Pending Survey';
+              : 'Surveyed';
           _notesController.text = survey.notes ?? '';
           _convertedProjectUuid = survey.convertedProjectUuid;
         });
@@ -190,7 +190,9 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
 
       if (mounted) {
         _showSnackBar('Survey saved successfully!');
-        context.pop();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.pop();
+        });
       }
     } catch (e) {
       if (mounted) {

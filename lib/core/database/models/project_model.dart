@@ -11,7 +11,8 @@ class ProjectModel {
 
   late String name;
   String? description;
-  late double capacityMw;
+  @Name('capacityMw')
+  late double capacity;
   String? capacityUnit; // 'MWp' | 'kWp'
   late String status; // 'planning' | 'construction' | 'commissioning' | 'om' | 'completed' | 'on_hold'
   String? stage; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'Commissioning' | 'Grid Tie'

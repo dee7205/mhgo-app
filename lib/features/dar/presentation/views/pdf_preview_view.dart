@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -168,7 +169,7 @@ class PdfPreviewView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'MHG SOLAR EPC SOLUTIONS INC.',
+              'Created by MHGo',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
@@ -176,12 +177,12 @@ class PdfPreviewView extends ConsumerWidget {
                 color: Color(0xFF1B5E20), // Solar Green primary branding
               ),
             ),
-            const SizedBox(height: 2),
-            const Text(
-              'EPC Project Site Operations & Engineering Division',
-              style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
+            // const SizedBox(height: 2),
+            // const Text(
+            //   'PROJECT',
+            //   style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 6),
             Text(
               'DAILY ACCOMPLISHMENT REPORT (DAR)',
               style: TextStyle(
@@ -332,7 +333,7 @@ class PdfPreviewView extends ConsumerWidget {
                     _buildTableBodyCell('${idx + 1}'),
                     _buildTableBodyCell(item.workDescription),
                     _buildTableBodyCell(item.areaLocation),
-                    _buildTableBodyCell(item.quantity.toStringAsFixed(1)),
+                    _buildTableBodyCell((item.quantity.isNaN || item.quantity.isInfinite ? 0.0 : item.quantity).toStringAsFixed(1)),
                     _buildTableBodyCell(item.unit),
                     _buildTableBodyCell(item.remarks),
                   ],
@@ -686,25 +687,40 @@ class PdfPreviewView extends ConsumerWidget {
   Future<Uint8List> _generatePdf(DarReport report) async {
     final pdf = pw.Document();
 
+    pw.ImageProvider? logoImage;
+    try {
+      final ByteData logoData = await rootBundle.load('assets/images/company_logo.png');
+      final Uint8List logoBytes = logoData.buffer.asUint8List();
+      logoImage = pw.MemoryImage(logoBytes);
+    } catch (_) {
+      logoImage = null;
+    }
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        header: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              if (logoImage != null)
+                pw.Image(logoImage, height: 60, fit: pw.BoxFit.contain)
+              else
+                pw.Text('COMPANY LOGO', style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey500)),
+              pw.SizedBox(height: 12),
+              pw.Divider(color: const PdfColor.fromInt(0xFF1B5E20), thickness: 1.0),
+              pw.SizedBox(height: 16),
+            ],
+          );
+        },
         build: (pw.Context context) => [
-          // Header
+          // Title
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('MHG SOLAR EPC SOLUTIONS INC.', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1B5E20))),
-                  pw.Text('EPC Project Site Operations & Engineering Division', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-                  pw.SizedBox(height: 6),
-                  pw.Text('DAILY ACCOMPLISHMENT REPORT (DAR)', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
+              pw.Text('DAILY ACCOMPLISHMENT REPORT', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1B5E20))),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -715,9 +731,7 @@ class PdfPreviewView extends ConsumerWidget {
               ),
             ],
           ),
-          pw.SizedBox(height: 12),
-          pw.Divider(),
-          pw.SizedBox(height: 12),
+          pw.SizedBox(height: 16),
 
           // Info
           pw.Container(
@@ -772,6 +786,16 @@ class PdfPreviewView extends ConsumerWidget {
             ],
           )
         ],
+        footer: (pw.Context context) {
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(top: 10.0),
+            child: pw.Text(
+              'Page ${context.pageNumber} of ${context.pagesCount}',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+            ),
+          );
+        },
       ),
     );
 

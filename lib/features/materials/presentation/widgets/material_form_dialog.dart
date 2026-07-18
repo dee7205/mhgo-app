@@ -141,14 +141,16 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _selectedCategory,
-                    items: _categories
-                        .map((c) => DropdownMenuItem(
+                    value: _categories.contains(_selectedCategory) ? _selectedCategory : null,
+                    items: _categories.toSet()
+                        .map((c) => DropdownMenuItem<String>(
                               value: c,
-                              child: Text(c, overflow: TextOverflow.ellipsis),
+                              child: Row(children: [Expanded(child: Text(c, overflow: TextOverflow.ellipsis))]),
                             ))
                         .toList(),
-                    onChanged: (val) => setState(() => _selectedCategory = val!),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _selectedCategory = val);
+                    },
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
@@ -158,14 +160,16 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _selectedUnit,
-                    items: _units
-                        .map((u) => DropdownMenuItem(
+                    value: _units.contains(_selectedUnit) ? _selectedUnit : null,
+                    items: _units.toSet()
+                        .map((u) => DropdownMenuItem<String>(
                               value: u,
-                              child: Text(u, overflow: TextOverflow.ellipsis),
+                              child: Row(children: [Expanded(child: Text(u, overflow: TextOverflow.ellipsis))]),
                             ))
                         .toList(),
-                    onChanged: (val) => setState(() => _selectedUnit = val!),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _selectedUnit = val);
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

@@ -505,11 +505,12 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _status,
+                  value: ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled'].contains(_status) ? _status : null,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
                   items: ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled']
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis)))
+                      .toSet()
+                      .map((s) => DropdownMenuItem<String>(value: s, child: Row(children: [Expanded(child: Text(s, overflow: TextOverflow.ellipsis))]),))
                       .toList(),
                   onChanged: (val) {
                     if (val != null) setState(() => _status = val);

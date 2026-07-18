@@ -7,7 +7,8 @@ class DashboardOverview {
   final int totalProjectsCount;
   final int activeProjectsCount;
   final int planningProjectsCount;
-  final double totalCapacityMw;
+  final Map<String, double> capacityByUnit;
+  final double accumulatedTotalCost;
   final double overallProgress; // average progress of active/construction projects (0.0 to 1.0)
   
   final Map<String, int> projectsByStage;
@@ -23,7 +24,8 @@ class DashboardOverview {
     required this.totalProjectsCount,
     required this.activeProjectsCount,
     required this.planningProjectsCount,
-    required this.totalCapacityMw,
+    required this.capacityByUnit,
+    required this.accumulatedTotalCost,
     required this.overallProgress,
     required this.projectsByStage,
     required this.recentDarCount,

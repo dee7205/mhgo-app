@@ -129,6 +129,29 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     }
   }
 
+  String _formatCurrency(double amount) {
+    if (amount.isNaN || amount.isInfinite) return '₱0';
+    if (amount >= 1000000) {
+      return '₱${(amount / 1000000).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')}M';
+    } else if (amount >= 1000) {
+      return '₱${(amount / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}K';
+    } else {
+      return '₱${amount.toStringAsFixed(0)}';
+    }
+  }
+
+  /// Format capacity grouped by stored unit — no kWp↔MWp conversion.
+  String _formatCapacityByUnit(Map<String, double> capacityByUnit) {
+    if (capacityByUnit.isEmpty) return '0 kWp';
+    final parts = <String>[];
+    for (final entry in capacityByUnit.entries) {
+      final val = (entry.value.isNaN || entry.value.isInfinite) ? 0.0 : entry.value;
+      final formatted = val.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      parts.add('$formatted ${entry.key}');
+    }
+    return parts.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final stateAsync = ref.watch(dashboardStateProvider);
@@ -675,10 +698,19 @@ class _DashboardViewState extends ConsumerState<DashboardView>
       ),
       _KpiCard(
         title: 'CAPACITY IMPLEMENTED',
-        value: '${data.totalCapacityMw.toStringAsFixed(1)} kWp',
+        value: _formatCapacityByUnit(data.capacityByUnit),
         subtitle: 'EPC solar generation target',
         icon: Icons.wb_sunny_rounded,
         accentColor: const Color(0xFFFFB300), // Amber
+        theme: theme,
+        isDark: isDark,
+      ),
+      _KpiCard(
+        title: 'ACCUMULATED VALUE',
+        value: _formatCurrency(data.accumulatedTotalCost),
+        subtitle: 'Total active project cost',
+        icon: Icons.account_balance_wallet_rounded,
+        accentColor: const Color(0xFF4CAF50), // Green
         theme: theme,
         isDark: isDark,
       ),
@@ -759,40 +791,25 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     }
 
     if (crossAxisCount == 2) {
-      if (cards.length < 4) {
-        return Column(
-          children: cards
-              .map(
-                (c) => Padding(
-                  padding: EdgeInsets.only(bottom: spacing),
-                  child: c,
-                ),
-              )
-              .toList(),
-        );
-      }
-      return Column(
-        children: [
+      final rows = <Widget>[];
+      for (int i = 0; i < cards.length; i += 2) {
+        rows.add(
           Row(
             children: [
-              Expanded(child: cards[0]),
+              Expanded(child: cards[i]),
               SizedBox(width: spacing),
-              Expanded(child: cards[1]),
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              Expanded(child: cards[2]),
-              SizedBox(width: spacing),
-              if (cards.length > 3)
-                Expanded(child: cards[3])
+              if (i + 1 < cards.length)
+                Expanded(child: cards[i + 1])
               else
-                const Spacer(),
+                Expanded(child: const SizedBox.shrink()),
             ],
           ),
-        ],
-      );
+        );
+        if (i + 2 < cards.length) {
+          rows.add(SizedBox(height: spacing));
+        }
+      }
+      return Column(children: rows);
     }
 
     if (cards.length < 4) {
@@ -1556,18 +1573,15 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     }
 
     // Add recent inspections
-    for (final insp in data.recentInspections.take(3)) {
-      final isRejected = insp.status.toLowerCase() == 'rejected';
+    for (final survey in data.recentInspections.take(3)) {
       activities.add(
         _ActivityItem(
-          time: DateFormat('MMM d, h:mm a').format(insp.surveyDate),
-          title: 'QC Inspection Logged',
-          description: isRejected
-              ? '${insp.clientName} flagged an issue at ${insp.address}.'
-              : '${insp.clientName} passed QA/QC.',
-          icon: isRejected ? Icons.cancel_outlined : Icons.check_circle_outline,
-          color: isRejected ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32),
-          timestamp: insp.surveyDate,
+          time: DateFormat('MMM d, h:mm a').format(survey.surveyDate),
+          title: 'New client survey created',
+          description: 'Survey created for ${survey.clientName}.',
+          icon: Icons.assignment_outlined,
+          color: Colors.orange,
+          timestamp: survey.surveyDate,
         ),
       );
     }
@@ -2070,7 +2084,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                         runSpacing: 4,
                         children: [
                           Text(
-                            '${project.capacityMw.toStringAsFixed(1)} MWp • ${project.location}',
+                            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.location}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 11,
                             ),
@@ -2116,7 +2130,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}% Complete',
+                  '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}% Complete',
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     fontSize: 11,

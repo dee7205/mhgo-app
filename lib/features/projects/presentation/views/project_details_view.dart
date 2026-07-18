@@ -9,6 +9,7 @@ import 'package:mhgo/core/widgets/app_button.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/features/projects/domain/entities/projects_entities.dart';
 import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
+import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:mhgo/features/projects/presentation/widgets/project_create_edit_dialog.dart';
 import 'package:mhgo/features/materials/presentation/widgets/project_material_requirements_tab.dart';
 
@@ -103,6 +104,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   final repo = ref.read(projectsRepositoryProvider);
                   await repo.deleteProject(project.uuid);
                   ref.invalidate(projectsListProvider);
+                  ref.invalidate(dashboardStateProvider);
                   if (context.mounted) {
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -164,7 +166,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                         ),
                       ),
                       Text(
-                        '${project.capacityMw.toStringAsFixed(1)} ${project.capacityUnit ?? 'MWp'} • ${project.systemType != null ? '${project.systemType} ' : ''}${project.type}',
+                        '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.systemType != null ? '${project.systemType} ' : ''}${project.type}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -206,7 +208,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
+                        '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}%',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
@@ -377,7 +379,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           _buildInfoRow('Client Name', project.client ?? 'MHG Internals', theme, isDark),
           _buildInfoRow('Contract Reference', 'CONTR-${project.uuid.toUpperCase().substring(0, 6)}', theme, isDark),
           _buildInfoRow('Site Location', project.location, theme, isDark),
-          _buildInfoRow('Target Capacity', '${project.capacityMw.toStringAsFixed(2)} ${project.capacityUnit ?? 'MWp'}', theme, isDark),
+          _buildInfoRow('Target Capacity', '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '').replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}', theme, isDark),
           _buildInfoRow('Arrangement Type', project.type, theme, isDark),
           _buildInfoRow('Contract Start', formattedStart, theme, isDark),
           _buildInfoRow('Expected Completion', formattedEnd, theme, isDark),
@@ -505,7 +507,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                         ),
                       ),
                       Text(
-                        '${stage.progress.toStringAsFixed(0)}%',
+                        '${(stage.progress.isNaN || stage.progress.isInfinite ? 0 : stage.progress).toStringAsFixed(0)}%',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
@@ -876,7 +878,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          '${(item.progress.isNaN || item.progress.isInfinite ? 0 : item.progress).toStringAsFixed(0)}%',
+                                          '${(item.progress.isNaN || item.progress.isInfinite ? 0.0 : item.progress).toStringAsFixed(0)}%',
                                           style: theme.textTheme.bodySmall?.copyWith(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,

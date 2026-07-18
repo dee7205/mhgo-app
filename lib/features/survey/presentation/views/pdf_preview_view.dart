@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -8,6 +9,7 @@ import 'package:printing/printing.dart';
 import 'package:mhgo/core/theme/app_theme.dart';
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 import 'package:mhgo/features/survey/presentation/providers/survey_provider.dart';
+import 'package:mhgo/core/widgets/pdf_export_dialog.dart';
 
 class SurveyPdfPreviewView extends ConsumerWidget {
   final String id;
@@ -49,7 +51,7 @@ class SurveyPdfPreviewView extends ConsumerWidget {
               );
             }
             return PdfPreview(
-              build: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format),
+              build: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format, options: const PdfExportOptions()),
               pdfFileName: 'survey_report_${survey.uuid}.pdf',
               canChangeOrientation: false,
               canChangePageFormat: false,
@@ -62,11 +64,22 @@ class SurveyPdfPreviewView extends ConsumerWidget {
     );
   }
 
-  static Future<Uint8List> generatePdfDocument(Survey survey, PdfPageFormat format, {Uint8List? logoBytes}) async {
+  static Future<Uint8List> generatePdfDocument(Survey survey, PdfPageFormat format, {Uint8List? logoBytes, PdfExportOptions options = const PdfExportOptions()}) async {
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
     final formattedDate = DateFormat('EEEE, MMMM dd, yyyy').format(survey.surveyDate);
 
-    final pw.ImageProvider? logoImage = logoBytes != null ? pw.MemoryImage(logoBytes) : null;
+    pw.ImageProvider? logoImage;
+    if (logoBytes != null) {
+      logoImage = pw.MemoryImage(logoBytes);
+    } else {
+      try {
+        final ByteData logoData = await rootBundle.load('assets/images/company_logo.png');
+        final Uint8List defaultLogoBytes = logoData.buffer.asUint8List();
+        logoImage = pw.MemoryImage(defaultLogoBytes);
+      } catch (_) {
+        logoImage = null;
+      }
+    }
 
     // Helper to draw a type-safe vector Philippine Peso symbol that never throws font missing exceptions
     pw.Widget pesoSymbol(double fontSize, PdfColor color) {
@@ -120,19 +133,44 @@ class SurveyPdfPreviewView extends ConsumerWidget {
           marginRight: 1.5 * PdfPageFormat.cm,
         ),
         // Running structural header repeated across pages
-        header: (context) => pw.Column(
-          children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('MHGO ENGG - FIELD OPERATIONS', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
-                pw.Text('CONFIDENTIAL', style: const pw.TextStyle(fontSize: 8, color: PdfColors.red500)),
-              ],
-            ),
-            pw.SizedBox(height: 4),
-            pw.Divider(thickness: 0.5, color: PdfColors.grey300),
-          ],
-        ),
+        header: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  if (logoImage != null)
+                    pw.Image(logoImage, width: 90, height: 45, fit: pw.BoxFit.contain)
+                  else
+                    pw.Text('COMPANY LOGO', style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey500)),
+                  
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text('SITE ASSESSMENT LOG', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+                      pw.SizedBox(height: 4),
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.blue50,
+                          borderRadius: pw.BorderRadius.all(pw.Radius.circular(2)),
+                        ),
+                        child: pw.Text(survey.status.toUpperCase(), style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text('DATE: $formattedDate', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Divider(color: const PdfColor.fromInt(0xFF0F172A), thickness: 1.0),
+              pw.SizedBox(height: 16),
+            ],
+          );
+        },
         // Running structural footer calculating pagination elements and branding dynamically
         footer: (context) => pw.Column(
           children: [
@@ -156,50 +194,10 @@ class SurveyPdfPreviewView extends ConsumerWidget {
           ],
         ),
         build: (context) => [
-          pw.SizedBox(height: 10),
-
-          // Formal Corporate Header Block
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              logoImage != null
-                  ? pw.Image(logoImage, width: 75, height: 75, fit: pw.BoxFit.contain)
-                  : pw.Container(
-                width: 75,
-                height: 75,
-                decoration: const pw.BoxDecoration(
-                  color: PdfColors.grey100,
-                  border: pw.Border.fromBorderSide(pw.BorderSide(color: PdfColors.grey300, width: 1)),
-                ),
-                alignment: pw.Alignment.center,
-                child: pw.Text('COMPANY\nLOGO', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
-              ),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  pw.Text('SITE ASSESSMENT LOG', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
-                  pw.SizedBox(height: 4),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: const pw.BoxDecoration(
-                      color: PdfColors.blue50,
-                      borderRadius: pw.BorderRadius.all(pw.Radius.circular(2)),
-                    ),
-                    child: pw.Text(survey.status.toUpperCase(), style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                  ),
-                  pw.SizedBox(height: 6),
-                  pw.Text('Date: $formattedDate', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-                ],
-              ),
-            ],
-          ),
-
-          pw.SizedBox(height: 25),
 
           // Section I: Client Particulars
-          pw.Text('1. SITE ASSESSMENT PARTICULARS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.Text('1. SITE ASSESSMENT PARTICULARS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+          pw.Divider(thickness: 1, color: const PdfColor.fromInt(0xFF0F172A)),
           pw.SizedBox(height: 4),
           buildFormalRow('Client Name', pw.Text(survey.clientName, style: const pw.TextStyle(fontSize: 10))),
           buildFormalRow('Contact Number', pw.Text(survey.contactNumber, style: const pw.TextStyle(fontSize: 10))),
@@ -211,8 +209,8 @@ class SurveyPdfPreviewView extends ConsumerWidget {
           pw.SizedBox(height: 20),
 
           // Section II: Technical Analysis
-          pw.Text('2. SITE TECHNICAL SPECIFICATIONS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.Text('2. SITE TECHNICAL SPECIFICATIONS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+          pw.Divider(thickness: 1, color: const PdfColor.fromInt(0xFF0F172A)),
           pw.SizedBox(height: 4),
           if (survey.technicalSpecs.isEmpty)
             pw.Padding(
@@ -225,16 +223,16 @@ class SurveyPdfPreviewView extends ConsumerWidget {
           pw.SizedBox(height: 20),
 
           // Section III: Engineering Proposal
-          pw.Text('3. PROPOSED SYSTEM ARCHITECTURE', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-          pw.Divider(thickness: 1, color: PdfColors.blue900),
+          pw.Text('3. PROPOSED SYSTEM ARCHITECTURE', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+          pw.Divider(thickness: 1, color: const PdfColor.fromInt(0xFF0F172A)),
           pw.SizedBox(height: 4),
           buildFormalRow('System Configuration', pw.Text(survey.proposedSystem, style: const pw.TextStyle(fontSize: 10))),
-          buildFormalRow('Target Array Capacity', pw.Text('${survey.proposedCapacityKw.toStringAsFixed(2)} kW', style: const pw.TextStyle(fontSize: 10))),
+          buildFormalRow('Target Array Capacity', pw.Text('${(survey.proposedCapacityKw.isNaN || survey.proposedCapacityKw.isInfinite ? 0.0 : survey.proposedCapacityKw).toStringAsFixed(2)} kW', style: const pw.TextStyle(fontSize: 10))),
           // Section IV: Remarks
           if (survey.notes != null && survey.notes!.isNotEmpty) ...[
             pw.SizedBox(height: 20),
-            pw.Text('4. FIELD SURVEY REMARKS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-            pw.Divider(thickness: 1, color: PdfColors.blue900),
+            pw.Text('4. FIELD SURVEY REMARKS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+            pw.Divider(thickness: 1, color: const PdfColor.fromInt(0xFF0F172A)),
             pw.SizedBox(height: 6),
             pw.Container(
               width: double.infinity,
@@ -244,6 +242,62 @@ class SurveyPdfPreviewView extends ConsumerWidget {
                 borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
               ),
               child: pw.Text(survey.notes!, style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey900)),
+            ),
+          ],
+          
+          // Signatory Block
+          if (options.includeSignatures) ...[
+            pw.SizedBox(height: 35),
+            pw.Text('5. AUTHORIZATION & SIGN-OFF', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+            pw.Divider(thickness: 1, color: const PdfColor.fromInt(0xFF0F172A)),
+            pw.SizedBox(height: 20),
+            pw.Column(
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    // Left Column
+                    pw.Expanded(
+                      child: pw.SizedBox(
+                        width: 180,
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.SizedBox(height: 24),
+                            pw.Text(options.engineerName.isEmpty ? '_______________________' : options.engineerName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                            pw.SizedBox(height: 2),
+                            pw.Text(options.engineerTitle, style: const pw.TextStyle(fontSize: 9)),
+                            pw.SizedBox(height: 4),
+                            pw.Divider(thickness: 1, color: PdfColors.black),
+                            pw.SizedBox(height: 4),
+                            pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Right Column
+                    pw.Expanded(
+                      child: pw.SizedBox(
+                        width: 180,
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.SizedBox(height: 24),
+                            pw.Text(options.clientName.isEmpty ? '_______________________' : options.clientName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                            pw.SizedBox(height: 2),
+                            pw.Text(options.clientTitle, style: const pw.TextStyle(fontSize: 9)),
+                            pw.SizedBox(height: 4),
+                            pw.Divider(thickness: 1, color: PdfColors.black),
+                            pw.SizedBox(height: 4),
+                            pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ],

@@ -102,7 +102,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
                   case 'progress':
                     return b.progress.compareTo(a.progress);
                   case 'capacity':
-                    return b.capacityMw.compareTo(a.capacityMw);
+                    return b.capacity.compareTo(a.capacity);
                   case 'completion':
                     return a.endDate.compareTo(b.endDate);
                   case 'name':
@@ -469,7 +469,7 @@ class _ProjectGridCard extends StatelessWidget {
           // Details grid
           _buildDetailRow(Icons.pin_drop_outlined, project.location),
           const SizedBox(height: 8),
-          _buildDetailRow(Icons.flash_on_outlined, '${project.capacityMw.toStringAsFixed(1)} ${project.capacityUnit ?? 'MWp'} Capacity'),
+          _buildDetailRow(Icons.flash_on_outlined, '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} Capacity'),
           const SizedBox(height: 8),
           _buildDetailRow(Icons.calendar_month_outlined, '$formattedStart - $formattedEnd'),
           const SizedBox(height: 8),
@@ -489,7 +489,7 @@ class _ProjectGridCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
+                '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}%',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.primary,
@@ -607,7 +607,7 @@ class _ProjectListCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               _buildDetailItem(Icons.pin_drop_outlined, project.location),
-              _buildDetailItem(Icons.flash_on_outlined, '${project.capacityMw.toStringAsFixed(1)} ${project.capacityUnit ?? 'MWp'}'),
+              _buildDetailItem(Icons.flash_on_outlined, '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}'),
               _buildDetailItem(Icons.calendar_month_outlined, '$formattedStart - $formattedEnd'),
               _buildDetailItem(Icons.engineering_outlined, project.supervisor ?? 'N/A'),
             ],
@@ -629,7 +629,7 @@ class _ProjectListCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}%',
+                    '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}%',
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -673,7 +673,7 @@ class _ProjectListCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${(project.progress.isNaN || project.progress.isInfinite ? 0 : project.progress).toStringAsFixed(0)}% Complete',
+                      '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}% Complete',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,

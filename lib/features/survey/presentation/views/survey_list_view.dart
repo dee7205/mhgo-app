@@ -187,8 +187,8 @@ class _SurveyListViewState extends ConsumerState<SurveyListView> {
             items: const [
               DropdownMenuItem(value: null, child: Text('All Status')),
               DropdownMenuItem(
-                value: 'Pending Survey',
-                child: Text('Pending Survey'),
+                value: 'Surveyed',
+                child: Text('Surveyed'),
               ),
               DropdownMenuItem(value: 'Quoted', child: Text('Quoted')),
               DropdownMenuItem(
@@ -335,7 +335,7 @@ class _SurveyCard extends StatelessWidget {
       case 'Approved':
       case 'Converted':
         return Colors.green;
-      case 'Pending Survey':
+      case 'Surveyed':
       case 'Quoted':
       case 'Waiting Client':
         return Colors.orange;

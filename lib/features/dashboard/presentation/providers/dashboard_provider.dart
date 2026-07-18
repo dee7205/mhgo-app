@@ -58,16 +58,18 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
     final planningProjectsCount = planningProjects.length;
     final totalProjectsCount = projects.length;
 
-    // 2. Capacity KPIs
-    double totalCapacityMw = 0.0;
+    // 2. Capacity KPIs — preserve stored unit, no conversions
+    final Map<String, double> capacityByUnit = {};
+    double accumulatedTotalCost = 0.0;
     for (final p in projects) {
-      double mwValue = p.capacityMw;
-      if (p.capacityUnit == 'kWp') {
-        mwValue = p.capacityMw / 1000;
-      } else if (p.capacityUnit == 'Wp') {
-        mwValue = p.capacityMw / 1000000;
-      }
-      totalCapacityMw += mwValue;
+      if (p.status == 'on_hold') continue;
+      // Capacity: sum per unit
+      final double cap = (p.capacity.isNaN || p.capacity.isInfinite) ? 0.0 : p.capacity;
+      final String unit = (p.capacityUnit ?? 'kWp').isEmpty ? 'kWp' : p.capacityUnit!;
+      capacityByUnit[unit] = (capacityByUnit[unit] ?? 0.0) + cap;
+      // Total cost: sum all non-on_hold projects
+      final double cost = (p.totalCost.isNaN || p.totalCost.isInfinite) ? 0.0 : p.totalCost;
+      accumulatedTotalCost += cost;
     }
 
     // 3. Progress KPI
@@ -103,7 +105,8 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
       totalProjectsCount: totalProjectsCount,
       activeProjectsCount: activeProjectsCount,
       planningProjectsCount: planningProjectsCount,
-      totalCapacityMw: totalCapacityMw,
+      capacityByUnit: capacityByUnit,
+      accumulatedTotalCost: accumulatedTotalCost,
       overallProgress: overallProgress,
       projectsByStage: projectsByStage,
       recentDarCount: recentDarCount,
