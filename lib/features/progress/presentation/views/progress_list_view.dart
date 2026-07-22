@@ -37,7 +37,8 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(progressNotifierProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(progressNotifierProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -45,7 +46,10 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
         heroTag: 'progress-list-fab',
         onPressed: () => _showCreateProgressDialog(context),
         icon: const Icon(Icons.add),
-        label: const Text('Track New Project', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          'Track New Project',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
       ),
@@ -60,15 +64,31 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
           // Deduplicate reports by projectUuid
           final Map<String, ProgressReport> uniqueReports = {};
           for (final report in reports) {
-            if (!uniqueReports.containsKey(report.projectUuid) || report.updatedAt.isAfter(uniqueReports[report.projectUuid]!.updatedAt)) {
+            if (!uniqueReports.containsKey(report.projectUuid) ||
+                report.updatedAt.isAfter(
+                  uniqueReports[report.projectUuid]!.updatedAt,
+                )) {
               uniqueReports[report.projectUuid] = report;
             }
           }
           final deduplicatedReports = uniqueReports.values.toList();
 
           int totalProjects = deduplicatedReports.length;
-          double totalProgress = deduplicatedReports.isEmpty ? 0.0 : deduplicatedReports.fold(0.0, (sum, r) => sum + (r.overallProgress.isNaN || r.overallProgress.isInfinite ? 0.0 : r.overallProgress)) / deduplicatedReports.length;
-          int autoCalculated = deduplicatedReports.where((r) => r.isAutoCalculated).length;
+          double totalProgress = deduplicatedReports.isEmpty
+              ? 0.0
+              : deduplicatedReports.fold(
+                      0.0,
+                      (sum, r) =>
+                          sum +
+                          (r.overallProgress.isNaN ||
+                                  r.overallProgress.isInfinite
+                              ? 0.0
+                              : r.overallProgress),
+                    ) /
+                    deduplicatedReports.length;
+          int autoCalculated = deduplicatedReports
+              .where((r) => r.isAutoCalculated)
+              .length;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,7 +110,9 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
                       const SizedBox(height: 24),
                       Text(
                         'Projects',
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       if (deduplicatedReports.isEmpty)
@@ -112,7 +134,9 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
 
                             if (crossAxisCount == 1) {
                               return Column(
-                                children: deduplicatedReports.map((r) => _ProjectCard(report: r)).toList(),
+                                children: deduplicatedReports
+                                    .map((r) => _ProjectCard(report: r))
+                                    .toList(),
                               );
                             }
 
@@ -121,7 +145,10 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
                               runSpacing: 16,
                               children: deduplicatedReports.map((r) {
                                 return SizedBox(
-                                  width: (constraints.maxWidth - (16 * (crossAxisCount - 1))) / crossAxisCount,
+                                  width:
+                                      (constraints.maxWidth -
+                                          (16 * (crossAxisCount - 1))) /
+                                      crossAxisCount,
                                   child: _ProjectCard(report: r),
                                 );
                               }).toList(),
@@ -144,7 +171,9 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
-        border: Border(bottom: BorderSide(color: isDark ? Colors.white12 : Colors.black12)),
+        border: Border(
+          bottom: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+        ),
       ),
       child: Wrap(
         spacing: 16,
@@ -159,9 +188,12 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
                 hintText: 'Search projects...',
                 prefixIcon: const Icon(Icons.search),
                 isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              onChanged: (val) => ref.read(progressSearchQueryProvider.notifier).update(val),
+              onChanged: (val) =>
+                  ref.read(progressSearchQueryProvider.notifier).update(val),
             ),
           ),
         ],
@@ -184,7 +216,8 @@ class _ProgressListViewState extends ConsumerState<ProgressListView> {
           children: [
             _KpiCard(
               title: 'Avg Overall Progress',
-              value: '${(totalProgress.isNaN || totalProgress.isInfinite ? 0.0 : totalProgress).toStringAsFixed(1)}%',
+              value:
+                  '${(totalProgress.isNaN || totalProgress.isInfinite ? 0.0 : totalProgress).toStringAsFixed(1)}%',
               icon: Icons.pie_chart,
               color: Colors.blue,
               width: _getKpiWidth(constraints.maxWidth),
@@ -320,7 +353,9 @@ class _ProjectCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       report.projectName,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -332,12 +367,22 @@ class _ProjectCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Overall Progress', style: theme.textTheme.bodySmall),
-                  Text('${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0.0 : report.overallProgress).toStringAsFixed(1)}%', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    '${(report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0.0 : report.overallProgress).toStringAsFixed(1)}%',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
-                value: (report.overallProgress.isNaN || report.overallProgress.isInfinite ? 0.0 : report.overallProgress) / 100,
+                value:
+                    (report.overallProgress.isNaN ||
+                            report.overallProgress.isInfinite
+                        ? 0.0
+                        : report.overallProgress) /
+                    100,
                 backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
                 color: theme.colorScheme.primary,
                 minHeight: 6,
@@ -355,7 +400,9 @@ class _ProjectCard extends StatelessWidget {
                   const Spacer(),
                   Text(
                     'Updated: ${DateFormat('MMM dd, yyyy').format(report.updatedAt)}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
@@ -385,7 +432,11 @@ class _AutoCalcChip extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -395,7 +446,8 @@ class _CreateProgressDialog extends ConsumerStatefulWidget {
   const _CreateProgressDialog();
 
   @override
-  ConsumerState<_CreateProgressDialog> createState() => _CreateProgressDialogState();
+  ConsumerState<_CreateProgressDialog> createState() =>
+      _CreateProgressDialogState();
 }
 
 class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
@@ -411,11 +463,17 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
     return AlertDialog(
       title: const Text('Track New Project Progress'),
       content: projectsAsync.when(
-        loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+        loading: () => const SizedBox(
+          height: 100,
+          child: Center(child: CircularProgressIndicator()),
+        ),
         error: (err, _) => Text('Error loading projects: $err'),
         data: (projects) {
-          final existingUuids = progressState.value?.map((r) => r.projectUuid).toSet() ?? {};
-          final availableProjects = projects.where((p) => !existingUuids.contains(p.uuid)).toList();
+          final existingUuids =
+              progressState.value?.map((r) => r.projectUuid).toSet() ?? {};
+          final availableProjects = projects
+              .where((p) => !existingUuids.contains(p.uuid))
+              .toList();
 
           if (availableProjects.isEmpty) {
             return const Text('All active projects are already being tracked.');
@@ -445,7 +503,9 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
                   onChanged: (val) {
                     setState(() {
                       _selectedProjectUuid = val;
-                      _selectedProjectName = availableProjects.firstWhere((p) => p.uuid == val).name;
+                      _selectedProjectName = availableProjects
+                          .firstWhere((p) => p.uuid == val)
+                          .name;
                     });
                   },
                 ),
@@ -462,7 +522,11 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
         if (_isLoading)
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           )
         else
           ElevatedButton(
@@ -475,7 +539,7 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
 
   Future<void> _createReport() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final newReport = ProgressReport(
         uuid: 'PRG-${DateTime.now().millisecondsSinceEpoch}',
@@ -490,13 +554,15 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
       );
 
       await ref.read(progressNotifierProvider.notifier).saveReport(newReport);
-      
+
       if (mounted) {
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
         setState(() => _isLoading = false);
       }
     }

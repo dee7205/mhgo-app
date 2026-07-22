@@ -6,9 +6,10 @@ import 'package:mhgo/features/survey/presentation/providers/survey_provider.dart
 import 'package:mhgo/features/materials/presentation/providers/materials_provider.dart';
 import 'package:mhgo/features/progress/presentation/providers/progress_provider.dart';
 
-final dashboardStateProvider = AsyncNotifierProvider<DashboardNotifier, DashboardOverview>(() {
-  return DashboardNotifier();
-});
+final dashboardStateProvider =
+    AsyncNotifierProvider<DashboardNotifier, DashboardOverview>(() {
+      return DashboardNotifier();
+    });
 
 class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
   @override
@@ -30,7 +31,7 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
       // Validate and prevent recurrence: Catch Isar serialization errors and return empty list
       projects = [];
     }
-    
+
     try {
       dars = await ref.watch(darsListProvider.future);
     } catch (e) {
@@ -51,9 +52,19 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
 
     // 1. Projects KPIs
     // Assuming 'construction', 'om', 'commissioning' are active statuses
-    final activeProjects = projects.where((p) => p.status == 'active' || p.status == 'construction' || p.status == 'om' || p.status == 'commissioning').toList();
-    final planningProjects = projects.where((p) => p.status == 'planning').toList();
-    
+    final activeProjects = projects
+        .where(
+          (p) =>
+              p.status == 'active' ||
+              p.status == 'construction' ||
+              p.status == 'om' ||
+              p.status == 'commissioning',
+        )
+        .toList();
+    final planningProjects = projects
+        .where((p) => p.status == 'planning')
+        .toList();
+
     final activeProjectsCount = activeProjects.length;
     final planningProjectsCount = planningProjects.length;
     final totalProjectsCount = projects.length;
@@ -64,11 +75,17 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
     for (final p in projects) {
       if (p.status == 'on_hold') continue;
       // Capacity: sum per unit
-      final double cap = (p.capacity.isNaN || p.capacity.isInfinite) ? 0.0 : p.capacity;
-      final String unit = (p.capacityUnit ?? 'kWp').isEmpty ? 'kWp' : p.capacityUnit!;
+      final double cap = (p.capacity.isNaN || p.capacity.isInfinite)
+          ? 0.0
+          : p.capacity;
+      final String unit = (p.capacityUnit ?? 'kWp').isEmpty
+          ? 'kWp'
+          : p.capacityUnit!;
       capacityByUnit[unit] = (capacityByUnit[unit] ?? 0.0) + cap;
       // Total cost: sum all non-on_hold projects
-      final double cost = (p.totalCost.isNaN || p.totalCost.isInfinite) ? 0.0 : p.totalCost;
+      final double cost = (p.totalCost.isNaN || p.totalCost.isInfinite)
+          ? 0.0
+          : p.totalCost;
       accumulatedTotalCost += cost;
     }
 
@@ -83,14 +100,24 @@ class DashboardNotifier extends AsyncNotifier<DashboardOverview> {
     }
 
     // 4. Logistics KPIs
-    final lowStockMaterials = materials.where((m) => m.currentStock <= m.minimumStock).toList();
-    
+    final lowStockMaterials = materials
+        .where((m) => m.currentStock <= m.minimumStock)
+        .toList();
+
     // 5. DAR KPIs
-    final recentDars = List.of(dars)..sort((a, b) => b.reportDate.compareTo(a.reportDate));
-    final recentDarCount = recentDars.where((dar) => dar.reportDate.isAfter(DateTime.now().subtract(const Duration(days: 7)))).length;
+    final recentDars = List.of(dars)
+      ..sort((a, b) => b.reportDate.compareTo(a.reportDate));
+    final recentDarCount = recentDars
+        .where(
+          (dar) => dar.reportDate.isAfter(
+            DateTime.now().subtract(const Duration(days: 7)),
+          ),
+        )
+        .length;
 
     // 6. Recent Inspections (Survey)
-    final recentSurveys = List.of(surveys)..sort((a, b) => b.surveyDate.compareTo(a.surveyDate));
+    final recentSurveys = List.of(surveys)
+      ..sort((a, b) => b.surveyDate.compareTo(a.surveyDate));
     final recentInspections = recentSurveys.take(5).toList();
 
     // 6. Stage distribution

@@ -37,7 +37,10 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
         .filter()
         .materialUuidEqualTo(materialUuid)
         .findAll();
-    return requirements.fold<double>(0.0, (sum, req) => sum + req.allocatedQuantity);
+    return requirements.fold<double>(
+      0.0,
+      (sum, req) => sum + req.allocatedQuantity,
+    );
   }
 
   @override
@@ -64,7 +67,7 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
     if (existing != null) {
       await isar.writeTxn(() async {
         await isar.materialModels.delete(existing.id);
-        
+
         // Cascading delete requirements linked to this material
         final requirements = await isar.projectMaterialRequirementModels
             .filter()
@@ -129,7 +132,9 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
 
   @override
   Future<void> forceResetAllRequirementsToZero() async {
-    final requirements = await isar.projectMaterialRequirementModels.where().findAll();
+    final requirements = await isar.projectMaterialRequirementModels
+        .where()
+        .findAll();
     await isar.writeTxn(() async {
       for (var req in requirements) {
         req.requiredQuantity = 0.0;
@@ -172,7 +177,9 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
       ..isSynced = false;
   }
 
-  ProjectMaterialRequirementEntity _mapReqToEntity(ProjectMaterialRequirementModel m) {
+  ProjectMaterialRequirementEntity _mapReqToEntity(
+    ProjectMaterialRequirementModel m,
+  ) {
     return ProjectMaterialRequirementEntity(
       uuid: m.uuid,
       projectUuid: m.projectUuid,
@@ -185,7 +192,9 @@ class MaterialsRepositoryImpl implements MaterialsRepository {
     );
   }
 
-  ProjectMaterialRequirementModel _mapReqToModel(ProjectMaterialRequirementEntity e) {
+  ProjectMaterialRequirementModel _mapReqToModel(
+    ProjectMaterialRequirementEntity e,
+  ) {
     return ProjectMaterialRequirementModel()
       ..uuid = e.uuid
       ..projectUuid = e.projectUuid

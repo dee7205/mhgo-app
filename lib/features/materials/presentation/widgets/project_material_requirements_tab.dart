@@ -149,21 +149,27 @@ class ProjectMaterialRequirementsTab extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ProjectMaterialRequirementsTab> createState() => _ProjectMaterialRequirementsTabState();
+  ConsumerState<ProjectMaterialRequirementsTab> createState() =>
+      _ProjectMaterialRequirementsTabState();
 }
 
-class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterialRequirementsTab> {
+class _ProjectMaterialRequirementsTabState
+    extends ConsumerState<ProjectMaterialRequirementsTab> {
   bool _isSeeding = false;
-  
-  bool get isOngrid => widget.projectType.toLowerCase().contains('on-grid') || widget.projectType.toLowerCase().contains('ongrid');
+
+  bool get isOngrid =>
+      widget.projectType.toLowerCase().contains('on-grid') ||
+      widget.projectType.toLowerCase().contains('ongrid');
 
   Future<void> _seedDefaults() async {
     setState(() => _isSeeding = true);
 
     final defaultBom = isOngrid ? onGridBom : hybridBom;
-    
-    final existingReqs = await ref.read(materialsRepositoryProvider).getRequirementsForProject(widget.projectUuid);
-    
+
+    final existingReqs = await ref
+        .read(materialsRepositoryProvider)
+        .getRequirementsForProject(widget.projectUuid);
+
     // Gather all valid material names for the current project type
     final validNames = <String>{};
     for (final items in defaultBom.values) {
@@ -199,7 +205,7 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
         }
       }
     }
-    
+
     // Also invalidate the cache so UI updates
     ref.invalidate(projectMaterialRequirementsProvider(widget.projectUuid));
     setState(() => _isSeeding = false);
@@ -212,7 +218,7 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
       _checkAndSeed();
     });
   }
-  
+
   Future<void> _checkAndSeed() async {
     await _seedDefaults();
   }
@@ -220,7 +226,9 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final requirementsAsync = ref.watch(projectMaterialRequirementsProvider(widget.projectUuid));
+    final requirementsAsync = ref.watch(
+      projectMaterialRequirementsProvider(widget.projectUuid),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,8 +239,10 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Material Requirements', 
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+                'Material Requirements',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               TextButton.icon(
@@ -243,21 +253,37 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   alignment: Alignment.centerLeft,
                 ),
                 icon: const Icon(Icons.refresh, color: Colors.red, size: 18),
-                label: const Text('Reset All to 0', style: TextStyle(color: Colors.red, fontSize: 13)),
+                label: const Text(
+                  'Reset All to 0',
+                  style: TextStyle(color: Colors.red, fontSize: 13),
+                ),
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: const Text('Reset BOM?'),
-                      content: const Text('This will set Qty and Allocated to 0 for ALL projects.'),
+                      content: const Text(
+                        'This will set Qty and Allocated to 0 for ALL projects.',
+                      ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reset', style: TextStyle(color: Colors.red))),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text(
+                            'Reset',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
                       ],
                     ),
                   );
                   if (confirm == true) {
-                    await ref.read(materialsRepositoryProvider).forceResetAllRequirementsToZero();
+                    await ref
+                        .read(materialsRepositoryProvider)
+                        .forceResetAllRequirementsToZero();
                     ref.invalidate(projectMaterialRequirementsProvider);
                   }
                 },
@@ -278,7 +304,10 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('No material requirements assigned.', style: theme.textTheme.bodyMedium),
+                      Text(
+                        'No material requirements assigned.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       const SizedBox(height: 16),
                       AppButton(
                         text: 'Load BOM Template',
@@ -293,13 +322,17 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
               }
 
               // Group requirements by section
-              final Map<String, List<ProjectMaterialRequirementEntity>> groupedReqs = {};
+              final Map<String, List<ProjectMaterialRequirementEntity>>
+              groupedReqs = {};
               final defaultBom = isOngrid ? onGridBom : hybridBom;
-              
+
               for (final req in requirements) {
                 String foundSection = 'Other Materials';
                 for (final section in bomSections) {
-                  if (defaultBom[section]?.any((item) => item.$1 == req.materialUuid) ?? false) {
+                  if (defaultBom[section]?.any(
+                        (item) => item.$1 == req.materialUuid,
+                      ) ??
+                      false) {
                     foundSection = section;
                     break;
                   }
@@ -308,13 +341,19 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 32.0),
-                itemCount: bomSections.length + (groupedReqs.containsKey('Other Materials') ? 1 : 0),
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  bottom: 32.0,
+                ),
+                itemCount:
+                    bomSections.length +
+                    (groupedReqs.containsKey('Other Materials') ? 1 : 0),
                 itemBuilder: (context, index) {
-                  final sectionName = index < bomSections.length 
-                      ? bomSections[index] 
+                  final sectionName = index < bomSections.length
+                      ? bomSections[index]
                       : 'Other Materials';
-                      
+
                   final sectionReqs = groupedReqs[sectionName] ?? [];
                   if (sectionReqs.isEmpty) return const SizedBox.shrink();
 
@@ -355,7 +394,10 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
     );
   }
 
-  Widget _buildMaterialRow(BuildContext context, ProjectMaterialRequirementEntity req) {
+  Widget _buildMaterialRow(
+    BuildContext context,
+    ProjectMaterialRequirementEntity req,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -367,7 +409,10 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
               children: [
                 Text(
                   req.customName ?? req.materialUuid,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Wrap(
@@ -375,7 +420,13 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Text('Qty: ${req.requiredQuantity} ${req.unit}', style: const TextStyle(fontSize: 13, color: Colors.white24)),
+                    Text(
+                      'Qty: ${req.requiredQuantity} ${req.unit}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.white24,
+                      ),
+                    ),
                     _buildStatusChip(req.status),
                   ],
                 ),
@@ -394,13 +445,25 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status) {
-      case 'Requested': color = Colors.orange; break;
-      case 'Ordered': color = Colors.blue; break;
-      case 'Delivered': color = Colors.purple; break;
-      case 'Installed': color = Colors.green; break;
-      case 'Cancelled': color = Colors.red; break;
+      case 'Requested':
+        color = Colors.orange;
+        break;
+      case 'Ordered':
+        color = Colors.blue;
+        break;
+      case 'Delivered':
+        color = Colors.purple;
+        break;
+      case 'Installed':
+        color = Colors.green;
+        break;
+      case 'Cancelled':
+        color = Colors.red;
+        break;
       case 'Pending':
-      default: color = Colors.grey; break;
+      default:
+        color = Colors.grey;
+        break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -410,19 +473,24 @@ class _ProjectMaterialRequirementsTabState extends ConsumerState<ProjectMaterial
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        status, 
-        style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)
+        status,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  void _showEditRequirementDialog(BuildContext context, ProjectMaterialRequirementEntity req) {
+  void _showEditRequirementDialog(
+    BuildContext context,
+    ProjectMaterialRequirementEntity req,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => _EditRequirementDialog(
-        projectUuid: widget.projectUuid,
-        req: req,
-      ),
+      builder: (context) =>
+          _EditRequirementDialog(projectUuid: widget.projectUuid, req: req),
     );
   }
 }
@@ -431,16 +499,15 @@ class _EditRequirementDialog extends ConsumerStatefulWidget {
   final String projectUuid;
   final ProjectMaterialRequirementEntity req;
 
-  const _EditRequirementDialog({
-    required this.projectUuid,
-    required this.req,
-  });
+  const _EditRequirementDialog({required this.projectUuid, required this.req});
 
   @override
-  ConsumerState<_EditRequirementDialog> createState() => _EditRequirementDialogState();
+  ConsumerState<_EditRequirementDialog> createState() =>
+      _EditRequirementDialogState();
 }
 
-class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> {
+class _EditRequirementDialogState
+    extends ConsumerState<_EditRequirementDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _qtyController;
   late TextEditingController _nameController;
@@ -452,13 +519,28 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
   @override
   void initState() {
     super.initState();
-    final validStatuses = ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled'];
-    _status = validStatuses.contains(widget.req.status) ? widget.req.status : 'Pending';
-    
+    final validStatuses = [
+      'Pending',
+      'Requested',
+      'Ordered',
+      'Delivered',
+      'Installed',
+      'Cancelled',
+    ];
+    _status = validStatuses.contains(widget.req.status)
+        ? widget.req.status
+        : 'Pending';
+
     // Strip trailing .0 if integer
     final qty = widget.req.requiredQuantity;
-    _qtyController = TextEditingController(text: qty == qty.truncateToDouble() ? qty.toInt().toString() : qty.toString());
-    _nameController = TextEditingController(text: widget.req.customName ?? widget.req.materialUuid);
+    _qtyController = TextEditingController(
+      text: qty == qty.truncateToDouble()
+          ? qty.toInt().toString()
+          : qty.toString(),
+    );
+    _nameController = TextEditingController(
+      text: widget.req.customName ?? widget.req.materialUuid,
+    );
     _unitController = TextEditingController(text: widget.req.unit);
 
     _qtyFocus.addListener(() {
@@ -494,24 +576,67 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Material Name', border: OutlineInputBorder()),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Material Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _unitController,
-                  decoration: const InputDecoration(labelText: 'Unit', border: OutlineInputBorder()),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Unit',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled'].contains(_status) ? _status : null,
+                  value:
+                      [
+                        'Pending',
+                        'Requested',
+                        'Ordered',
+                        'Delivered',
+                        'Installed',
+                        'Cancelled',
+                      ].contains(_status)
+                      ? _status
+                      : null,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-                  items: ['Pending', 'Requested', 'Ordered', 'Delivered', 'Installed', 'Cancelled']
-                      .toSet()
-                      .map((s) => DropdownMenuItem<String>(value: s, child: Row(children: [Expanded(child: Text(s, overflow: TextOverflow.ellipsis))]),))
-                      .toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(),
+                  ),
+                  items:
+                      [
+                            'Pending',
+                            'Requested',
+                            'Ordered',
+                            'Delivered',
+                            'Installed',
+                            'Cancelled',
+                          ]
+                          .toSet()
+                          .map(
+                            (s) => DropdownMenuItem<String>(
+                              value: s,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      s,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
                   onChanged: (val) {
                     if (val != null) setState(() => _status = val);
                   },
@@ -521,10 +646,12 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
                   controller: _qtyController,
                   focusNode: _qtyFocus,
                   decoration: const InputDecoration(
-                    labelText: 'Quantity', 
+                    labelText: 'Quantity',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Required';
                     if (double.tryParse(val) == null) return 'Must be a number';
@@ -537,7 +664,10 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
@@ -550,9 +680,13 @@ class _EditRequirementDialogState extends ConsumerState<_EditRequirementDialog> 
                 allocatedQuantity: widget.req.allocatedQuantity,
                 unit: _unitController.text.trim(),
                 status: _status,
-                customName: customName == widget.req.materialUuid ? null : customName,
+                customName: customName == widget.req.materialUuid
+                    ? null
+                    : customName,
               );
-              ref.read(materialsNotifierProvider.notifier).saveRequirement(updatedReq);
+              ref
+                  .read(materialsNotifierProvider.notifier)
+                  .saveRequirement(updatedReq);
               Navigator.pop(context);
             }
           },

@@ -29,7 +29,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final projectsAsync = ref.watch(projectsListProvider);
     final searchQuery = ref.watch(projectsSearchQueryProvider);
     final filterStatus = ref.watch(projectsFilterStatusProvider);
@@ -48,7 +48,9 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
+            icon: Icon(
+              isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            ),
             tooltip: isGridView ? 'Switch to List View' : 'Switch to Grid View',
             onPressed: () {
               ref.read(projectsGridViewProvider.notifier).toggle();
@@ -87,12 +89,18 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
               if (filterStatus != null) {
                 if (filterStatus == 'active') {
                   // Active means planning, construction, or commissioning
-                  filtered = filtered.where((p) => 
-                      p.status == 'planning' || 
-                      p.status == 'construction' || 
-                      p.status == 'commissioning').toList();
+                  filtered = filtered
+                      .where(
+                        (p) =>
+                            p.status == 'planning' ||
+                            p.status == 'construction' ||
+                            p.status == 'commissioning',
+                      )
+                      .toList();
                 } else {
-                  filtered = filtered.where((p) => p.status == filterStatus).toList();
+                  filtered = filtered
+                      .where((p) => p.status == filterStatus)
+                      .toList();
                 }
               }
 
@@ -136,14 +144,15 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 8.0,
+                      ),
                       sliver: isGridView
                           ? _buildProjectsGrid(filtered, theme, isDark)
                           : _buildProjectsList(filtered, theme, isDark),
                     ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 48),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 48)),
                 ],
               );
             },
@@ -179,14 +188,21 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
                 : null,
             filled: true,
             fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+              borderSide: BorderSide(
+                color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+              borderSide: BorderSide(
+                color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+              ),
             ),
           ),
         );
@@ -197,24 +213,49 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
           decoration: BoxDecoration(
             color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+            border: Border.all(
+              color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+            ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: sortBy,
               isExpanded: true,
               icon: const Icon(Icons.sort_rounded, size: 18),
-              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               onChanged: (val) {
                 if (val != null) {
                   ref.read(projectsSortProvider.notifier).set(val);
                 }
               },
               items: const [
-                DropdownMenuItem(value: 'name', child: Text('Sort by Name', overflow: TextOverflow.ellipsis)),
-                DropdownMenuItem(value: 'progress', child: Text('Sort by Progress', overflow: TextOverflow.ellipsis)),
-                DropdownMenuItem(value: 'capacity', child: Text('Sort by Capacity', overflow: TextOverflow.ellipsis)),
-                DropdownMenuItem(value: 'completion', child: Text('Sort by Completion', overflow: TextOverflow.ellipsis)),
+                DropdownMenuItem(
+                  value: 'name',
+                  child: Text('Sort by Name', overflow: TextOverflow.ellipsis),
+                ),
+                DropdownMenuItem(
+                  value: 'progress',
+                  child: Text(
+                    'Sort by Progress',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'capacity',
+                  child: Text(
+                    'Sort by Capacity',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'completion',
+                  child: Text(
+                    'Sort by Completion',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
@@ -223,11 +264,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
         if (useVerticalLayout) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              searchField,
-              const SizedBox(height: 12),
-              sortDropdown,
-            ],
+            children: [searchField, const SizedBox(height: 12), sortDropdown],
           );
         }
 
@@ -245,7 +282,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
   // --- FILTER CHIPS ROW ---
   Widget _buildFilterChipsRow(ThemeData theme, bool isDark) {
     final activeFilter = ref.watch(projectsFilterStatusProvider);
-    
+
     final filters = [
       {'label': 'All Projects', 'value': null},
       {'label': 'Active Sites', 'value': 'active'},
@@ -266,21 +303,27 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
               label: Text(filter['label'] as String),
               selected: isSelected,
               onSelected: (_) {
-                ref.read(projectsFilterStatusProvider.notifier).set(filter['value'] as String?);
+                ref
+                    .read(projectsFilterStatusProvider.notifier)
+                    .set(filter['value'] as String?);
               },
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected 
-                    ? Colors.white 
-                    : (isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary),
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.lightTextSecondary),
               ),
               selectedColor: theme.colorScheme.primary,
-              backgroundColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
+              backgroundColor: isDark
+                  ? AppTheme.darkSurface
+                  : AppTheme.lightSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
                 side: BorderSide(
-                  color: isSelected 
-                      ? theme.colorScheme.primary 
+                  color: isSelected
+                      ? theme.colorScheme.primary
                       : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
                 ),
               ),
@@ -292,7 +335,11 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
   }
 
   // --- PROJECTS GRID MODE ---
-  Widget _buildProjectsGrid(List<ProjectModel> projects, ThemeData theme, bool isDark) {
+  Widget _buildProjectsGrid(
+    List<ProjectModel> projects,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 420,
@@ -300,29 +347,31 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
         crossAxisSpacing: 24,
         mainAxisExtent: 280, // Consistent fixed height for Project cards
       ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final project = projects[index];
-          return _ProjectGridCard(project: project, theme: theme, isDark: isDark);
-        },
-        childCount: projects.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final project = projects[index];
+        return _ProjectGridCard(project: project, theme: theme, isDark: isDark);
+      }, childCount: projects.length),
     );
   }
 
   // --- PROJECTS LIST MODE ---
-  Widget _buildProjectsList(List<ProjectModel> projects, ThemeData theme, bool isDark) {
+  Widget _buildProjectsList(
+    List<ProjectModel> projects,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final project = projects[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _ProjectListCard(project: project, theme: theme, isDark: isDark),
-          );
-        },
-        childCount: projects.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final project = projects[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: _ProjectListCard(
+            project: project,
+            theme: theme,
+            isDark: isDark,
+          ),
+        );
+      }, childCount: projects.length),
     );
   }
 
@@ -339,7 +388,10 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
         children: [
           const Icon(Icons.error_outline, size: 56, color: Color(0xFFD32F2F)),
           const SizedBox(height: 16),
-          Text('Failed to load projects', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Failed to load projects',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
@@ -358,9 +410,16 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 56, color: Theme.of(context).disabledColor),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 56,
+            color: Theme.of(context).disabledColor,
+          ),
           const SizedBox(height: 16),
-          Text('No projects matched your filters', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'No projects matched your filters',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           const Text('Try adjusting your search criteria or filter status.'),
         ],
@@ -410,7 +469,10 @@ class _ProjectGridCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -429,7 +491,9 @@ class _ProjectGridCard extends StatelessWidget {
                   Icon(
                     project.type == 'Rooftop'
                         ? Icons.storefront_outlined
-                        : (project.type == 'Floating' ? Icons.tsunami_outlined : Icons.landscape_outlined),
+                        : (project.type == 'Floating'
+                              ? Icons.tsunami_outlined
+                              : Icons.landscape_outlined),
                     size: 16,
                     color: theme.colorScheme.primary,
                   ),
@@ -461,7 +525,9 @@ class _ProjectGridCard extends StatelessWidget {
           Text(
             'Client: ${project.client ?? 'MHG Internals'}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.lightTextSecondary,
             ),
           ),
           const Spacer(),
@@ -469,12 +535,21 @@ class _ProjectGridCard extends StatelessWidget {
           // Details grid
           _buildDetailRow(Icons.pin_drop_outlined, project.location),
           const SizedBox(height: 8),
-          _buildDetailRow(Icons.flash_on_outlined, '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} Capacity'),
+          _buildDetailRow(
+            Icons.flash_on_outlined,
+            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} Capacity',
+          ),
           const SizedBox(height: 8),
-          _buildDetailRow(Icons.calendar_month_outlined, '$formattedStart - $formattedEnd'),
+          _buildDetailRow(
+            Icons.calendar_month_outlined,
+            '$formattedStart - $formattedEnd',
+          ),
           const SizedBox(height: 8),
-          _buildDetailRow(Icons.engineering_outlined, 'Lead: ${project.supervisor ?? "N/A"}'),
-          
+          _buildDetailRow(
+            Icons.engineering_outlined,
+            'Lead: ${project.supervisor ?? "N/A"}',
+          ),
+
           const Spacer(),
 
           // Progress section
@@ -484,7 +559,9 @@ class _ProjectGridCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Overall Stage: ${project.stage}',
-                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -501,7 +578,11 @@ class _ProjectGridCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: LinearProgressIndicator(
-              value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
+              value:
+                  (project.progress.isNaN || project.progress.isInfinite
+                      ? 0.0
+                      : project.progress) /
+                  100.0,
               minHeight: 6.0,
               backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
             ),
@@ -576,7 +657,10 @@ class _ProjectListCard extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -594,7 +678,9 @@ class _ProjectListCard extends StatelessWidget {
                   Text(
                     'Client: ${project.client ?? 'MHG Internals'}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.lightTextSecondary,
                     ),
                   ),
                 ],
@@ -607,9 +693,18 @@ class _ProjectListCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               _buildDetailItem(Icons.pin_drop_outlined, project.location),
-              _buildDetailItem(Icons.flash_on_outlined, '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}'),
-              _buildDetailItem(Icons.calendar_month_outlined, '$formattedStart - $formattedEnd'),
-              _buildDetailItem(Icons.engineering_outlined, project.supervisor ?? 'N/A'),
+              _buildDetailItem(
+                Icons.flash_on_outlined,
+                '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}',
+              ),
+              _buildDetailItem(
+                Icons.calendar_month_outlined,
+                '$formattedStart - $formattedEnd',
+              ),
+              _buildDetailItem(
+                Icons.engineering_outlined,
+                project.supervisor ?? 'N/A',
+              ),
             ],
           );
 
@@ -623,7 +718,9 @@ class _ProjectListCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       project.stage ?? 'Planning',
-                      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -643,7 +740,11 @@ class _ProjectListCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
-                    value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
+                    value:
+                        (project.progress.isNaN || project.progress.isInfinite
+                            ? 0.0
+                            : project.progress) /
+                        100.0,
                     minHeight: 5.0,
                     backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                   ),
@@ -668,7 +769,9 @@ class _ProjectListCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Stage: ${project.stage}',
-                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

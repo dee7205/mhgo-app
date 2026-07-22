@@ -22,28 +22,42 @@ class GetDashboardOverview {
 
     // 1. Calculate project counts
     final totalProjectsCount = projects.length;
-    final activeProjectsCount = projects.where((p) => p.status == 'construction').length;
-    final planningProjectsCount = projects.where((p) => p.status == 'planning').length;
+    final activeProjectsCount = projects
+        .where((p) => p.status == 'construction')
+        .length;
+    final planningProjectsCount = projects
+        .where((p) => p.status == 'planning')
+        .length;
 
     // 2. Capacity — preserve stored unit, no conversions
     final Map<String, double> capacityByUnit = {};
     double accumulatedTotalCost = 0.0;
     for (final p in projects) {
       if (p.status == 'on_hold') continue;
-      final double cap = (p.capacity.isNaN || p.capacity.isInfinite) ? 0.0 : p.capacity;
-      final String unit = (p.capacityUnit ?? 'kWp').isEmpty ? 'kWp' : p.capacityUnit!;
+      final double cap = (p.capacity.isNaN || p.capacity.isInfinite)
+          ? 0.0
+          : p.capacity;
+      final String unit = (p.capacityUnit ?? 'kWp').isEmpty
+          ? 'kWp'
+          : p.capacityUnit!;
       capacityByUnit[unit] = (capacityByUnit[unit] ?? 0.0) + cap;
-      final double cost = (p.totalCost.isNaN || p.totalCost.isInfinite) ? 0.0 : p.totalCost;
+      final double cost = (p.totalCost.isNaN || p.totalCost.isInfinite)
+          ? 0.0
+          : p.totalCost;
       accumulatedTotalCost += cost;
     }
 
     // 3. Compute overall progress average (weighted or simple average across active/construction projects)
     double overallProgress = 0.0;
-    final activeOrComp = projects.where((p) => p.status == 'construction' || p.status == 'completed').toList();
+    final activeOrComp = projects
+        .where((p) => p.status == 'construction' || p.status == 'completed')
+        .toList();
     if (activeOrComp.isNotEmpty) {
       double totalProgressSum = 0.0;
       for (final p in activeOrComp) {
-        totalProgressSum += p.progress.isNaN || p.progress.isInfinite ? 0.0 : p.progress;
+        totalProgressSum += p.progress.isNaN || p.progress.isInfinite
+            ? 0.0
+            : p.progress;
       }
       overallProgress = totalProgressSum / activeOrComp.length;
     }

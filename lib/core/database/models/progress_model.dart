@@ -8,16 +8,16 @@ class ProgressModel {
 
   @Index(unique: true)
   late String uuid;
-  
+
   @Index()
   late String projectUuid;
-  
+
   late String projectName;
   late double overallProgress;
   late bool isAutoCalculated;
-  
+
   late String categoriesJson;
-  
+
   late DateTime createdAt;
   late DateTime updatedAt;
   late bool isSynced;

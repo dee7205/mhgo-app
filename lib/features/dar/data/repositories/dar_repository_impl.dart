@@ -11,7 +11,10 @@ class DarRepositoryImpl implements DarRepository {
 
   @override
   Future<List<DarReport>> getDars() async {
-    final models = await _isar.darModels.where().sortByReportDateDesc().findAll();
+    final models = await _isar.darModels
+        .where()
+        .sortByReportDateDesc()
+        .findAll();
     if (models.isEmpty) {
       // Seed initial mock data on first load
       final seeded = _getSeededReports();
@@ -32,7 +35,10 @@ class DarRepositoryImpl implements DarRepository {
 
   @override
   Future<void> saveDar(DarReport report) async {
-    final existing = await _isar.darModels.filter().uuidEqualTo(report.id).findFirst();
+    final existing = await _isar.darModels
+        .filter()
+        .uuidEqualTo(report.id)
+        .findFirst();
 
     await _isar.writeTxn(() async {
       final model = existing ?? DarModel();
@@ -47,12 +53,24 @@ class DarRepositoryImpl implements DarRepository {
       model.temperature = report.temperature;
       model.windCondition = report.windCondition;
       model.siteCondition = report.siteCondition;
-      model.accomplishmentsJson = json.encode(report.accomplishments.map((a) => a.toJson()).toList());
-      model.manpowerJson = json.encode(report.manpower.map((m) => m.toJson()).toList());
-      model.equipmentJson = json.encode(report.equipment.map((e) => e.toJson()).toList());
-      model.materialsJson = json.encode(report.materials.map((m) => m.toJson()).toList());
-      model.delaysJson = json.encode(report.delays.map((d) => d.toJson()).toList());
-      model.photosJson = json.encode(report.photos.map((p) => p.toJson()).toList());
+      model.accomplishmentsJson = json.encode(
+        report.accomplishments.map((a) => a.toJson()).toList(),
+      );
+      model.manpowerJson = json.encode(
+        report.manpower.map((m) => m.toJson()).toList(),
+      );
+      model.equipmentJson = json.encode(
+        report.equipment.map((e) => e.toJson()).toList(),
+      );
+      model.materialsJson = json.encode(
+        report.materials.map((m) => m.toJson()).toList(),
+      );
+      model.delaysJson = json.encode(
+        report.delays.map((d) => d.toJson()).toList(),
+      );
+      model.photosJson = json.encode(
+        report.photos.map((p) => p.toJson()).toList(),
+      );
       model.signedPrepared = report.signedPrepared;
       model.signedChecked = report.signedChecked;
       model.signedApproved = report.signedApproved;
@@ -89,10 +107,22 @@ class DarRepositoryImpl implements DarRepository {
       temperature: m.temperature,
       windCondition: m.windCondition,
       siteCondition: m.siteCondition,
-      accomplishments: _decodeList(m.accomplishmentsJson, (j) => AccomplishmentItem.fromJson(j)),
-      manpower: _decodeList(m.manpowerJson, (j) => ManpowerAccomplishment.fromJson(j)),
-      equipment: _decodeList(m.equipmentJson, (j) => EquipmentUsage.fromJson(j)),
-      materials: _decodeList(m.materialsJson, (j) => MaterialInstalled.fromJson(j)),
+      accomplishments: _decodeList(
+        m.accomplishmentsJson,
+        (j) => AccomplishmentItem.fromJson(j),
+      ),
+      manpower: _decodeList(
+        m.manpowerJson,
+        (j) => ManpowerAccomplishment.fromJson(j),
+      ),
+      equipment: _decodeList(
+        m.equipmentJson,
+        (j) => EquipmentUsage.fromJson(j),
+      ),
+      materials: _decodeList(
+        m.materialsJson,
+        (j) => MaterialInstalled.fromJson(j),
+      ),
       delays: _decodeList(m.delaysJson, (j) => DelayIssue.fromJson(j)),
       photos: _decodeList(m.photosJson, (j) => DarPhoto.fromJson(j)),
       signedPrepared: m.signedPrepared ?? '',
@@ -103,10 +133,15 @@ class DarRepositoryImpl implements DarRepository {
     );
   }
 
-  List<T> _decodeList<T>(String jsonStr, T Function(Map<String, dynamic>) fromJson) {
+  List<T> _decodeList<T>(
+    String jsonStr,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
     try {
       final List decoded = json.decode(jsonStr) as List;
-      return decoded.map((item) => fromJson(item as Map<String, dynamic>)).toList();
+      return decoded
+          .map((item) => fromJson(item as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       return [];
     }
@@ -128,15 +163,52 @@ class DarRepositoryImpl implements DarRepository {
         windCondition: 'Moderate',
         siteCondition: 'Dry',
         accomplishments: const [
-          AccomplishmentItem(workDescription: 'Ramming of structural piles for Block A3 arrays.', areaLocation: 'Zone A3-East', quantity: 45, unit: 'piles', remarks: 'Target met for the day.'),
-          AccomplishmentItem(workDescription: 'Trenching for DC strings cabling feed.', areaLocation: 'Inverter Station #2', quantity: 120, unit: 'meters', remarks: 'Slight delay due to rocky soil.'),
+          AccomplishmentItem(
+            workDescription: 'Ramming of structural piles for Block A3 arrays.',
+            areaLocation: 'Zone A3-East',
+            quantity: 45,
+            unit: 'piles',
+            remarks: 'Target met for the day.',
+          ),
+          AccomplishmentItem(
+            workDescription: 'Trenching for DC strings cabling feed.',
+            areaLocation: 'Inverter Station #2',
+            quantity: 120,
+            unit: 'meters',
+            remarks: 'Slight delay due to rocky soil.',
+          ),
         ],
         manpower: const [
-          ManpowerAccomplishment(category: 'Project Engineer', planned: 1, present: 1, overtime: 0),
-          ManpowerAccomplishment(category: 'Site Supervisor', planned: 2, present: 2, overtime: 0),
-          ManpowerAccomplishment(category: 'Electrician', planned: 8, present: 6, overtime: 2),
-          ManpowerAccomplishment(category: 'Civil Worker', planned: 15, present: 15, overtime: 4),
-          ManpowerAccomplishment(category: 'Helper', planned: 10, present: 10, overtime: 0),
+          ManpowerAccomplishment(
+            category: 'Project Engineer',
+            planned: 1,
+            present: 1,
+            overtime: 0,
+          ),
+          ManpowerAccomplishment(
+            category: 'Site Supervisor',
+            planned: 2,
+            present: 2,
+            overtime: 0,
+          ),
+          ManpowerAccomplishment(
+            category: 'Electrician',
+            planned: 8,
+            present: 6,
+            overtime: 2,
+          ),
+          ManpowerAccomplishment(
+            category: 'Civil Worker',
+            planned: 15,
+            present: 15,
+            overtime: 4,
+          ),
+          ManpowerAccomplishment(
+            category: 'Helper',
+            planned: 10,
+            present: 10,
+            overtime: 0,
+          ),
         ],
         equipment: const [
           EquipmentUsage(name: 'Crane', count: 1, hoursUsed: 6.5),
@@ -144,15 +216,29 @@ class DarRepositoryImpl implements DarRepository {
           EquipmentUsage(name: 'Service Vehicle', count: 2, hoursUsed: 4.0),
         ],
         materials: const [
-          MaterialInstalled(name: 'Mounting Rails', quantity: 90, unit: 'lengths'),
+          MaterialInstalled(
+            name: 'Mounting Rails',
+            quantity: 90,
+            unit: 'lengths',
+          ),
           MaterialInstalled(name: 'DC Cables', quantity: 240, unit: 'meters'),
         ],
         delays: const [
-          DelayIssue(type: 'Technical Issue', description: 'Excavator bucket teeth replaced.', impactHours: 1.5),
+          DelayIssue(
+            type: 'Technical Issue',
+            description: 'Excavator bucket teeth replaced.',
+            impactHours: 1.5,
+          ),
         ],
         photos: const [
-          DarPhoto(path: 'mock_pile_driving.jpg', caption: 'Block A3 steel pile driving operations.'),
-          DarPhoto(path: 'mock_dc_trenching.jpg', caption: 'DC cable conduit laying.'),
+          DarPhoto(
+            path: 'mock_pile_driving.jpg',
+            caption: 'Block A3 steel pile driving operations.',
+          ),
+          DarPhoto(
+            path: 'mock_dc_trenching.jpg',
+            caption: 'DC cable conduit laying.',
+          ),
         ],
         signedPrepared: 'Joyce Cruz',
         signedChecked: 'John Rey',
@@ -173,12 +259,33 @@ class DarRepositoryImpl implements DarRepository {
         windCondition: 'Strong',
         siteCondition: 'Muddy',
         accomplishments: const [
-          AccomplishmentItem(workDescription: 'Laying PV solar panels string brackets.', areaLocation: 'Roof Area Bldg 3', quantity: 24, unit: 'brackets', remarks: 'Halted early due to lightning risk.'),
+          AccomplishmentItem(
+            workDescription: 'Laying PV solar panels string brackets.',
+            areaLocation: 'Roof Area Bldg 3',
+            quantity: 24,
+            unit: 'brackets',
+            remarks: 'Halted early due to lightning risk.',
+          ),
         ],
         manpower: const [
-          ManpowerAccomplishment(category: 'Project Engineer', planned: 1, present: 1, overtime: 0),
-          ManpowerAccomplishment(category: 'Electrician', planned: 8, present: 8, overtime: 0),
-          ManpowerAccomplishment(category: 'Helper', planned: 4, present: 4, overtime: 0),
+          ManpowerAccomplishment(
+            category: 'Project Engineer',
+            planned: 1,
+            present: 1,
+            overtime: 0,
+          ),
+          ManpowerAccomplishment(
+            category: 'Electrician',
+            planned: 8,
+            present: 8,
+            overtime: 0,
+          ),
+          ManpowerAccomplishment(
+            category: 'Helper',
+            planned: 4,
+            present: 4,
+            overtime: 0,
+          ),
         ],
         equipment: const [
           EquipmentUsage(name: 'Boom Truck', count: 1, hoursUsed: 3.5),
@@ -187,10 +294,18 @@ class DarRepositoryImpl implements DarRepository {
           MaterialInstalled(name: 'PV Modules', quantity: 48, unit: 'pcs'),
         ],
         delays: const [
-          DelayIssue(type: 'Weather Delay', description: 'Heavy thunderstorm warning suspended all rooftop tasks.', impactHours: 4.0),
+          DelayIssue(
+            type: 'Weather Delay',
+            description:
+                'Heavy thunderstorm warning suspended all rooftop tasks.',
+            impactHours: 4.0,
+          ),
         ],
         photos: const [
-          DarPhoto(path: 'mock_lightning.jpg', caption: 'Storm halting tasks at building #3 roof.'),
+          DarPhoto(
+            path: 'mock_lightning.jpg',
+            caption: 'Storm halting tasks at building #3 roof.',
+          ),
         ],
         signedPrepared: 'John Rey',
         signedChecked: 'Leo Santos',

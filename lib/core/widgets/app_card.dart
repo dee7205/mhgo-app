@@ -42,12 +42,14 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _yOffsetAnimation = Tween<double>(begin: 0.0, end: -3.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.01).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _yOffsetAnimation = Tween<double>(
+      begin: 0.0,
+      end: -3.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.01,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -57,7 +59,8 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   }
 
   void _handleHover(bool isHovered) {
-    if (widget.onTap == null) return; // Only animate hover for interactive cards
+    if (widget.onTap == null)
+      return; // Only animate hover for interactive cards
     setState(() {
       _isHovered = isHovered;
     });
@@ -80,9 +83,13 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
 
     switch (widget.variant) {
       case AppCardVariant.elevated:
-        bg = widget.backgroundColor ?? (isDark ? AppTheme.darkSurfaceCard : AppTheme.lightSurface);
+        bg =
+            widget.backgroundColor ??
+            (isDark ? AppTheme.darkSurfaceCard : AppTheme.lightSurface);
         border = Border.all(
-          color: isDark ? AppTheme.darkBorder.withOpacity(0.5) : AppTheme.lightBorder.withOpacity(0.5),
+          color: isDark
+              ? AppTheme.darkBorder.withOpacity(0.5)
+              : AppTheme.lightBorder.withOpacity(0.5),
           width: 1,
         );
         shadow = _isHovered
@@ -92,23 +99,32 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                   color: Colors.black.withOpacity(isDark ? 0.08 : 0.02),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
-                )
+                ),
               ];
         break;
 
       case AppCardVariant.glass:
-        bg = widget.backgroundColor ??
-            (isDark ? Colors.white.withOpacity(0.03) : Colors.white.withOpacity(0.7));
+        bg =
+            widget.backgroundColor ??
+            (isDark
+                ? Colors.white.withOpacity(0.03)
+                : Colors.white.withOpacity(0.7));
         border = Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.06),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
           width: 1,
         );
-        shadow = _isHovered ? (isDark ? AppTheme.darkShadow : AppTheme.lightShadow) : null;
+        shadow = _isHovered
+            ? (isDark ? AppTheme.darkShadow : AppTheme.lightShadow)
+            : null;
         break;
 
       case AppCardVariant.outlined:
       default:
-        bg = widget.backgroundColor ?? (isDark ? AppTheme.darkSurface : AppTheme.lightSurface);
+        bg =
+            widget.backgroundColor ??
+            (isDark ? AppTheme.darkSurface : AppTheme.lightSurface);
         border = Border.all(
           color: _isHovered
               ? theme.colorScheme.primary.withOpacity(0.4)
@@ -118,10 +134,12 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         shadow = _isHovered
             ? [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(isDark ? 0.12 : 0.05),
+                  color: theme.colorScheme.primary.withOpacity(
+                    isDark ? 0.12 : 0.05,
+                  ),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
-                )
+                ),
               ]
             : null;
         break;

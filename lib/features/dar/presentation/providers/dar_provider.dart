@@ -27,7 +27,10 @@ final darsListProvider = FutureProvider<List<DarReport>>((ref) async {
   return useCase.execute();
 });
 
-final darDetailsProvider = FutureProvider.family<DarReport?, String>((ref, id) async {
+final darDetailsProvider = FutureProvider.family<DarReport?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(darRepositoryProvider);
   return repo.getDarById(id);
 });
@@ -39,27 +42,34 @@ class DarSearchQueryNotifier extends Notifier<String> {
   void set(String val) => state = val;
   void clear() => state = '';
 }
-final darSearchQueryProvider = NotifierProvider<DarSearchQueryNotifier, String>(() {
-  return DarSearchQueryNotifier();
-});
+
+final darSearchQueryProvider = NotifierProvider<DarSearchQueryNotifier, String>(
+  () {
+    return DarSearchQueryNotifier();
+  },
+);
 
 class DarProjectFilterNotifier extends Notifier<String?> {
   @override
   String? build() => null;
   void set(String? val) => state = val;
 }
-final darProjectFilterProvider = NotifierProvider<DarProjectFilterNotifier, String?>(() {
-  return DarProjectFilterNotifier();
-});
+
+final darProjectFilterProvider =
+    NotifierProvider<DarProjectFilterNotifier, String?>(() {
+      return DarProjectFilterNotifier();
+    });
 
 class DarStatusFilterNotifier extends Notifier<String?> {
   @override
   String? build() => null;
   void set(String? val) => state = val;
 }
-final darStatusFilterProvider = NotifierProvider<DarStatusFilterNotifier, String?>(() {
-  return DarStatusFilterNotifier();
-});
+
+final darStatusFilterProvider =
+    NotifierProvider<DarStatusFilterNotifier, String?>(() {
+      return DarStatusFilterNotifier();
+    });
 
 class DarDateFilterNotifier extends Notifier<DateTime?> {
   @override
@@ -67,15 +77,18 @@ class DarDateFilterNotifier extends Notifier<DateTime?> {
   void set(DateTime? val) => state = val;
   void clear() => state = null;
 }
-final darDateFilterProvider = NotifierProvider<DarDateFilterNotifier, DateTime?>(() {
-  return DarDateFilterNotifier();
-});
+
+final darDateFilterProvider =
+    NotifierProvider<DarDateFilterNotifier, DateTime?>(() {
+      return DarDateFilterNotifier();
+    });
 
 class DarGridViewNotifier extends Notifier<bool> {
   @override
   bool build() => true;
   void toggle() => state = !state;
 }
+
 final darGridViewProvider = NotifierProvider<DarGridViewNotifier, bool>(() {
   return DarGridViewNotifier();
 });

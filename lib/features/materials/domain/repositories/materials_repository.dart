@@ -8,8 +8,12 @@ abstract class MaterialsRepository {
   Future<void> deleteMaterial(String uuid);
 
   // Requests
-  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForProject(String projectUuid);
-  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForMaterial(String materialUuid);
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForProject(
+    String projectUuid,
+  );
+  Future<List<ProjectMaterialRequirementEntity>> getRequirementsForMaterial(
+    String materialUuid,
+  );
   Future<void> saveRequirement(ProjectMaterialRequirementEntity requirement);
   Future<void> deleteRequirement(String uuid);
   Future<void> forceResetAllRequirementsToZero();

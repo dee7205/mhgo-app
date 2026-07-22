@@ -5,6 +5,8 @@ class UserModel {
   final String role;
   final String? avatarUrl;
   final String? token;
+  final String? phoneNumber;
+  final String? department;
 
   const UserModel({
     required this.uuid,
@@ -13,7 +15,31 @@ class UserModel {
     required this.role,
     this.avatarUrl,
     this.token,
+    this.phoneNumber,
+    this.department,
   });
+
+  UserModel copyWith({
+    String? uuid,
+    String? name,
+    String? email,
+    String? role,
+    String? avatarUrl,
+    String? token,
+    String? phoneNumber,
+    String? department,
+  }) {
+    return UserModel(
+      uuid: uuid ?? this.uuid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      token: token ?? this.token,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      department: department ?? this.department,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -23,6 +49,8 @@ class UserModel {
       'role': role,
       'avatarUrl': avatarUrl,
       'token': token,
+      'phoneNumber': phoneNumber,
+      'department': department,
     };
   }
 
@@ -34,6 +62,8 @@ class UserModel {
       role: json['role'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       token: json['token'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      department: json['department'] as String?,
     );
   }
 }

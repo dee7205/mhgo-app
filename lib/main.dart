@@ -14,9 +14,7 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        isarServiceProvider.overrideWithValue(isarService),
-      ],
+      overrides: [isarServiceProvider.overrideWithValue(isarService)],
       child: const MyApp(),
     ),
   );

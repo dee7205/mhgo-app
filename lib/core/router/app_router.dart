@@ -21,7 +21,9 @@ import 'package:mhgo/features/progress/presentation/views/progress_list_view.dar
 import 'package:mhgo/features/progress/presentation/views/progress_details_view.dart';
 import 'package:mhgo/features/progress/presentation/views/progress_create_edit_view.dart';
 import '../../features/materials/presentation/router/materials_router.dart';
-
+import '../../features/settings/presentation/views/settings_view.dart';
+import '../../features/settings/presentation/views/profile_view.dart';
+import 'package:mhgo/features/notifications/presentation/views/notifications_list_view.dart';
 abstract class AppRouteNames {
   static const String surveyList = 'survey_list';
   static const String surveyCreate = 'survey_create';
@@ -33,10 +35,7 @@ abstract class AppRouteNames {
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
   RouterNotifier(this._ref) {
-    _ref.listen<AuthState>(
-      authProvider,
-      (_, __) => notifyListeners(),
-    );
+    _ref.listen<AuthState>(authProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -53,7 +52,9 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
     ),
     redirect: (context, state) {
       final isLoggedIn = ref.read(authProvider).isAuthenticated;
-      final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/forgot-password';
+      final isGoingToAuth =
+          state.matchedLocation == '/login' ||
+          state.matchedLocation == '/forgot-password';
 
       if (!isLoggedIn) {
         // If not logged in and not heading to auth screens, push to login
@@ -69,21 +70,20 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       // Top-level Auth & Work Routes (outside the StatefulShellRoute)
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginView(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginView()),
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordView(),
       ),
       GoRoute(
-        path: '/dar',
-        builder: (context, state) => const DarListView(),
+        path: '/notifications',
+        builder: (context, state) => const NotificationsListView(),
       ),
+      GoRoute(path: '/dar', builder: (context, state) => const DarListView()),
       GoRoute(
         path: '/dar/create',
-        builder: (context, state) => const DarCreateEditView(mode: DarFormMode.create),
+        builder: (context, state) =>
+            const DarCreateEditView(mode: DarFormMode.create),
       ),
       GoRoute(
         path: '/dar/edit/:id',
@@ -94,15 +94,13 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/dar/details/:id',
-        builder: (context, state) => DarDetailsView(
-          id: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            DarDetailsView(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/dar/pdf/:id',
-        builder: (context, state) => PdfPreviewView(
-          id: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            PdfPreviewView(id: state.pathParameters['id']!),
       ),
 
       StatefulShellRoute.indexedStack(
@@ -128,9 +126,8 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':id',
-                    builder: (context, state) => ProjectDetailsView(
-                      uuid: state.pathParameters['id']!,
-                    ),
+                    builder: (context, state) =>
+                        ProjectDetailsView(uuid: state.pathParameters['id']!),
                     routes: [
                       GoRoute(
                         path: 'pdf',
@@ -153,24 +150,20 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'details/:id',
-                    builder: (context, state) => ProgressDetailsView(
-                      id: state.pathParameters['id']!,
-                    ),
+                    builder: (context, state) =>
+                        ProgressDetailsView(id: state.pathParameters['id']!),
                   ),
                   GoRoute(
                     path: 'update/:id',
-                    builder: (context, state) => ProgressCreateEditView(
-                      id: state.pathParameters['id']!,
-                    ),
+                    builder: (context, state) =>
+                        ProgressCreateEditView(id: state.pathParameters['id']!),
                   ),
                 ],
               ),
             ],
           ),
           // Inventory Branch (Index 3)
-          StatefulShellBranch(
-            routes: MaterialsRouter.routes,
-          ),
+          StatefulShellBranch(routes: MaterialsRouter.routes),
           // Survey Branch (Index 4)
           StatefulShellBranch(
             routes: [
@@ -194,15 +187,13 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     name: AppRouteNames.surveyDetails,
                     path: 'details/:uuid',
-                    builder: (context, state) => SurveyDetailsView(
-                      uuid: state.pathParameters['uuid']!,
-                    ),
+                    builder: (context, state) =>
+                        SurveyDetailsView(uuid: state.pathParameters['uuid']!),
                   ),
                   GoRoute(
                     path: 'pdf/:uuid',
-                    builder: (context, state) => SurveyPdfPreviewView(
-                      id: state.pathParameters['uuid']!,
-                    ),
+                    builder: (context, state) =>
+                        SurveyPdfPreviewView(id: state.pathParameters['uuid']!),
                   ),
                 ],
               ),
@@ -212,8 +203,14 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/om',
-                builder: (context, state) => const _PlaceholderScreen(title: 'Operations & Maintenance'),
+                path: '/settings',
+                builder: (context, state) => const SettingsView(),
+                routes: [
+                  GoRoute(
+                    path: 'profile',
+                    builder: (context, state) => const ProfileView(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -222,47 +219,3 @@ final appRouterNotifierProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.construction_outlined,
-              size: 64,
-              color: theme.colorScheme.secondary.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$title Module',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This module is currently in development for MHG.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.white70 : Colors.black54,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

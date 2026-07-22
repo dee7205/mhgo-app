@@ -28,7 +28,8 @@ class ProgressReport {
       projectName: json['projectName'] as String,
       overallProgress: (json['overallProgress'] as num).toDouble(),
       isAutoCalculated: json['isAutoCalculated'] as bool? ?? true,
-      categories: (json['categories'] as List<dynamic>?)
+      categories:
+          (json['categories'] as List<dynamic>?)
               ?.map((e) => ProgressCategory.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -104,13 +105,19 @@ class ProgressCategory {
 
   factory ProgressCategory.fromJson(Map<String, dynamic> json) {
     return ProgressCategory(
-      id: json['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          json['id'] as String? ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       name: json['name'] as String,
       description: json['description'] as String?,
       progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'Not Started',
-      targetDate: json['targetDate'] != null ? DateTime.parse(json['targetDate'] as String) : null,
-      lastUpdated: json['lastUpdated'] != null ? DateTime.parse(json['lastUpdated'] as String) : DateTime.now(),
+      targetDate: json['targetDate'] != null
+          ? DateTime.parse(json['targetDate'] as String)
+          : null,
+      lastUpdated: json['lastUpdated'] != null
+          ? DateTime.parse(json['lastUpdated'] as String)
+          : DateTime.now(),
       notes: json['notes'] as String?,
       isArchived: json['isArchived'] as bool? ?? false,
       orderIndex: json['orderIndex'] as int? ?? 0,

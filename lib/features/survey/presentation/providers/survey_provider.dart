@@ -29,18 +29,22 @@ class SurveySearchQueryNotifier extends Notifier<String> {
   void set(String val) => state = val;
   void clear() => state = '';
 }
-final surveySearchQueryProvider = NotifierProvider<SurveySearchQueryNotifier, String>(() {
-  return SurveySearchQueryNotifier();
-});
+
+final surveySearchQueryProvider =
+    NotifierProvider<SurveySearchQueryNotifier, String>(() {
+      return SurveySearchQueryNotifier();
+    });
 
 class SurveyStatusFilterNotifier extends Notifier<String> {
   @override
   String build() => 'All'; // 'All', 'Pending Survey', 'Quoted', 'Waiting Client', 'Approved', 'Declined', 'Converted'
   void set(String val) => state = val;
 }
-final surveyStatusFilterProvider = NotifierProvider<SurveyStatusFilterNotifier, String>(() {
-  return SurveyStatusFilterNotifier();
-});
+
+final surveyStatusFilterProvider =
+    NotifierProvider<SurveyStatusFilterNotifier, String>(() {
+      return SurveyStatusFilterNotifier();
+    });
 
 class SurveyGridViewNotifier extends Notifier<bool> {
   @override
@@ -48,9 +52,12 @@ class SurveyGridViewNotifier extends Notifier<bool> {
   void toggle() => state = !state;
   void set(bool val) => state = val;
 }
-final surveyGridViewProvider = NotifierProvider<SurveyGridViewNotifier, bool>(() {
-  return SurveyGridViewNotifier();
-});
+
+final surveyGridViewProvider = NotifierProvider<SurveyGridViewNotifier, bool>(
+  () {
+    return SurveyGridViewNotifier();
+  },
+);
 
 // --- Derived Providers ---
 
@@ -72,11 +79,12 @@ final filteredSurveysProvider = Provider<AsyncValue<List<Survey>>>((ref) {
         final matchesAddress = item.address.toLowerCase().contains(query);
         if (!matchesName && !matchesAddress) return false;
       }
-      
-      if (status != 'All' && item.status.toLowerCase() != status.toLowerCase()) {
+
+      if (status != 'All' &&
+          item.status.toLowerCase() != status.toLowerCase()) {
         return false;
       }
-      
+
       return true;
     }).toList();
 
@@ -84,7 +92,10 @@ final filteredSurveysProvider = Provider<AsyncValue<List<Survey>>>((ref) {
   });
 });
 
-final surveyDetailsProvider = FutureProvider.family<Survey?, String>((ref, uuid) async {
+final surveyDetailsProvider = FutureProvider.family<Survey?, String>((
+  ref,
+  uuid,
+) async {
   final repo = ref.watch(surveyRepositoryProvider);
   return repo.getSurveyByUuid(uuid);
 });

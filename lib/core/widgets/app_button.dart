@@ -31,7 +31,8 @@ class AppButton extends StatefulWidget {
   State<AppButton> createState() => _AppButtonState();
 }
 
-class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
+class _AppButtonState extends State<AppButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
@@ -43,9 +44,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -90,10 +92,14 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
 
     switch (widget.variant) {
       case AppButtonVariant.secondary:
-        bg = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04);
+        bg = isDark
+            ? Colors.white.withOpacity(0.06)
+            : Colors.black.withOpacity(0.04);
         fg = isDark ? AppTheme.darkTextPrimary : AppTheme.lightTextPrimary;
         if (_isHovered && isEnabled) {
-          bg = isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+          bg = isDark
+              ? Colors.white.withOpacity(0.1)
+              : Colors.black.withOpacity(0.08);
         }
         break;
 
@@ -144,7 +150,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       bg = bg.withOpacity(0.4);
       fg = fg.withOpacity(0.4);
       if (borderSide != BorderSide.none) {
-        borderSide = BorderSide(color: borderSide.color.withOpacity(0.4), width: borderSide.width);
+        borderSide = BorderSide(
+          color: borderSide.color.withOpacity(0.4),
+          width: borderSide.width,
+        );
       }
     }
 
@@ -210,10 +219,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
         child: AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: child,
-            );
+            return Transform.scale(scale: _scaleAnimation.value, child: child);
           },
           child: buttonStyle,
         ),

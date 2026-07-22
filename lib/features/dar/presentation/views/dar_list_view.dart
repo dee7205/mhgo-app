@@ -32,7 +32,7 @@ class _DarListViewState extends ConsumerState<DarListView> {
 
     final darsAsync = ref.watch(darsListProvider);
     final projectsAsync = ref.watch(projectsListProvider);
-    
+
     final searchQuery = ref.watch(darSearchQueryProvider);
     final selectedProject = ref.watch(darProjectFilterProvider);
     final selectedStatus = ref.watch(darStatusFilterProvider);
@@ -51,7 +51,9 @@ class _DarListViewState extends ConsumerState<DarListView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
+            icon: Icon(
+              isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            ),
             tooltip: isGridView ? 'Switch to List View' : 'Switch to Grid View',
             onPressed: () {
               ref.read(darGridViewProvider.notifier).toggle();
@@ -63,7 +65,10 @@ class _DarListViewState extends ConsumerState<DarListView> {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'dar-list-fab',
         onPressed: () => context.push('/dar/create'),
-        label: const Text('New Daily Report', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          'New Daily Report',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         icon: const Icon(Icons.add),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
@@ -81,23 +86,31 @@ class _DarListViewState extends ConsumerState<DarListView> {
               var filtered = reports.where((r) {
                 // Search query
                 final query = searchQuery.toLowerCase();
-                final matchesSearch = r.darNumber.toLowerCase().contains(query) ||
+                final matchesSearch =
+                    r.darNumber.toLowerCase().contains(query) ||
                     r.projectName.toLowerCase().contains(query) ||
                     r.preparedBy.toLowerCase().contains(query);
 
                 // Project filter
-                final matchesProject = selectedProject == null || r.projectUuid == selectedProject;
+                final matchesProject =
+                    selectedProject == null || r.projectUuid == selectedProject;
 
                 // Status filter
-                final matchesStatus = selectedStatus == null || r.status.toLowerCase() == selectedStatus.toLowerCase();
+                final matchesStatus =
+                    selectedStatus == null ||
+                    r.status.toLowerCase() == selectedStatus.toLowerCase();
 
                 // Date filter
-                final matchesDate = selectedDate == null ||
+                final matchesDate =
+                    selectedDate == null ||
                     (r.reportDate.year == selectedDate.year &&
                         r.reportDate.month == selectedDate.month &&
                         r.reportDate.day == selectedDate.day);
 
-                return matchesSearch && matchesProject && matchesStatus && matchesDate;
+                return matchesSearch &&
+                    matchesProject &&
+                    matchesStatus &&
+                    matchesDate;
               }).toList();
 
               // Sort by date descending (newest reports first)
@@ -112,7 +125,11 @@ class _DarListViewState extends ConsumerState<DarListView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSearchAndFiltersRow(projectsAsync, theme, isDark),
+                          _buildSearchAndFiltersRow(
+                            projectsAsync,
+                            theme,
+                            isDark,
+                          ),
                           const SizedBox(height: 16),
                           _buildStatusFilterRow(theme, isDark),
                         ],
@@ -128,7 +145,10 @@ class _DarListViewState extends ConsumerState<DarListView> {
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 8.0,
+                      ),
                       sliver: isGridView
                           ? _buildReportsGrid(filtered, theme, isDark)
                           : _buildReportsList(filtered, theme, isDark),
@@ -146,7 +166,11 @@ class _DarListViewState extends ConsumerState<DarListView> {
   }
 
   // --- SEARCH AND FILTERS PANEL ---
-  Widget _buildSearchAndFiltersRow(AsyncValue<List<dynamic>> projectsAsync, ThemeData theme, bool isDark) {
+  Widget _buildSearchAndFiltersRow(
+    AsyncValue<List<dynamic>> projectsAsync,
+    ThemeData theme,
+    bool isDark,
+  ) {
     final selectedProject = ref.watch(darProjectFilterProvider);
     final selectedDate = ref.watch(darDateFilterProvider);
 
@@ -173,14 +197,21 @@ class _DarListViewState extends ConsumerState<DarListView> {
                 : null,
             filled: true,
             fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+              borderSide: BorderSide(
+                color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+              borderSide: BorderSide(
+                color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+              ),
             ),
           ),
         );
@@ -194,20 +225,32 @@ class _DarListViewState extends ConsumerState<DarListView> {
               decoration: BoxDecoration(
                 color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+                border: Border.all(
+                  color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String?>(
                   value: selectedProject,
                   hint: const Text('All Projects'),
                   icon: const Icon(Icons.arrow_drop_down, size: 18),
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   onChanged: (val) {
                     ref.read(darProjectFilterProvider.notifier).set(val);
                   },
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Projects')),
-                    ...projects.map((p) => DropdownMenuItem(value: p.uuid as String, child: Text(p.name as String))),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Projects'),
+                    ),
+                    ...projects.map(
+                      (p) => DropdownMenuItem(
+                        value: p.uuid as String,
+                        child: Text(p.name as String),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -227,10 +270,14 @@ class _DarListViewState extends ConsumerState<DarListView> {
               ref.read(darDateFilterProvider.notifier).set(picked);
             }
           },
-          icon: Icon(Icons.calendar_today_outlined, size: 16, color: theme.colorScheme.primary),
+          icon: Icon(
+            Icons.calendar_today_outlined,
+            size: 16,
+            color: theme.colorScheme.primary,
+          ),
           label: Text(
-            selectedDate == null 
-                ? 'Select Date' 
+            selectedDate == null
+                ? 'Select Date'
                 : DateFormat('MMM dd, yyyy').format(selectedDate),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.primary,
@@ -240,7 +287,9 @@ class _DarListViewState extends ConsumerState<DarListView> {
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         );
 
@@ -260,7 +309,8 @@ class _DarListViewState extends ConsumerState<DarListView> {
                         const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () => ref.read(darDateFilterProvider.notifier).clear(),
+                          onPressed: () =>
+                              ref.read(darDateFilterProvider.notifier).clear(),
                         ),
                       ],
                     ),
@@ -276,7 +326,8 @@ class _DarListViewState extends ConsumerState<DarListView> {
                     const SizedBox(width: 4),
                     IconButton(
                       icon: const Icon(Icons.clear, size: 18),
-                      onPressed: () => ref.read(darDateFilterProvider.notifier).clear(),
+                      onPressed: () =>
+                          ref.read(darDateFilterProvider.notifier).clear(),
                     ),
                   ],
                 );
@@ -330,21 +381,27 @@ class _DarListViewState extends ConsumerState<DarListView> {
               label: Text(status['label'] as String),
               selected: isSelected,
               onSelected: (_) {
-                ref.read(darStatusFilterProvider.notifier).set(status['value'] as String?);
+                ref
+                    .read(darStatusFilterProvider.notifier)
+                    .set(status['value'] as String?);
               },
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected 
-                    ? Colors.white 
-                    : (isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary),
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.lightTextSecondary),
               ),
               selectedColor: theme.colorScheme.primary,
-              backgroundColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
+              backgroundColor: isDark
+                  ? AppTheme.darkSurface
+                  : AppTheme.lightSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
                 side: BorderSide(
-                  color: isSelected 
-                      ? theme.colorScheme.primary 
+                  color: isSelected
+                      ? theme.colorScheme.primary
                       : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
                 ),
               ),
@@ -356,7 +413,11 @@ class _DarListViewState extends ConsumerState<DarListView> {
   }
 
   // --- GRID RENDER ---
-  Widget _buildReportsGrid(List<DarReport> reports, ThemeData theme, bool isDark) {
+  Widget _buildReportsGrid(
+    List<DarReport> reports,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 420,
@@ -364,29 +425,27 @@ class _DarListViewState extends ConsumerState<DarListView> {
         crossAxisSpacing: 24,
         mainAxisExtent: 280, // Fixed consistent height
       ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final report = reports[index];
-          return _DarGridCard(report: report, theme: theme, isDark: isDark);
-        },
-        childCount: reports.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final report = reports[index];
+        return _DarGridCard(report: report, theme: theme, isDark: isDark);
+      }, childCount: reports.length),
     );
   }
 
   // --- LIST RENDER ---
-  Widget _buildReportsList(List<DarReport> reports, ThemeData theme, bool isDark) {
+  Widget _buildReportsList(
+    List<DarReport> reports,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final report = reports[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _DarListCard(report: report, theme: theme, isDark: isDark),
-          );
-        },
-        childCount: reports.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final report = reports[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: _DarListCard(report: report, theme: theme, isDark: isDark),
+        );
+      }, childCount: reports.length),
     );
   }
 
@@ -398,7 +457,10 @@ class _DarListViewState extends ConsumerState<DarListView> {
         children: [
           const Icon(Icons.error_outline, size: 56, color: Color(0xFFD32F2F)),
           const SizedBox(height: 16),
-          Text('Failed to load activity reports', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Failed to load activity reports',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
@@ -416,11 +478,20 @@ class _DarListViewState extends ConsumerState<DarListView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.assignment_outlined, size: 56, color: Theme.of(context).disabledColor),
+          Icon(
+            Icons.assignment_outlined,
+            size: 56,
+            color: Theme.of(context).disabledColor,
+          ),
           const SizedBox(height: 16),
-          Text('No reports matches your selection', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'No reports matches your selection',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
-          const Text('Create a new Daily Report or check your filter criteria.'),
+          const Text(
+            'Create a new Daily Report or check your filter criteria.',
+          ),
         ],
       ),
     );
@@ -443,7 +514,9 @@ class _DarGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(report.status);
     final formattedDate = DateFormat('MMMM dd, yyyy').format(report.reportDate);
-    final formattedUpdated = DateFormat('MMM dd, hh:mm a').format(report.lastUpdated);
+    final formattedUpdated = DateFormat(
+      'MMM dd, hh:mm a',
+    ).format(report.lastUpdated);
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -459,7 +532,10 @@ class _DarGridCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -475,9 +551,18 @@ class _DarGridCard extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Icon(_getWeatherIcon(report.weather), size: 16, color: Colors.amber),
+                  Icon(
+                    _getWeatherIcon(report.weather),
+                    size: 16,
+                    color: Colors.amber,
+                  ),
                   const SizedBox(width: 4),
-                  Text(report.weather, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    report.weather,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -495,7 +580,9 @@ class _DarGridCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             formattedDate,
-            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const Spacer(),
 
@@ -505,7 +592,9 @@ class _DarGridCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.lightTextSecondary,
               fontSize: 13,
             ),
           ),
@@ -543,13 +632,19 @@ class _DarGridCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: () => context.push('/dar/edit/${report.id}'),
                   icon: const Icon(Icons.edit_outlined, size: 14),
-                  label: const Text('Edit Draft', style: TextStyle(fontSize: 11)),
+                  label: const Text(
+                    'Edit Draft',
+                    style: TextStyle(fontSize: 11),
+                  ),
                 ),
               ],
               TextButton.icon(
                 onPressed: () => context.push('/dar/pdf/${report.id}'),
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 14),
-                label: const Text('PDF Preview', style: TextStyle(fontSize: 11)),
+                label: const Text(
+                  'PDF Preview',
+                  style: TextStyle(fontSize: 11),
+                ),
               ),
             ],
           ),
@@ -575,7 +670,9 @@ class _DarListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(report.status);
     final formattedDate = DateFormat('MMMM dd, yyyy').format(report.reportDate);
-    final formattedUpdated = DateFormat('MMM dd, hh:mm a').format(report.lastUpdated);
+    final formattedUpdated = DateFormat(
+      'MMM dd, hh:mm a',
+    ).format(report.lastUpdated);
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -601,7 +698,10 @@ class _DarListCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -622,7 +722,9 @@ class _DarListCard extends StatelessWidget {
               Text(
                 report.projectName,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                  color: isDark
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.lightTextSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -631,25 +733,41 @@ class _DarListCard extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 4,
                 children: [
-                  _buildDetailItem(Icons.calendar_today_outlined, formattedDate),
-                  _buildDetailItem(Icons.person_outline, 'By: ${report.preparedBy}'),
-                  _buildDetailItem(_getWeatherIcon(report.weather), 'Weather: ${report.weather}'),
+                  _buildDetailItem(
+                    Icons.calendar_today_outlined,
+                    formattedDate,
+                  ),
+                  _buildDetailItem(
+                    Icons.person_outline,
+                    'By: ${report.preparedBy}',
+                  ),
+                  _buildDetailItem(
+                    _getWeatherIcon(report.weather),
+                    'Weather: ${report.weather}',
+                  ),
                 ],
               ),
             ],
           );
 
           final rightCol = Column(
-            crossAxisAlignment: isNarrow ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment: isNarrow
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Last updated:',
-                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: theme.disabledColor),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  color: theme.disabledColor,
+                ),
               ),
               Text(
                 formattedUpdated,
-                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -702,10 +820,7 @@ class _DarListCard extends StatelessWidget {
       children: [
         Icon(icon, size: 12, color: theme.disabledColor),
         const SizedBox(width: 6),
-        Text(
-          text,
-          style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
-        ),
+        Text(text, style: theme.textTheme.bodySmall?.copyWith(fontSize: 11)),
       ],
     );
   }

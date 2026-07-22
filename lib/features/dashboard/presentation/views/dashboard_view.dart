@@ -11,6 +11,7 @@ import 'package:mhgo/core/widgets/app_button.dart';
 import 'package:mhgo/core/widgets/responsive_layout.dart';
 import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:mhgo/features/dashboard/domain/models/dashboard_overview.dart';
+import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
 import 'package:mhgo/features/materials/data/models/material_model.dart';
@@ -26,7 +27,6 @@ class DashboardView extends ConsumerStatefulWidget {
 
 class _DashboardViewState extends ConsumerState<DashboardView>
     with TickerProviderStateMixin {
-  bool _showNotifications = false;
   int _touchedChartIndex = -1;
   DateTime _lastSyncTime = DateTime.now();
   bool _isSyncing = false;
@@ -130,14 +130,13 @@ class _DashboardViewState extends ConsumerState<DashboardView>
   }
 
   String _formatCurrency(double amount) {
-    if (amount.isNaN || amount.isInfinite) return '₱0';
-    if (amount >= 1000000) {
-      return '₱${(amount / 1000000).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')}M';
-    } else if (amount >= 1000) {
-      return '₱${(amount / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}K';
-    } else {
-      return '₱${amount.toStringAsFixed(0)}';
-    }
+    if (amount.isNaN || amount.isInfinite) return '₱0.00';
+    final formatter = NumberFormat.currency(
+      locale: 'en_PH',
+      symbol: '₱',
+      decimalDigits: 2,
+    );
+    return formatter.format(amount);
   }
 
   /// Format capacity grouped by stored unit — no kWp↔MWp conversion.
@@ -146,7 +145,8 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     final parts = <String>[];
     for (final entry in capacityByUnit.entries) {
       final val = (entry.value.isNaN || entry.value.isInfinite) ? 0.0 : entry.value;
-      final formatted = val.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      // Format up to 4 decimal places and remove trailing zeros
+      final formatted = val.toStringAsFixed(4).replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
       parts.add('$formatted ${entry.key}');
     }
     return parts.join(', ');
@@ -211,37 +211,63 @@ class _DashboardViewState extends ConsumerState<DashboardView>
               ),
 
               // Notification Bell
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      _showNotifications
-                          ? Icons.notifications
-                          : Icons.notifications_none_outlined,
-                      size: 20,
-                      color: _showNotifications
-                          ? theme.colorScheme.primary
-                          : null,
-                    ),
-                    tooltip: 'System Alerts',
-                    onPressed: () => setState(
-                      () => _showNotifications = !_showNotifications,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+              Consumer(
+                builder: (context, ref, child) {
+                  final notifications =
+                      ref.watch(notificationProvider).value ?? [];
+                  final unreadCount =
+                      notifications.where((n) => !n.isRead).length;
+
+                  return Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          unreadCount > 0
+                              ? Icons.notifications_active
+                              : Icons.notifications_none_outlined,
+                          size: 20,
+                          color: unreadCount > 0
+                              ? theme.colorScheme.primary
+                              : null,
+                        ),
+                        tooltip: 'Notifications',
+                        onPressed: () {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.push('/notifications');
+                          });
+                        },
                       ),
-                    ),
-                  ),
-                ],
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 14,
+                              minHeight: 14,
+                            ),
+                            child: Center(
+                              child: Text(
+                                unreadCount > 9 ? '9+' : unreadCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(width: 16),
             ],
@@ -428,45 +454,22 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                                         ),
                                       ],
                                     ),
-                                  ),
+                                  ), // ResponsiveLayout
                                 ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // If on wide screen (desktop), show side-by-side
-                    if (_showNotifications &&
-                        MediaQuery.sizeOf(context).width >= 1000)
-                      _buildRightNotificationPanel(theme, isDark),
+                              ), // Column
+                            ), // SingleChildScrollView
+                          ); // RefreshIndicator
+                        }, // data
+                      ), // stateAsync.when
+                    ), // Expanded
                   ],
-                ),
-              ),
-
-              // If on narrow screen (mobile/tablet), show as a sliding overlay drawer
-              if (_showNotifications && MediaQuery.sizeOf(context).width < 1000)
-                Positioned.fill(
-                  child: Stack(
-                    children: [
-                      // Dimmed background tap-to-dismiss
-                      GestureDetector(
-                        onTap: () => setState(() => _showNotifications = false),
-                        child: Container(color: Colors.black45),
-                      ),
-                      // Slide-in panel from the right
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: _buildRightNotificationPanel(theme, isDark),
-                      ),
-                    ],
-                  ),
-                ),
+                ), // Row
+              ), // Positioned.fill
             ],
-          ),
-        ),
-      ),
-    );
+          ), // Stack
+        ), // Scaffold
+      ), // Focus
+    ); // CallbackShortcuts
   }
 
   // --- SYNC STATUS HEADER WIDGET ---
@@ -1686,143 +1689,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     );
   }
 
-  // --- SLIDE-OUT NOTIFICATION CENTER ---
-  Widget _buildRightNotificationPanel(ThemeData theme, bool isDark) {
-    final notifications = [
-      _AlertItem(
-        title: 'Test Alert Title',
-        message: 'PV array structural clamp torque check failed at sector C.',
-        time: '1h ago',
-        type: 'error',
-      ),
-      _AlertItem(
-        title: 'Weather Warning: Bulacan Farm',
-        message: 'Heavy rain delay expected. Civil foundation works suspended.',
-        time: '3h ago',
-        type: 'warning',
-      ),
-      _AlertItem(
-        title: 'Laguna environmental clearance',
-        message: 'Laguna Lake Floating project EIA clearance passed review.',
-        time: 'Yesterday',
-        type: 'success',
-      ),
-    ];
 
-    return Container(
-      width: 320,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : Colors.white,
-        border: Border(
-          left: BorderSide(
-            color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'EPC System Alerts',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () => setState(() => _showNotifications = false),
-                ),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: notifications.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final note = notifications[index];
-
-                Color iconColor = theme.colorScheme.primary;
-                IconData alertIcon = Icons.info_outline;
-
-                if (note.type == 'error') {
-                  iconColor = const Color(0xFFD32F2F);
-                  alertIcon = Icons.error_outline;
-                } else if (note.type == 'warning') {
-                  iconColor = const Color(0xFFFFB300);
-                  alertIcon = Icons.warning_amber_rounded;
-                } else if (note.type == 'success') {
-                  iconColor = const Color(0xFF2E7D32);
-                  alertIcon = Icons.check_circle_outline;
-                }
-
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.02)
-                        : Colors.black.withOpacity(0.01),
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.borderRadiusMedium,
-                    ),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.06)
-                          : Colors.black.withOpacity(0.04),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(alertIcon, color: iconColor, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              note.title,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              note.message,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              note.time,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 9,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // --- SKELETON ERROR STATE PANEL ---
   Widget _buildErrorState(Object err) {
@@ -2020,12 +1887,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
     // Milestones definition based on mock data
     final List<String> milestones;
 
-    // Engineer Avatar initials
-    final engineerInitials = project.uuid.contains('bulacan')
-        ? ['JR', 'ML']
-        : project.uuid.contains('cavite')
-        ? ['JC', 'ML', 'LS']
-        : ['LS'];
+    // Engineer Avatar initials removed per request
 
     return InkWell(
       onTap: () => context.go('/projects/${project.uuid}'),
@@ -2084,7 +1946,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                         runSpacing: 4,
                         children: [
                           Text(
-                            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.location}',
+                            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.location}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 11,
                             ),
@@ -2195,44 +2057,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
             //       }).toList(),
             //     ),
 
-            // Engr Team Avatars
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Team: ',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                SizedBox(
-                  height: 20,
-                  width: (engineerInitials.length * 12.0) + 8.0,
-                  child: Stack(
-                    children: List.generate(engineerInitials.length, (idx) {
-                      return Positioned(
-                        left: idx * 12.0,
-                        child: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: theme.colorScheme.secondary
-                              .withOpacity(0.2),
-                          child: Text(
-                            engineerInitials[idx],
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.secondary,
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
+
           ],
         ),
       ),
@@ -2677,16 +2502,4 @@ class _ActivityItem {
   });
 }
 
-class _AlertItem {
-  final String title;
-  final String message;
-  final String time;
-  final String type;
 
-  const _AlertItem({
-    required this.title,
-    required this.message,
-    required this.time,
-    required this.type,
-  });
-}

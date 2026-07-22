@@ -30,7 +30,8 @@ class AuthState {
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
-      forgotPasswordSuccess: forgotPasswordSuccess ?? this.forgotPasswordSuccess,
+      forgotPasswordSuccess:
+          forgotPasswordSuccess ?? this.forgotPasswordSuccess,
     );
   }
 }
@@ -70,17 +71,27 @@ class AuthNotifier extends Notifier<AuthState> {
       }
       state = AuthState(user: user);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceFirst('Exception: ', ''));
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
     }
   }
 
   Future<void> forgotPassword(String email) async {
-    state = state.copyWith(isLoading: true, errorMessage: null, forgotPasswordSuccess: false);
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      forgotPasswordSuccess: false,
+    );
     try {
       await ForgotPasswordUseCase(_repository).execute(email);
       state = state.copyWith(isLoading: false, forgotPasswordSuccess: true);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceFirst('Exception: ', ''));
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
     }
   }
 
@@ -88,6 +99,11 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true);
     await _repository.clearPersistedUser();
     state = AuthState();
+  }
+
+  Future<void> updateUser(UserModel updatedUser) async {
+    await _repository.persistUser(updatedUser);
+    state = state.copyWith(user: updatedUser);
   }
 
   void clearErrors() {

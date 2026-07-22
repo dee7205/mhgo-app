@@ -6,7 +6,7 @@ import '../../data/repositories/progress_repository_impl.dart';
 import '../../domain/entities/progress_entities.dart';
 
 import '../../../projects/presentation/providers/projects_provider.dart';
-
+import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   return ProgressRepositoryImpl(isarService.isar);
@@ -42,13 +42,13 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   Future<List<ProgressReport>> _fetchReports(String query) async {
     final getProgressReports = ref.read(getProgressReportsProvider);
     final reports = await getProgressReports();
-    
+
     return reports.where((report) {
       final matchesQuery = report.projectName.toLowerCase().contains(query);
       return matchesQuery;
     }).toList();
   }
-  
+
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     final query = ref.read(progressSearchQueryProvider).toLowerCase();
@@ -58,11 +58,19 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
   Future<void> saveReport(ProgressReport report) async {
     final saveProgressReport = ref.read(saveProgressReportProvider);
     await saveProgressReport(report);
-    
+
     // Invalidate related providers so Projects views refresh with the new data
     ref.invalidate(projectsListProvider);
     ref.invalidate(projectDetailsProvider(report.projectUuid));
-    
+
+    ref.read(notificationProvider.notifier).createNotification(
+      title: 'Progress Update',
+      description: 'Progress update saved for ${report.projectName}.',
+      type: 'progress',
+      relatedUuid: report.uuid,
+      targetRoute: '/progress/${report.uuid}',
+    );
+
     await refresh();
   }
 
@@ -76,7 +84,9 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     final reports = state.value;
     if (reports != null) {
       try {
-        final r = reports.firstWhere((r) => r.uuid == uuid || r.projectUuid == uuid);
+        final r = reports.firstWhere(
+          (r) => r.uuid == uuid || r.projectUuid == uuid,
+        );
         return r;
       } catch (e) {
         // Fallback to fetch
@@ -98,8 +108,9 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     final report = await _getReport(reportUuid);
     if (report == null) return;
 
-    final updatedCategories = List<ProgressCategory>.from(report.categories)..add(category);
-    
+    final updatedCategories = List<ProgressCategory>.from(report.categories)
+      ..add(category);
+
     double overallProgress = report.overallProgress;
     if (report.isAutoCalculated) {
       overallProgress = _calculateOverallProgress(updatedCategories);
@@ -114,12 +125,17 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     await saveReport(updatedReport);
   }
 
-  Future<void> updateCategory(String reportUuid, ProgressCategory category) async {
+  Future<void> updateCategory(
+    String reportUuid,
+    ProgressCategory category,
+  ) async {
     final report = await _getReport(reportUuid);
     if (report == null) return;
 
-    final updatedCategories = report.categories.map((c) => c.id == category.id ? category : c).toList();
-    
+    final updatedCategories = report.categories
+        .map((c) => c.id == category.id ? category : c)
+        .toList();
+
     double overallProgress = report.overallProgress;
     if (report.isAutoCalculated) {
       overallProgress = _calculateOverallProgress(updatedCategories);
@@ -138,8 +154,10 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     final report = await _getReport(reportUuid);
     if (report == null) return;
 
-    final updatedCategories = report.categories.where((c) => c.id != categoryId).toList();
-    
+    final updatedCategories = report.categories
+        .where((c) => c.id != categoryId)
+        .toList();
+
     double overallProgress = report.overallProgress;
     if (report.isAutoCalculated) {
       overallProgress = _calculateOverallProgress(updatedCategories);
@@ -154,17 +172,21 @@ class ProgressNotifier extends AsyncNotifier<List<ProgressReport>> {
     await saveReport(updatedReport);
   }
 
-  Future<void> reorderCategories(String reportUuid, int oldIndex, int newIndex) async {
+  Future<void> reorderCategories(
+    String reportUuid,
+    int oldIndex,
+    int newIndex,
+  ) async {
     final report = await _getReport(reportUuid);
     if (report == null) return;
 
     final categories = List<ProgressCategory>.from(report.categories);
     categories.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
-    
+
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    
+
     final item = categories.removeAt(oldIndex);
     categories.insert(newIndex, item);
 
@@ -218,8 +240,11 @@ class ProgressSearchQuery extends Notifier<String> {
   String build() => '';
   void update(String value) => state = value;
 }
-final progressSearchQueryProvider = NotifierProvider<ProgressSearchQuery, String>(() => ProgressSearchQuery());
 
-final progressNotifierProvider = AsyncNotifierProvider<ProgressNotifier, List<ProgressReport>>(() {
-  return ProgressNotifier();
-});
+final progressSearchQueryProvider =
+    NotifierProvider<ProgressSearchQuery, String>(() => ProgressSearchQuery());
+
+final progressNotifierProvider =
+    AsyncNotifierProvider<ProgressNotifier, List<ProgressReport>>(() {
+      return ProgressNotifier();
+    });

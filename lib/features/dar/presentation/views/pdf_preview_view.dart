@@ -15,10 +15,7 @@ import 'package:printing/printing.dart';
 class PdfPreviewView extends ConsumerWidget {
   final String id;
 
-  const PdfPreviewView({
-    super.key,
-    required this.id,
-  });
+  const PdfPreviewView({super.key, required this.id});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +25,11 @@ class PdfPreviewView extends ConsumerWidget {
     final detailsAsync = ref.watch(darDetailsProvider(id));
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBg : const Color(0xFFECEFF1), // Light grey background to contrast the white paper page
+      backgroundColor: isDark
+          ? AppTheme.darkBg
+          : const Color(
+              0xFFECEFF1,
+            ), // Light grey background to contrast the white paper page
       appBar: AppBar(
         title: const Text('DAR PDF Print Preview'),
         actions: [
@@ -38,7 +39,8 @@ class PdfPreviewView extends ConsumerWidget {
             onPressed: () async {
               if (detailsAsync.value != null) {
                 await Printing.layoutPdf(
-                  onLayout: (PdfPageFormat format) async => _generatePdf(detailsAsync.value!),
+                  onLayout: (PdfPageFormat format) async =>
+                      _generatePdf(detailsAsync.value!),
                 );
               }
             },
@@ -50,7 +52,7 @@ class PdfPreviewView extends ConsumerWidget {
               if (detailsAsync.value != null) {
                 final bytes = await _generatePdf(detailsAsync.value!);
                 await Printing.sharePdf(
-                  bytes: bytes, 
+                  bytes: bytes,
                   filename: 'DAR_${detailsAsync.value!.darNumber}.pdf',
                 );
               }
@@ -65,11 +67,16 @@ class PdfPreviewView extends ConsumerWidget {
           error: (err, stack) => _buildErrorState(context, err.toString()),
           data: (report) {
             if (report == null) {
-              return const Center(child: Text('Daily Activity Report not found.'));
+              return const Center(
+                child: Text('Daily Activity Report not found.'),
+              );
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 32.0,
+                horizontal: 16.0,
+              ),
               child: Center(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -84,16 +91,23 @@ class PdfPreviewView extends ConsumerWidget {
                         child: Container(
                           width: targetWidth,
                           padding: const EdgeInsets.all(40.0),
-                          color: Colors.white, // Always white background for printing page look
+                          color: Colors
+                              .white, // Always white background for printing page look
                           child: DefaultTextStyle(
-                            style: const TextStyle(color: Colors.black87, fontFamily: 'Courier'),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontFamily: 'Courier',
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // 1. Corporate Header
                                 _buildPdfHeader(report),
                                 const SizedBox(height: 12),
-                                const Divider(color: Colors.black54, thickness: 1.5),
+                                const Divider(
+                                  color: Colors.black54,
+                                  thickness: 1.5,
+                                ),
                                 const SizedBox(height: 12),
 
                                 // 2. Info Block Row
@@ -105,7 +119,9 @@ class PdfPreviewView extends ConsumerWidget {
                                 const SizedBox(height: 24),
 
                                 // 4. Daily Accomplishments Table
-                                _buildPdfAccomplishmentsTable(report.accomplishments),
+                                _buildPdfAccomplishmentsTable(
+                                  report.accomplishments,
+                                ),
                                 const SizedBox(height: 24),
 
                                 // 5. Grid for Manpower, Equipment and Materials side-by-side
@@ -204,7 +220,7 @@ class PdfPreviewView extends ConsumerWidget {
             Text(
               'STATUS: ${report.status.toUpperCase()}',
               style: TextStyle(
-                fontSize: 10, 
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: report.status == 'Approved' ? Colors.green : Colors.blue,
               ),
@@ -227,7 +243,10 @@ class PdfPreviewView extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildInfoItem('PROJECT NAME:', report.projectName),
-          _buildInfoItem('REPORT DATE:', DateFormat('MMMM dd, yyyy').format(report.reportDate)),
+          _buildInfoItem(
+            'REPORT DATE:',
+            DateFormat('MMMM dd, yyyy').format(report.reportDate),
+          ),
           _buildInfoItem('PREPARED BY:', report.preparedBy),
           _buildInfoItem('PERIOD SHIFT:', report.reportingPeriod),
         ],
@@ -242,7 +261,11 @@ class PdfPreviewView extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54),
+            style: const TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
@@ -289,7 +312,11 @@ class PdfPreviewView extends ConsumerWidget {
       children: [
         const Text(
           '1.0 DAILY WORK ACCOMPLISHMENTS',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1B5E20),
+          ),
         ),
         const SizedBox(height: 8),
         Table(
@@ -333,7 +360,12 @@ class PdfPreviewView extends ConsumerWidget {
                     _buildTableBodyCell('${idx + 1}'),
                     _buildTableBodyCell(item.workDescription),
                     _buildTableBodyCell(item.areaLocation),
-                    _buildTableBodyCell((item.quantity.isNaN || item.quantity.isInfinite ? 0.0 : item.quantity).toStringAsFixed(1)),
+                    _buildTableBodyCell(
+                      (item.quantity.isNaN || item.quantity.isInfinite
+                              ? 0.0
+                              : item.quantity)
+                          .toStringAsFixed(1),
+                    ),
                     _buildTableBodyCell(item.unit),
                     _buildTableBodyCell(item.remarks),
                   ],
@@ -358,7 +390,11 @@ class PdfPreviewView extends ConsumerWidget {
             children: [
               const Text(
                 '2.0 MANPOWER LOGS',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
               ),
               const SizedBox(height: 6),
               Table(
@@ -415,7 +451,11 @@ class PdfPreviewView extends ConsumerWidget {
               // Equipment
               const Text(
                 '3.0 EQUIPMENT / MACHINERY LOGS',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
               ),
               const SizedBox(height: 6),
               Table(
@@ -455,7 +495,11 @@ class PdfPreviewView extends ConsumerWidget {
               // Materials
               const Text(
                 '4.0 MATERIALS INSTALLED LOGS',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
               ),
               const SizedBox(height: 6),
               Table(
@@ -500,7 +544,11 @@ class PdfPreviewView extends ConsumerWidget {
       children: [
         const Text(
           '5.0 TECHNICAL DELAYS & HSE ISSUES',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1B5E20),
+          ),
         ),
         const SizedBox(height: 8),
         Table(
@@ -541,7 +589,11 @@ class PdfPreviewView extends ConsumerWidget {
       children: [
         const Text(
           '6.0 OPERATIONS DOCUMENTATION PHOTOS',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1B5E20),
+          ),
         ),
         const SizedBox(height: 8),
         Row(
@@ -556,7 +608,13 @@ class PdfPreviewView extends ConsumerWidget {
                 ),
                 child: Stack(
                   children: [
-                    const Center(child: Icon(Icons.insert_photo_outlined, size: 28, color: Colors.grey)),
+                    const Center(
+                      child: Icon(
+                        Icons.insert_photo_outlined,
+                        size: 28,
+                        color: Colors.grey,
+                      ),
+                    ),
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -568,7 +626,11 @@ class PdfPreviewView extends ConsumerWidget {
                           p.caption,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -587,9 +649,15 @@ class PdfPreviewView extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureField('PREPARED BY (Supervisor/Engineer):', report.signedPrepared),
+        _buildSignatureField(
+          'PREPARED BY (Supervisor/Engineer):',
+          report.signedPrepared,
+        ),
         _buildSignatureField('CHECKED BY (Lead QA/QC):', report.signedChecked),
-        _buildSignatureField('APPROVED BY (Project Manager):', report.signedApproved),
+        _buildSignatureField(
+          'APPROVED BY (Project Manager):',
+          report.signedApproved,
+        ),
       ],
     );
   }
@@ -600,7 +668,11 @@ class PdfPreviewView extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: const TextStyle(
+            fontSize: 8,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
         ),
         const SizedBox(height: 28),
         Container(
@@ -614,7 +686,9 @@ class PdfPreviewView extends ConsumerWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              fontStyle: signatureName.isEmpty ? FontStyle.normal : FontStyle.italic,
+              fontStyle: signatureName.isEmpty
+                  ? FontStyle.normal
+                  : FontStyle.italic,
               color: signatureName.isEmpty ? Colors.grey : Colors.black87,
             ),
           ),
@@ -630,7 +704,11 @@ class PdfPreviewView extends ConsumerWidget {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black87),
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
       ),
     );
   }
@@ -652,11 +730,19 @@ class PdfPreviewView extends ConsumerWidget {
       children: [
         const Text(
           'CONFIDENTIAL — FOR INTERNAL MHG PROJECT USE ONLY',
-          style: TextStyle(fontSize: 7, color: Colors.grey, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 7,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           'Generated on ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())} | Page 1 of 1',
-          style: const TextStyle(fontSize: 7, color: Colors.grey, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 7,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
@@ -670,14 +756,14 @@ class PdfPreviewView extends ConsumerWidget {
         children: [
           const Icon(Icons.error_outline, size: 56, color: Color(0xFFD32F2F)),
           const SizedBox(height: 16),
-          Text('Failed to render PDF preview', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Failed to render PDF preview',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
-          AppButton(
-            text: 'Return to details',
-            onPressed: () => context.pop(),
-          ),
+          AppButton(text: 'Return to details', onPressed: () => context.pop()),
         ],
       ),
     );
@@ -689,7 +775,9 @@ class PdfPreviewView extends ConsumerWidget {
 
     pw.ImageProvider? logoImage;
     try {
-      final ByteData logoData = await rootBundle.load('assets/images/company_logo.png');
+      final ByteData logoData = await rootBundle.load(
+        'assets/images/company_logo.png',
+      );
       final Uint8List logoBytes = logoData.buffer.asUint8List();
       logoImage = pw.MemoryImage(logoBytes);
     } catch (_) {
@@ -707,9 +795,18 @@ class PdfPreviewView extends ConsumerWidget {
               if (logoImage != null)
                 pw.Image(logoImage, height: 60, fit: pw.BoxFit.contain)
               else
-                pw.Text('COMPANY LOGO', style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey500)),
+                pw.Text(
+                  'COMPANY LOGO',
+                  style: const pw.TextStyle(
+                    fontSize: 16,
+                    color: PdfColors.grey500,
+                  ),
+                ),
               pw.SizedBox(height: 12),
-              pw.Divider(color: const PdfColor.fromInt(0xFF1B5E20), thickness: 1.0),
+              pw.Divider(
+                color: const PdfColor.fromInt(0xFF1B5E20),
+                thickness: 1.0,
+              ),
               pw.SizedBox(height: 16),
             ],
           );
@@ -720,13 +817,35 @@ class PdfPreviewView extends ConsumerWidget {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Text('DAILY ACCOMPLISHMENT REPORT', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1B5E20))),
+              pw.Text(
+                'DAILY ACCOMPLISHMENT REPORT',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                  color: const PdfColor.fromInt(0xFF1B5E20),
+                ),
+              ),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  pw.Text('REPORT NO: ${report.darNumber}', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    'REPORT NO: ${report.darNumber}',
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
                   pw.SizedBox(height: 2),
-                  pw.Text('STATUS: ${report.status.toUpperCase()}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: report.status == 'Approved' ? PdfColors.green : PdfColors.blue)),
+                  pw.Text(
+                    'STATUS: ${report.status.toUpperCase()}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                      color: report.status == 'Approved'
+                          ? PdfColors.green
+                          : PdfColors.blue,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -736,12 +855,18 @@ class PdfPreviewView extends ConsumerWidget {
           // Info
           pw.Container(
             padding: const pw.EdgeInsets.all(12),
-            decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300), color: PdfColors.grey100),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey300),
+              color: PdfColors.grey100,
+            ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 _pwInfoItem('PROJECT NAME:', report.projectName),
-                _pwInfoItem('REPORT DATE:', DateFormat('MMMM dd, yyyy').format(report.reportDate)),
+                _pwInfoItem(
+                  'REPORT DATE:',
+                  DateFormat('MMMM dd, yyyy').format(report.reportDate),
+                ),
                 _pwInfoItem('PREPARED BY:', report.preparedBy),
                 _pwInfoItem('PERIOD SHIFT:', report.reportingPeriod),
               ],
@@ -753,25 +878,58 @@ class PdfPreviewView extends ConsumerWidget {
           pw.TableHelper.fromTextArray(
             border: pw.TableBorder.all(color: PdfColors.grey300),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
-            headers: ['Weather Status', 'Avg Temp (°C)', 'Wind Velocity', 'Site / Terrain Condition'],
+            headers: [
+              'Weather Status',
+              'Avg Temp (°C)',
+              'Wind Velocity',
+              'Site / Terrain Condition',
+            ],
             data: [
-              [report.weather, '${report.temperature}', report.windCondition, report.siteCondition],
+              [
+                report.weather,
+                '${report.temperature}',
+                report.windCondition,
+                report.siteCondition,
+              ],
             ],
           ),
           pw.SizedBox(height: 24),
 
           // Accomplishments
-          pw.Text('1.0 DAILY WORK ACCOMPLISHMENTS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1B5E20))),
+          pw.Text(
+            '1.0 DAILY WORK ACCOMPLISHMENTS',
+            style: pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+              color: const PdfColor.fromInt(0xFF1B5E20),
+            ),
+          ),
           pw.SizedBox(height: 8),
           pw.TableHelper.fromTextArray(
             border: pw.TableBorder.all(color: PdfColors.grey300),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
-            headers: ['#', 'Work Description', 'Area / Location', 'Qty', 'Unit', 'Remarks'],
-            data: report.accomplishments.isEmpty 
-                ? [['-', 'No accomplishments recorded.', '-', '-', '-', '-']]
+            headers: [
+              '#',
+              'Work Description',
+              'Area / Location',
+              'Qty',
+              'Unit',
+              'Remarks',
+            ],
+            data: report.accomplishments.isEmpty
+                ? [
+                    ['-', 'No accomplishments recorded.', '-', '-', '-', '-'],
+                  ]
                 : List.generate(report.accomplishments.length, (i) {
                     final acc = report.accomplishments[i];
-                    return ['${i+1}', acc.workDescription, acc.areaLocation, '${acc.quantity}', acc.unit, acc.remarks];
+                    return [
+                      '${i + 1}',
+                      acc.workDescription,
+                      acc.areaLocation,
+                      '${acc.quantity}',
+                      acc.unit,
+                      acc.remarks,
+                    ];
                   }),
           ),
           pw.SizedBox(height: 32),
@@ -780,11 +938,14 @@ class PdfPreviewView extends ConsumerWidget {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              _pwSig('PREPARED BY (Supervisor/Engineer):', report.signedPrepared),
+              _pwSig(
+                'PREPARED BY (Supervisor/Engineer):',
+                report.signedPrepared,
+              ),
               _pwSig('CHECKED BY (Lead QA/QC):', report.signedChecked),
               _pwSig('APPROVED BY (Project Manager):', report.signedApproved),
             ],
-          )
+          ),
         ],
         footer: (pw.Context context) {
           return pw.Container(
@@ -806,9 +967,19 @@ class PdfPreviewView extends ConsumerWidget {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(label, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700)),
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.grey700,
+          ),
+        ),
         pw.SizedBox(height: 4),
-        pw.Text(value, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          value,
+          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+        ),
       ],
     );
   }
@@ -817,12 +988,28 @@ class PdfPreviewView extends ConsumerWidget {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(title, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700)),
+        pw.Text(
+          title,
+          style: pw.TextStyle(
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.grey700,
+          ),
+        ),
         pw.SizedBox(height: 28),
         pw.Container(
           width: 150,
-          decoration: const pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey700))),
-          child: pw.Text(name.isEmpty ? 'Pending sign-off' : name, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: name.isEmpty ? PdfColors.grey500 : PdfColors.black)),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey700)),
+          ),
+          child: pw.Text(
+            name.isEmpty ? 'Pending sign-off' : name,
+            style: pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+              color: name.isEmpty ? PdfColors.grey500 : PdfColors.black,
+            ),
+          ),
         ),
       ],
     );

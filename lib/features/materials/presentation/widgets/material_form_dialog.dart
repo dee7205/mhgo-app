@@ -34,7 +34,7 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
     'DC/AC Cabling',
     'Transformers',
     'BOS',
-    'Misc'
+    'Misc',
   ];
 
   final List<String> _units = ['pcs', 'meters', 'sets', 'rolls', 'kg'];
@@ -44,13 +44,16 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
     super.initState();
     final m = widget.existingMaterial;
     _nameController = TextEditingController(text: m?.name ?? '');
-    _currentStockController =
-        TextEditingController(text: m != null ? m.currentStock.toString() : '');
-    _minimumStockController =
-        TextEditingController(text: m != null ? m.minimumStock.toString() : '');
+    _currentStockController = TextEditingController(
+      text: m != null ? m.currentStock.toString() : '',
+    );
+    _minimumStockController = TextEditingController(
+      text: m != null ? m.minimumStock.toString() : '',
+    );
     _supplierController = TextEditingController(text: m?.supplier ?? '');
-    _storageLocationController =
-        TextEditingController(text: m?.storageLocation ?? '');
+    _storageLocationController = TextEditingController(
+      text: m?.storageLocation ?? '',
+    );
     _remarksController = TextEditingController(text: m?.remarks ?? '');
 
     if (m != null) {
@@ -141,12 +144,26 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _categories.contains(_selectedCategory) ? _selectedCategory : null,
-                    items: _categories.toSet()
-                        .map((c) => DropdownMenuItem<String>(
-                              value: c,
-                              child: Row(children: [Expanded(child: Text(c, overflow: TextOverflow.ellipsis))]),
-                            ))
+                    value: _categories.contains(_selectedCategory)
+                        ? _selectedCategory
+                        : null,
+                    items: _categories
+                        .toSet()
+                        .map(
+                          (c) => DropdownMenuItem<String>(
+                            value: c,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    c,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedCategory = val);
@@ -160,12 +177,26 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _units.contains(_selectedUnit) ? _selectedUnit : null,
-                    items: _units.toSet()
-                        .map((u) => DropdownMenuItem<String>(
-                              value: u,
-                              child: Row(children: [Expanded(child: Text(u, overflow: TextOverflow.ellipsis))]),
-                            ))
+                    value: _units.contains(_selectedUnit)
+                        ? _selectedUnit
+                        : null,
+                    items: _units
+                        .toSet()
+                        .map(
+                          (u) => DropdownMenuItem<String>(
+                            value: u,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    u,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedUnit = val);
@@ -179,8 +210,9 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'Required' : null,
                   ),
@@ -192,8 +224,9 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'Required' : null,
                   ),
@@ -234,10 +267,7 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                         child: const Text('Cancel'),
                       ),
                       const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: _save,
-                        child: const Text('Save'),
-                      ),
+                      FilledButton(onPressed: _save, child: const Text('Save')),
                     ],
                   ),
                 ],

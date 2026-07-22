@@ -12,6 +12,7 @@ import 'package:mhgo/features/dar/domain/entities/dar_entities.dart';
 import 'package:mhgo/features/dar/presentation/providers/dar_provider.dart';
 import 'package:mhgo/features/projects/presentation/providers/projects_provider.dart';
 import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 
 enum DarFormMode { create, edit }
 
@@ -19,11 +20,7 @@ class DarCreateEditView extends ConsumerStatefulWidget {
   final DarFormMode mode;
   final String? id;
 
-  const DarCreateEditView({
-    super.key,
-    required this.mode,
-    this.id,
-  });
+  const DarCreateEditView({super.key, required this.mode, this.id});
 
   @override
   ConsumerState<DarCreateEditView> createState() => _DarCreateEditViewState();
@@ -158,34 +155,40 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     final manpowerList = <ManpowerAccomplishment>[];
     _manpowerData.forEach((category, data) {
       if ((data['present'] ?? 0) > 0 || (data['planned'] ?? 0) > 0) {
-        manpowerList.add(ManpowerAccomplishment(
-          category: category,
-          planned: data['planned'] ?? 0,
-          present: data['present'] ?? 0,
-          overtime: data['overtime'] ?? 0,
-        ));
+        manpowerList.add(
+          ManpowerAccomplishment(
+            category: category,
+            planned: data['planned'] ?? 0,
+            present: data['present'] ?? 0,
+            overtime: data['overtime'] ?? 0,
+          ),
+        );
       }
     });
 
     final equipmentList = <EquipmentUsage>[];
     _equipmentData.forEach((name, data) {
       if ((data['count'] as int) > 0) {
-        equipmentList.add(EquipmentUsage(
-          name: name,
-          count: data['count'] as int,
-          hoursUsed: (data['hours'] as num).toDouble(),
-        ));
+        equipmentList.add(
+          EquipmentUsage(
+            name: name,
+            count: data['count'] as int,
+            hoursUsed: (data['hours'] as num).toDouble(),
+          ),
+        );
       }
     });
 
     final materialsList = <MaterialInstalled>[];
     _materialData.forEach((name, data) {
       if ((data['quantity'] as int) > 0) {
-        materialsList.add(MaterialInstalled(
-          name: name,
-          quantity: data['quantity'] as int,
-          unit: data['unit'] as String,
-        ));
+        materialsList.add(
+          MaterialInstalled(
+            name: name,
+            quantity: data['quantity'] as int,
+            unit: data['unit'] as String,
+          ),
+        );
       }
     });
 
@@ -227,7 +230,10 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     }
     if (!_formKey.currentState!.validate()) return;
     if (_accomplishments.isEmpty) {
-      _showSnackBar('Add at least one daily accomplishment record.', isError: true);
+      _showSnackBar(
+        'Add at least one daily accomplishment record.',
+        isError: true,
+      );
       return;
     }
 
@@ -236,6 +242,14 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     await ref.read(saveDarUseCaseProvider).execute(report);
     ref.invalidate(darsListProvider);
     ref.invalidate(dashboardStateProvider);
+
+    ref.read(notificationProvider.notifier).createNotification(
+      title: widget.mode == DarFormMode.create ? 'DAR Created' : 'DAR Updated',
+      description: 'DAR ${report.darNumber} has been successfully submitted.',
+      type: 'dar',
+      relatedUuid: report.id,
+      targetRoute: '/dar/${report.id}',
+    );
 
     if (mounted) {
       setState(() => _isSubmitting = false);
@@ -246,17 +260,32 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
 
   Future<void> _saveDraft() async {
     if (_selectedProjectUuid == null) {
-      _showSnackBar('Please select a project before saving draft.', isError: true);
+      _showSnackBar(
+        'Please select a project before saving draft.',
+        isError: true,
+      );
       return;
     }
     if (_preparedByController.text.trim().isEmpty) {
-      _showSnackBar('Please enter who the report is prepared by.', isError: true);
+      _showSnackBar(
+        'Please enter who the report is prepared by.',
+        isError: true,
+      );
       return;
     }
     final report = _assembleReport('Draft');
     await ref.read(saveDarUseCaseProvider).execute(report);
     ref.invalidate(darsListProvider);
     ref.invalidate(dashboardStateProvider);
+
+    ref.read(notificationProvider.notifier).createNotification(
+      title: 'DAR Draft Saved',
+      description: 'DAR ${report.darNumber} has been saved as a draft.',
+      type: 'dar',
+      relatedUuid: report.id,
+      targetRoute: '/dar/${report.id}',
+    );
+
     if (mounted) _showSnackBar('Draft saved.');
   }
 
@@ -265,7 +294,9 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: isError ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32),
+        backgroundColor: isError
+            ? const Color(0xFFD32F2F)
+            : const Color(0xFF2E7D32),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -287,7 +318,10 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
           widget.mode == DarFormMode.create
               ? 'Create Daily Accomplishment Report'
               : 'Edit Daily Accomplishment Report',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -0.5),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
         ),
         actions: [
           if (_selectedProjectUuid != null)
@@ -320,7 +354,12 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildProjectInfoSection(projectsAsync, theme, isDark, isDesktop),
+                          _buildProjectInfoSection(
+                            projectsAsync,
+                            theme,
+                            isDark,
+                            isDesktop,
+                          ),
                           const SizedBox(height: 28),
                           _buildWeatherSection(theme, isDark, isDesktop),
                           const SizedBox(height: 28),
@@ -383,14 +422,23 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
   // ════════════════════════════════════════════════════════════
   // 1. PROJECT & PERIOD CONFIGURATION
   // ════════════════════════════════════════════════════════════
-  Widget _buildProjectInfoSection(AsyncValue<List<ProjectModel>> projectsAsync, ThemeData theme, bool isDark, bool isDesktop) {
+  Widget _buildProjectInfoSection(
+    AsyncValue<List<ProjectModel>> projectsAsync,
+    ThemeData theme,
+    bool isDark,
+    bool isDesktop,
+  ) {
     return AppCard(
       variant: AppCardVariant.outlined,
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Project & Period Configuration', Icons.assignment_outlined, theme),
+          _sectionHeader(
+            'Project & Period Configuration',
+            Icons.assignment_outlined,
+            theme,
+          ),
           projectsAsync.when(
             loading: () => const LinearProgressIndicator(),
             error: (e, _) => Text('Error: $e'),
@@ -403,9 +451,13 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.folder_open_outlined),
                 ),
-                validator: (val) => val == null ? 'Project selection is required' : null,
+                validator: (val) =>
+                    val == null ? 'Project selection is required' : null,
                 items: projects.map((p) {
-                  return DropdownMenuItem(value: p.uuid, child: Text(p.name, overflow: TextOverflow.ellipsis));
+                  return DropdownMenuItem(
+                    value: p.uuid,
+                    child: Text(p.name, overflow: TextOverflow.ellipsis),
+                  );
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -442,7 +494,9 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.calendar_today_outlined),
                     ),
-                    child: Text(DateFormat('MMMM dd, yyyy').format(_reportDate)),
+                    child: Text(
+                      DateFormat('MMMM dd, yyyy').format(_reportDate),
+                    ),
                   ),
                 ),
               ),
@@ -457,8 +511,14 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                     prefixIcon: Icon(Icons.schedule_outlined),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'Day Shift', child: Text('Day Shift (07:00 – 16:00)')),
-                    DropdownMenuItem(value: 'Night Shift', child: Text('Night Shift (19:00 – 04:00)')),
+                    DropdownMenuItem(
+                      value: 'Day Shift',
+                      child: Text('Day Shift (07:00 – 16:00)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Night Shift',
+                      child: Text('Night Shift (19:00 – 04:00)'),
+                    ),
                   ],
                   onChanged: (val) {
                     if (val != null) setState(() => _reportingPeriod = val);
@@ -477,7 +537,8 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person_outline),
               ),
-              validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+              validator: (val) =>
+                  val == null || val.trim().isEmpty ? 'Required' : null,
             ),
           ),
         ],
@@ -495,7 +556,11 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Site Weather Conditions', Icons.cloud_queue_outlined, theme),
+          _sectionHeader(
+            'Site Weather Conditions',
+            Icons.cloud_queue_outlined,
+            theme,
+          ),
           Wrap(
             spacing: 16,
             runSpacing: 16,
@@ -505,21 +570,31 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 child: DropdownButtonFormField<String>(
                   value: _weather,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Weather', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Weather',
+                    border: OutlineInputBorder(),
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'Sunny', child: Text('☀️  Sunny')),
                     DropdownMenuItem(value: 'Rainy', child: Text('🌧️  Rainy')),
-                    DropdownMenuItem(value: 'Cloudy', child: Text('☁️  Cloudy')),
+                    DropdownMenuItem(
+                      value: 'Cloudy',
+                      child: Text('☁️  Cloudy'),
+                    ),
                     DropdownMenuItem(value: 'Windy', child: Text('💨  Windy')),
                   ],
-                  onChanged: (val) { if (val != null) setState(() => _weather = val); },
+                  onChanged: (val) {
+                    if (val != null) setState(() => _weather = val);
+                  },
                 ),
               ),
               SizedBox(
                 width: isDesktop ? 200 : double.infinity,
                 child: TextFormField(
                   controller: _temperatureController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Temperature',
                     border: OutlineInputBorder(),
@@ -532,13 +607,27 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 child: DropdownButtonFormField<String>(
                   value: _windCondition,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Wind', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Wind',
+                    border: OutlineInputBorder(),
+                  ),
                   items: const [
-                    DropdownMenuItem(value: 'Light', child: Text('Light Breeze')),
-                    DropdownMenuItem(value: 'Moderate', child: Text('Moderate Wind')),
-                    DropdownMenuItem(value: 'Strong', child: Text('Strong Gusts')),
+                    DropdownMenuItem(
+                      value: 'Light',
+                      child: Text('Light Breeze'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Moderate',
+                      child: Text('Moderate Wind'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Strong',
+                      child: Text('Strong Gusts'),
+                    ),
                   ],
-                  onChanged: (val) { if (val != null) setState(() => _windCondition = val); },
+                  onChanged: (val) {
+                    if (val != null) setState(() => _windCondition = val);
+                  },
                 ),
               ),
               SizedBox(
@@ -546,14 +635,22 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 child: DropdownButtonFormField<String>(
                   value: _siteCondition,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Terrain', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Terrain',
+                    border: OutlineInputBorder(),
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'Dry', child: Text('Dry / Clear')),
                     DropdownMenuItem(value: 'Muddy', child: Text('Muddy')),
-                    DropdownMenuItem(value: 'Flooded', child: Text('Waterlogged')),
+                    DropdownMenuItem(
+                      value: 'Flooded',
+                      child: Text('Waterlogged'),
+                    ),
                     DropdownMenuItem(value: 'Normal', child: Text('Normal')),
                   ],
-                  onChanged: (val) { if (val != null) setState(() => _siteCondition = val); },
+                  onChanged: (val) {
+                    if (val != null) setState(() => _siteCondition = val);
+                  },
                 ),
               ),
             ],
@@ -573,10 +670,16 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Daily Construction Accomplishments', Icons.construction_outlined, theme),
+          _sectionHeader(
+            'Daily Construction Accomplishments',
+            Icons.construction_outlined,
+            theme,
+          ),
           Text(
             'Record structural installations, piling counts, cable laying, and other site work.',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.disabledColor,
+            ),
           ),
           const SizedBox(height: 20),
           if (_accomplishments.isEmpty)
@@ -590,9 +693,18 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               ),
               child: Column(
                 children: [
-                  Icon(Icons.playlist_add, size: 40, color: theme.disabledColor),
+                  Icon(
+                    Icons.playlist_add,
+                    size: 40,
+                    color: theme.disabledColor,
+                  ),
                   const SizedBox(height: 8),
-                  Text('No accomplishments recorded yet.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+                  Text(
+                    'No accomplishments recorded yet.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.disabledColor,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -609,27 +721,53 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                      child: Text('${index + 1}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                      backgroundColor: theme.colorScheme.primary.withOpacity(
+                        0.1,
+                      ),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(item.workDescription, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            item.workDescription,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           const SizedBox(height: 4),
-                          Text('📍 ${item.areaLocation}  •  ${item.quantity} ${item.unit}', style: theme.textTheme.bodySmall),
+                          Text(
+                            '📍 ${item.areaLocation}  •  ${item.quantity} ${item.unit}',
+                            style: theme.textTheme.bodySmall,
+                          ),
                           if (item.remarks.isNotEmpty) ...[
                             const SizedBox(height: 2),
-                            Text('Notes: ${item.remarks}', style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic, color: theme.disabledColor)),
+                            Text(
+                              'Notes: ${item.remarks}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                color: theme.disabledColor,
+                              ),
+                            ),
                           ],
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFFD32F2F)),
-                      onPressed: () => setState(() => _accomplishments.removeAt(index)),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: Color(0xFFD32F2F),
+                      ),
+                      onPressed: () =>
+                          setState(() => _accomplishments.removeAt(index)),
                     ),
                   ],
                 );
@@ -664,37 +802,74 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Work Description'), maxLines: 2),
+                TextField(
+                  controller: descCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Work Description',
+                  ),
+                  maxLines: 2,
+                ),
                 const SizedBox(height: 16),
-                TextField(controller: areaCtrl, decoration: const InputDecoration(labelText: 'Area / Location')),
+                TextField(
+                  controller: areaCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Area / Location',
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: TextField(controller: qtyCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Quantity'))),
+                    Expanded(
+                      child: TextField(
+                        controller: qtyCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Quantity',
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 16),
-                    Expanded(child: TextField(controller: unitCtrl, decoration: const InputDecoration(labelText: 'Unit'))),
+                    Expanded(
+                      child: TextField(
+                        controller: unitCtrl,
+                        decoration: const InputDecoration(labelText: 'Unit'),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                TextField(controller: remarksCtrl, decoration: const InputDecoration(labelText: 'Remarks'), maxLines: 2),
+                TextField(
+                  controller: remarksCtrl,
+                  decoration: const InputDecoration(labelText: 'Remarks'),
+                  maxLines: 2,
+                ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               final qty = double.tryParse(qtyCtrl.text) ?? 0;
-              if (descCtrl.text.trim().isNotEmpty && areaCtrl.text.trim().isNotEmpty && qty > 0) {
+              if (descCtrl.text.trim().isNotEmpty &&
+                  areaCtrl.text.trim().isNotEmpty &&
+                  qty > 0) {
                 setState(() {
-                  _accomplishments.add(AccomplishmentItem(
-                    workDescription: descCtrl.text.trim(),
-                    areaLocation: areaCtrl.text.trim(),
-                    quantity: qty,
-                    unit: unitCtrl.text.trim(),
-                    remarks: remarksCtrl.text.trim(),
-                  ));
+                  _accomplishments.add(
+                    AccomplishmentItem(
+                      workDescription: descCtrl.text.trim(),
+                      areaLocation: areaCtrl.text.trim(),
+                      quantity: qty,
+                      unit: unitCtrl.text.trim(),
+                      remarks: remarksCtrl.text.trim(),
+                    ),
+                  );
                 });
                 Navigator.pop(ctx);
               }
@@ -716,7 +891,11 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Site Personnel Manpower', Icons.people_outline, theme),
+          _sectionHeader(
+            'Site Personnel Manpower',
+            Icons.people_outline,
+            theme,
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Table(
@@ -735,7 +914,9 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 // Header row
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+                    color: theme.colorScheme.primary.withOpacity(
+                      isDark ? 0.15 : 0.06,
+                    ),
                   ),
                   children: [
                     _tableHeader('Personnel Role', theme),
@@ -749,12 +930,35 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   return TableRow(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Text(entry.key, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          entry.key,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      _buildCompactNumberInput(entry.value, 'planned', isDark, theme),
-                      _buildCompactNumberInput(entry.value, 'present', isDark, theme),
-                      _buildCompactNumberInput(entry.value, 'overtime', isDark, theme),
+                      _buildCompactNumberInput(
+                        entry.value,
+                        'planned',
+                        isDark,
+                        theme,
+                      ),
+                      _buildCompactNumberInput(
+                        entry.value,
+                        'present',
+                        isDark,
+                        theme,
+                      ),
+                      _buildCompactNumberInput(
+                        entry.value,
+                        'overtime',
+                        isDark,
+                        theme,
+                      ),
                     ],
                   );
                 }),
@@ -772,12 +976,20 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Text(
         text,
         textAlign: center ? TextAlign.center : TextAlign.left,
-        style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.3),
+        style: theme.textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }
 
-  Widget _buildCompactNumberInput(Map<String, int> data, String key, bool isDark, ThemeData theme) {
+  Widget _buildCompactNumberInput(
+    Map<String, int> data,
+    String key,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: SizedBox(
@@ -786,9 +998,14 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
           initialValue: data[key].toString(),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
@@ -811,7 +1028,11 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Machinery & Equipment', Icons.local_shipping_outlined, theme),
+          _sectionHeader(
+            'Machinery & Equipment',
+            Icons.local_shipping_outlined,
+            theme,
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Table(
@@ -828,7 +1049,9 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               children: [
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+                    color: theme.colorScheme.primary.withOpacity(
+                      isDark ? 0.15 : 0.06,
+                    ),
                   ),
                   children: [
                     _tableHeader('Equipment Name', theme),
@@ -840,10 +1063,23 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   return TableRow(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Text(entry.key, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          entry.key,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      _buildEquipmentNumberInput(entry.value, 'count', isDark, theme),
+                      _buildEquipmentNumberInput(
+                        entry.value,
+                        'count',
+                        isDark,
+                        theme,
+                      ),
                       _buildEquipmentHoursInput(entry.value, isDark, theme),
                     ],
                   );
@@ -856,7 +1092,12 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     );
   }
 
-  Widget _buildEquipmentNumberInput(Map<String, dynamic> data, String key, bool isDark, ThemeData theme) {
+  Widget _buildEquipmentNumberInput(
+    Map<String, dynamic> data,
+    String key,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: SizedBox(
@@ -865,37 +1106,57 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
           initialValue: (data[key] as int).toString(),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
           ),
-          onChanged: (val) { data[key] = int.tryParse(val) ?? 0; },
+          onChanged: (val) {
+            data[key] = int.tryParse(val) ?? 0;
+          },
         ),
       ),
     );
   }
 
-  Widget _buildEquipmentHoursInput(Map<String, dynamic> data, bool isDark, ThemeData theme) {
+  Widget _buildEquipmentHoursInput(
+    Map<String, dynamic> data,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: SizedBox(
         height: 40,
         child: TextFormField(
-          initialValue: (data['hours'] as double) > 0 ? (data['hours'] as double).toString() : '',
+          initialValue: (data['hours'] as double) > 0
+              ? (data['hours'] as double).toString()
+              : '',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
           decoration: InputDecoration(
             hintText: '0.0',
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
           ),
-          onChanged: (val) { data['hours'] = double.tryParse(val) ?? 0.0; },
+          onChanged: (val) {
+            data['hours'] = double.tryParse(val) ?? 0.0;
+          },
         ),
       ),
     );
@@ -911,7 +1172,11 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Materials Installed', Icons.inventory_2_outlined, theme),
+          _sectionHeader(
+            'Materials Installed',
+            Icons.inventory_2_outlined,
+            theme,
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Table(
@@ -928,7 +1193,9 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               children: [
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+                    color: theme.colorScheme.primary.withOpacity(
+                      isDark ? 0.15 : 0.06,
+                    ),
                   ),
                   children: [
                     _tableHeader('Material Name', theme),
@@ -940,34 +1207,63 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   return TableRow(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Text(entry.key, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                        child: SizedBox(
-                          height: 40,
-                          child: TextFormField(
-                            initialValue: (entry.value['quantity'] as int).toString(),
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                              filled: true,
-                              fillColor: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
-                            ),
-                            onChanged: (val) { entry.value['quantity'] = int.tryParse(val) ?? 0; },
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          entry.key,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        child: SizedBox(
+                          height: 40,
+                          child: TextFormField(
+                            initialValue: (entry.value['quantity'] as int)
+                                .toString(),
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              filled: true,
+                              fillColor: isDark
+                                  ? AppTheme.darkSurface
+                                  : AppTheme.lightSurface,
+                            ),
+                            onChanged: (val) {
+                              entry.value['quantity'] = int.tryParse(val) ?? 0;
+                            },
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Text(
                           entry.value['unit'] as String,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.disabledColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -1002,7 +1298,12 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 border: Border.all(color: theme.dividerColor),
               ),
               child: Center(
-                child: Text('No delays or issues recorded.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+                child: Text(
+                  'No delays or issues recorded.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.disabledColor,
+                  ),
+                ),
               ),
             )
           else
@@ -1016,22 +1317,41 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFFFB300)),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 18,
+                      color: Color(0xFFFFB300),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(d.type, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFFB300))),
+                          Text(
+                            d.type,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFFFB300),
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(d.description, style: theme.textTheme.bodySmall),
                           const SizedBox(height: 2),
-                          Text('Impact: ${d.impactHours} hours', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            'Impact: ${d.impactHours} hours',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFFD32F2F)),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: Color(0xFFD32F2F),
+                      ),
                       onPressed: () => setState(() => _delays.removeAt(index)),
                     ),
                   ],
@@ -1067,31 +1387,67 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               DropdownButtonFormField<String>(
                 value: delayType,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
                 items: const [
-                  DropdownMenuItem(value: 'Weather Delay', child: Text('Weather Delay')),
-                  DropdownMenuItem(value: 'Material Delay', child: Text('Material Delay')),
-                  DropdownMenuItem(value: 'Safety Issue', child: Text('Safety Issue')),
-                  DropdownMenuItem(value: 'Technical Issue', child: Text('Technical Issue')),
+                  DropdownMenuItem(
+                    value: 'Weather Delay',
+                    child: Text('Weather Delay'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Material Delay',
+                    child: Text('Material Delay'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Safety Issue',
+                    child: Text('Safety Issue'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Technical Issue',
+                    child: Text('Technical Issue'),
+                  ),
                   DropdownMenuItem(value: 'Other', child: Text('Other')),
                 ],
-                onChanged: (val) { if (val != null) delayType = val; },
+                onChanged: (val) {
+                  if (val != null) delayType = val;
+                },
               ),
               const SizedBox(height: 16),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description'), maxLines: 2),
+              TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(labelText: 'Description'),
+                maxLines: 2,
+              ),
               const SizedBox(height: 16),
-              TextField(controller: impactCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Impact Hours')),
+              TextField(
+                controller: impactCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(labelText: 'Impact Hours'),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               final impact = double.tryParse(impactCtrl.text) ?? 0;
               if (descCtrl.text.trim().isNotEmpty && impact > 0) {
                 setState(() {
-                  _delays.add(DelayIssue(type: delayType, description: descCtrl.text.trim(), impactHours: impact));
+                  _delays.add(
+                    DelayIssue(
+                      type: delayType,
+                      description: descCtrl.text.trim(),
+                      impactHours: impact,
+                    ),
+                  );
                 });
                 Navigator.pop(ctx);
               }
@@ -1113,10 +1469,16 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Site Documentation Photos', Icons.photo_library_outlined, theme),
+          _sectionHeader(
+            'Site Documentation Photos',
+            Icons.photo_library_outlined,
+            theme,
+          ),
           LayoutBuilder(
             builder: (context, constraints) {
-              final crossAxisCount = constraints.maxWidth > 700 ? 4 : (constraints.maxWidth > 400 ? 3 : 2);
+              final crossAxisCount = constraints.maxWidth > 700
+                  ? 4
+                  : (constraints.maxWidth > 400 ? 3 : 2);
               final itemCount = _photos.length + 1;
 
               return GridView.builder(
@@ -1138,14 +1500,27 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary.withOpacity(0.04),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: theme.dividerColor, style: BorderStyle.solid),
+                          border: Border.all(
+                            color: theme.dividerColor,
+                            style: BorderStyle.solid,
+                          ),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_photo_alternate_outlined, size: 32, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.add_photo_alternate_outlined,
+                              size: 32,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(height: 8),
-                            Text('Add Photo', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                            Text(
+                              'Add Photo',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -1166,7 +1541,13 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                             color: Colors.blueGrey.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Center(child: Icon(Icons.image, size: 28, color: Colors.grey)),
+                          child: const Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 28,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                         Positioned(
                           bottom: 0,
@@ -1176,21 +1557,39 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.6),
-                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(12),
+                              ),
                             ),
-                            child: Text(photo.caption, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                            child: Text(
+                              photo.caption,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
                           ),
                         ),
                         Positioned(
                           top: 4,
                           right: 4,
                           child: GestureDetector(
-                            onTap: () => setState(() => _photos.removeAt(index)),
+                            onTap: () =>
+                                setState(() => _photos.removeAt(index)),
                             behavior: HitTestBehavior.opaque,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(color: Color(0xFFD32F2F), shape: BoxShape.circle),
-                              child: const Icon(Icons.close, size: 12, color: Colors.white),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFD32F2F),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -1220,26 +1619,43 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               Container(
                 height: 100,
                 width: double.infinity,
-                decoration: BoxDecoration(color: Colors.blueGrey.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
-                child: const Center(child: Icon(Icons.camera_alt_outlined, size: 32, color: Colors.grey)),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.camera_alt_outlined,
+                    size: 32,
+                    color: Colors.grey,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              TextField(controller: captionCtrl, decoration: const InputDecoration(labelText: 'Caption')),
+              TextField(
+                controller: captionCtrl,
+                decoration: const InputDecoration(labelText: 'Caption'),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
-              final caption = captionCtrl.text.trim().isEmpty 
-                  ? 'Attached Photo #${_photos.length + 1}' 
+              final caption = captionCtrl.text.trim().isEmpty
+                  ? 'Attached Photo #${_photos.length + 1}'
                   : captionCtrl.text.trim();
               setState(() {
-                _photos.add(DarPhoto(
-                  path: 'mock_${_photos.length + 1}.jpg', 
-                  caption: caption,
-                ));
+                _photos.add(
+                  DarPhoto(
+                    path: 'mock_${_photos.length + 1}.jpg',
+                    caption: caption,
+                  ),
+                );
               });
               Navigator.pop(ctx);
             },
@@ -1265,19 +1681,54 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 700;
               final cards = [
-                _signatureCard('Prepared By', _signedPrepared, (val) => setState(() => _signedPrepared = val), theme, isDark, required: true),
-                _signatureCard('Checked By (QA/QC)', _signedChecked, (val) => setState(() => _signedChecked = val), theme, isDark),
-                _signatureCard('Approved By (PM)', _signedApproved, (val) => setState(() => _signedApproved = val), theme, isDark),
+                _signatureCard(
+                  'Prepared By',
+                  _signedPrepared,
+                  (val) => setState(() => _signedPrepared = val),
+                  theme,
+                  isDark,
+                  required: true,
+                ),
+                _signatureCard(
+                  'Checked By (QA/QC)',
+                  _signedChecked,
+                  (val) => setState(() => _signedChecked = val),
+                  theme,
+                  isDark,
+                ),
+                _signatureCard(
+                  'Approved By (PM)',
+                  _signedApproved,
+                  (val) => setState(() => _signedApproved = val),
+                  theme,
+                  isDark,
+                ),
               ];
 
               if (isWide) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: cards.map((card) => Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: card))).toList(),
+                  children: cards
+                      .map(
+                        (card) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: card,
+                          ),
+                        ),
+                      )
+                      .toList(),
                 );
               }
               return Column(
-                children: cards.map((card) => Padding(padding: const EdgeInsets.only(bottom: 12), child: card)).toList(),
+                children: cards
+                    .map(
+                      (card) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: card,
+                      ),
+                    )
+                    .toList(),
               );
             },
           ),
@@ -1286,18 +1737,33 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
     );
   }
 
-  Widget _signatureCard(String title, String value, ValueChanged<String> onChanged, ThemeData theme, bool isDark, {bool required = false}) {
+  Widget _signatureCard(
+    String title,
+    String value,
+    ValueChanged<String> onChanged,
+    ThemeData theme,
+    bool isDark, {
+    bool required = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.disabledColor)),
+          Text(
+            title,
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.disabledColor,
+            ),
+          ),
           const SizedBox(height: 16),
           if (value.isEmpty)
             SizedBox(
@@ -1309,11 +1775,27 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text('Sign as $title'),
-                      content: SizedBox(width: 350, child: TextField(controller: ctrl, decoration: const InputDecoration(labelText: 'Full Name'))),
+                      content: SizedBox(
+                        width: 350,
+                        child: TextField(
+                          controller: ctrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Full Name',
+                          ),
+                        ),
+                      ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
                         ElevatedButton(
-                          onPressed: () { if (ctrl.text.trim().isNotEmpty) { onChanged(ctrl.text.trim()); Navigator.pop(ctx); } },
+                          onPressed: () {
+                            if (ctrl.text.trim().isNotEmpty) {
+                              onChanged(ctrl.text.trim());
+                              Navigator.pop(ctx);
+                            }
+                          },
                           child: const Text('Sign'),
                         ),
                       ],
@@ -1322,16 +1804,28 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 },
                 icon: const Icon(Icons.draw_outlined, size: 16),
                 label: const Text('Click to Sign'),
-                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
               ),
             )
           else
             Row(
               children: [
                 Expanded(
-                  child: Text(value, style: const TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, fontSize: 14)),
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-                IconButton(icon: const Icon(Icons.clear, size: 16), onPressed: () => onChanged('')),
+                IconButton(
+                  icon: const Icon(Icons.clear, size: 16),
+                  onPressed: () => onChanged(''),
+                ),
               ],
             ),
         ],
@@ -1356,26 +1850,50 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 child: ElevatedButton.icon(
                   onPressed: _isSubmitting ? null : _submitReport,
                   icon: _isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.assignment_turned_in_rounded, size: 22),
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.assignment_turned_in_rounded,
+                          size: 22,
+                        ),
                   label: Text(
-                    _isSubmitting ? 'Submitting...' : 'Submit Accomplishment Report',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.3),
+                    _isSubmitting
+                        ? 'Submitting...'
+                        : 'Submit Accomplishment Report',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2E7D32),
                     foregroundColor: Colors.white,
                     elevation: 4,
                     shadowColor: const Color(0xFF2E7D32).withOpacity(0.4),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.pop(),
-                child: Text('Cancel & Return', style: TextStyle(color: theme.disabledColor)),
+                child: Text(
+                  'Cancel & Return',
+                  style: TextStyle(color: theme.disabledColor),
+                ),
               ),
             ],
           ),

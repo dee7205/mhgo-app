@@ -17,23 +17,20 @@ class DashboardLocalDatasource {
     final allTasks = await _isar.taskModels.where().findAll();
     var filtered = allTasks.where((task) => task.status != 'done').toList();
     if (assignedToName != null) {
-      filtered = filtered.where((task) => task.assignedToName == assignedToName).toList();
+      filtered = filtered
+          .where((task) => task.assignedToName == assignedToName)
+          .toList();
     }
-    
+
     // Sort by priority: critical -> high -> medium -> low
-    final priorityWeight = {
-      'critical': 4,
-      'high': 3,
-      'medium': 2,
-      'low': 1,
-    };
-    
+    final priorityWeight = {'critical': 4, 'high': 3, 'medium': 2, 'low': 1};
+
     filtered.sort((a, b) {
       final aWeight = priorityWeight[a.priority.toLowerCase()] ?? 0;
       final bWeight = priorityWeight[b.priority.toLowerCase()] ?? 0;
       return bWeight.compareTo(aWeight); // descending priority
     });
-    
+
     return filtered;
   }
 
@@ -44,7 +41,9 @@ class DashboardLocalDatasource {
 
   Future<List<SurveyModel>> getRecentInspections() async {
     final surveys = await _isar.surveyModels.where().findAll();
-    surveys.sort((a, b) => b.surveyDate.compareTo(a.surveyDate)); // Newest first
+    surveys.sort(
+      (a, b) => b.surveyDate.compareTo(a.surveyDate),
+    ); // Newest first
     return surveys;
   }
 }

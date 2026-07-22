@@ -8,7 +8,9 @@ import 'package:mhgo/features/dashboard/data/datasources/dashboard_local_datasou
 import 'package:mhgo/features/dashboard/domain/repositories/dashboard_repository.dart';
 
 // Riverpod Provider for the Local Datasource
-final dashboardLocalDatasourceProvider = Provider<DashboardLocalDatasource>((ref) {
+final dashboardLocalDatasourceProvider = Provider<DashboardLocalDatasource>((
+  ref,
+) {
   final isarService = ref.watch(isarServiceProvider);
   return DashboardLocalDatasource(isarService.isar);
 });

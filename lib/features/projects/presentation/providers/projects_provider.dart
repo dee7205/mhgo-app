@@ -17,7 +17,9 @@ final getProjectsUseCaseProvider = Provider<GetProjectsUseCase>((ref) {
   return GetProjectsUseCase(repo);
 });
 
-final getProjectDetailsUseCaseProvider = Provider<GetProjectDetailsUseCase>((ref) {
+final getProjectDetailsUseCaseProvider = Provider<GetProjectDetailsUseCase>((
+  ref,
+) {
   final repo = ref.watch(projectsRepositoryProvider);
   return GetProjectDetailsUseCase(repo);
 });
@@ -27,10 +29,11 @@ final projectsListProvider = FutureProvider<List<ProjectModel>>((ref) async {
   return useCase.execute();
 });
 
-final projectDetailsProvider = FutureProvider.family<DetailedProjectData, String>((ref, uuid) async {
-  final useCase = ref.watch(getProjectDetailsUseCaseProvider);
-  return useCase.execute(uuid);
-});
+final projectDetailsProvider =
+    FutureProvider.family<DetailedProjectData, String>((ref, uuid) async {
+      final useCase = ref.watch(getProjectDetailsUseCaseProvider);
+      return useCase.execute(uuid);
+    });
 
 // Presentation states for filtering, search, sorting and display mode using modern Riverpod Notifiers
 class SearchQueryNotifier extends Notifier<String> {
@@ -39,24 +42,29 @@ class SearchQueryNotifier extends Notifier<String> {
   void set(String val) => state = val;
   void clear() => state = '';
 }
-final projectsSearchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(() {
-  return SearchQueryNotifier();
-});
+
+final projectsSearchQueryProvider =
+    NotifierProvider<SearchQueryNotifier, String>(() {
+      return SearchQueryNotifier();
+    });
 
 class FilterStatusNotifier extends Notifier<String?> {
   @override
   String? build() => null;
   void set(String? val) => state = val;
 }
-final projectsFilterStatusProvider = NotifierProvider<FilterStatusNotifier, String?>(() {
-  return FilterStatusNotifier();
-});
+
+final projectsFilterStatusProvider =
+    NotifierProvider<FilterStatusNotifier, String?>(() {
+      return FilterStatusNotifier();
+    });
 
 class SortNotifier extends Notifier<String> {
   @override
   String build() => 'name';
   void set(String val) => state = val;
 }
+
 final projectsSortProvider = NotifierProvider<SortNotifier, String>(() {
   return SortNotifier();
 });
@@ -66,6 +74,7 @@ class GridViewNotifier extends Notifier<bool> {
   bool build() => true;
   void toggle() => state = !state;
 }
+
 final projectsGridViewProvider = NotifierProvider<GridViewNotifier, bool>(() {
   return GridViewNotifier();
 });

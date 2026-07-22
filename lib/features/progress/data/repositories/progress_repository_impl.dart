@@ -19,7 +19,10 @@ class ProgressRepositoryImpl implements ProgressRepository {
   @override
   Future<ProgressReport?> getProgressReportById(String uuid) async {
     var model = await isar.progressModels.where().uuidEqualTo(uuid).findFirst();
-    model ??= await isar.progressModels.filter().projectUuidEqualTo(uuid).findFirst();
+    model ??= await isar.progressModels
+        .filter()
+        .projectUuidEqualTo(uuid)
+        .findFirst();
     if (model == null) return null;
     return _mapToEntity(model);
   }

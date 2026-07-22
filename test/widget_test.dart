@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mhgo/core/widgets/app_card.dart';
 
 void main() {
-  testWidgets('AppCard renders child and responds to tap', (WidgetTester tester) async {
+  testWidgets('AppCard renders child and responds to tap', (
+    WidgetTester tester,
+  ) async {
     bool tapped = false;
 
     await tester.pumpWidget(

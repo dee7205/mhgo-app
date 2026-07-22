@@ -10,6 +10,7 @@ import '../providers/projects_provider.dart';
 import '../../../progress/presentation/providers/progress_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 
 import '../../../materials/presentation/widgets/project_material_requirements_tab.dart';
 import '../../../materials/data/models/project_material_requirement_model.dart';
@@ -76,17 +77,18 @@ class _ProjectCreateEditDialogState
       _supervisor = p.supervisor ?? '';
       _capacity = p.capacity;
       _capacityUnit = p.capacityUnit ?? 'kWp';
-      _capacityController.text = _capacity == _capacity.roundToDouble() 
-          ? _capacity.toInt().toString() 
+      _capacityController.text = _capacity == _capacity.roundToDouble()
+          ? _capacity.toInt().toString()
           : _capacity.toString();
       _type = p.type;
       _systemType = p.systemType ?? 'On-Grid';
       _status = p.status;
       _stage = p.stage ?? 'Engineering';
       _totalCost = p.totalCost;
-      _totalCostController.text = _totalCost == _totalCost.roundToDouble() 
-          ? _totalCost.toInt().toString() 
-          : (_totalCost.isNaN || _totalCost.isInfinite ? 0.0 : _totalCost).toStringAsFixed(2);
+      _totalCostController.text = _totalCost == _totalCost.roundToDouble()
+          ? _totalCost.toInt().toString()
+          : (_totalCost.isNaN || _totalCost.isInfinite ? 0.0 : _totalCost)
+                .toStringAsFixed(2);
       _startDate = p.startDate;
       _endDate = p.endDate;
       if (p.bomSpecsJson != null) {
@@ -154,7 +156,9 @@ class _ProjectCreateEditDialogState
         project.isSynced = false;
       }
 
-      final typeChanged = widget.existingProject != null && widget.existingProject!.systemType != _systemType;
+      final typeChanged =
+          widget.existingProject != null &&
+          widget.existingProject!.systemType != _systemType;
 
       project
         ..name = _name
@@ -207,10 +211,17 @@ class _ProjectCreateEditDialogState
         }
         if (widget.existingProject == null || typeChanged) {
           if (typeChanged) {
-            await isar.projectMaterialRequirementModels.filter().projectUuidEqualTo(project.uuid).deleteAll();
+            await isar.projectMaterialRequirementModels
+                .filter()
+                .projectUuidEqualTo(project.uuid)
+                .deleteAll();
           }
-          final defaultBom = _systemType.toLowerCase().contains('on-grid') || _systemType.toLowerCase().contains('ongrid') ? onGridBom : hybridBom;
-          
+          final defaultBom =
+              _systemType.toLowerCase().contains('on-grid') ||
+                  _systemType.toLowerCase().contains('ongrid')
+              ? onGridBom
+              : hybridBom;
+
           for (final section in bomSections) {
             final items = defaultBom[section] ?? [];
             for (final item in items) {
@@ -230,11 +241,19 @@ class _ProjectCreateEditDialogState
         }
       });
 
-
       ref.invalidate(projectsListProvider);
       ref.invalidate(projectDetailsProvider(project.uuid));
       ref.invalidate(progressNotifierProvider);
       ref.invalidate(dashboardStateProvider);
+
+      ref.read(notificationProvider.notifier).createNotification(
+        title: widget.existingProject == null ? 'Project Created' : 'Project Updated',
+        description: '${project.name} has been successfully ${widget.existingProject == null ? 'created' : 'updated'}.',
+        type: 'project',
+        relatedUuid: project.uuid,
+        targetRoute: '/projects/${project.uuid}',
+      );
+
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -342,10 +361,13 @@ class _ProjectCreateEditDialogState
                         labelText: 'Total Project Cost (PHP)',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (val) =>
                           val == null || val.trim().isEmpty ? 'Required' : null,
-                      onSaved: (val) => _totalCost = double.tryParse(val ?? '0') ?? 0.0,
+                      onSaved: (val) =>
+                          _totalCost = double.tryParse(val ?? '0') ?? 0.0,
                     ),
 
                     const SizedBox(height: 24),
@@ -469,19 +491,28 @@ class _ProjectCreateEditDialogState
                     buildResponsiveRow(
                       TextFormField(
                         initialValue: _solarBrand,
-                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Brand',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _solarBrand = v,
                       ),
                       TextFormField(
                         initialValue: _solarWatts,
-                        decoration: const InputDecoration(labelText: 'Watts', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Watts',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _solarWatts = v,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       initialValue: _solarVolts,
-                      decoration: const InputDecoration(labelText: 'Volts', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Volts',
+                        border: OutlineInputBorder(),
+                      ),
                       onChanged: (v) => _solarVolts = v,
                     ),
 
@@ -494,19 +525,28 @@ class _ProjectCreateEditDialogState
                     buildResponsiveRow(
                       TextFormField(
                         initialValue: _inverterBrand,
-                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Brand',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _inverterBrand = v,
                       ),
                       TextFormField(
                         initialValue: _inverterWattage,
-                        decoration: const InputDecoration(labelText: 'Wattage', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Wattage',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _inverterWattage = v,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       initialValue: _inverterSerial,
-                      decoration: const InputDecoration(labelText: 'Serial No.', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Serial No.',
+                        border: OutlineInputBorder(),
+                      ),
                       onChanged: (v) => _inverterSerial = v,
                     ),
 
@@ -519,12 +559,18 @@ class _ProjectCreateEditDialogState
                     buildResponsiveRow(
                       TextFormField(
                         initialValue: _batteryBrand,
-                        decoration: const InputDecoration(labelText: 'Brand', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Brand',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _batteryBrand = v,
                       ),
                       TextFormField(
                         initialValue: _batteryWattage,
-                        decoration: const InputDecoration(labelText: 'Wattage', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Wattage',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _batteryWattage = v,
                       ),
                     ),
@@ -532,19 +578,28 @@ class _ProjectCreateEditDialogState
                     buildResponsiveRow(
                       TextFormField(
                         initialValue: _batteryVoltage,
-                        decoration: const InputDecoration(labelText: 'Voltage', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Voltage',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _batteryVoltage = v,
                       ),
                       TextFormField(
                         initialValue: _batteryAh,
-                        decoration: const InputDecoration(labelText: 'Ah', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Ah',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (v) => _batteryAh = v,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       initialValue: _batterySerial,
-                      decoration: const InputDecoration(labelText: 'Serial No.', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Serial No.',
+                        border: OutlineInputBorder(),
+                      ),
                       onChanged: (v) => _batterySerial = v,
                     ),
 

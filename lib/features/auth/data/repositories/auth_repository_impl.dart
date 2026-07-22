@@ -8,10 +8,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
   // Strict list of mock corporate accounts representing the 8 required roles
   static const Map<String, UserModel> _mockUsers = {
-    'dave@mhg.com': UserModel(
+    'heiks@mhg.com': UserModel(
       uuid: 'user-dave-gigawin',
-      name: 'Dave Gigawin',
-      email: 'dave@mhg.com',
+      name: 'Heike Garcia',
+      email: 'heiks@mhg.com',
       role: 'Project Manager',
       avatarUrl: null,
       token: 'mock-session-token-dave',
@@ -80,7 +80,7 @@ class AuthRepositoryImpl implements AuthRepository {
     await Future.delayed(const Duration(milliseconds: 1500));
 
     final cleanEmail = email.trim().toLowerCase();
-    
+
     if (password != 'password123') {
       throw Exception('Invalid email or password. Please use password123.');
     }
@@ -88,7 +88,9 @@ class AuthRepositoryImpl implements AuthRepository {
     if (_mockUsers.containsKey(cleanEmail)) {
       return _mockUsers[cleanEmail]!;
     } else {
-      throw Exception('Invalid email or password. Access is restricted to registered MHG accounts.');
+      throw Exception(
+        'Invalid email or password. Access is restricted to registered MHG accounts.',
+      );
     }
   }
 
@@ -97,13 +99,17 @@ class AuthRepositoryImpl implements AuthRepository {
     await Future.delayed(const Duration(milliseconds: 1200));
 
     final cleanEmail = email.trim().toLowerCase();
-    
+
     if (!cleanEmail.endsWith('@mhg.com')) {
-      throw Exception('Email address must belong to the @mhg.com enterprise domain.');
+      throw Exception(
+        'Email address must belong to the @mhg.com enterprise domain.',
+      );
     }
 
     if (!_mockUsers.containsKey(cleanEmail)) {
-      throw Exception('This email is not registered in the MHG personnel database.');
+      throw Exception(
+        'This email is not registered in the MHG personnel database.',
+      );
     }
   }
 
@@ -113,7 +119,8 @@ class AuthRepositoryImpl implements AuthRepository {
     final jsonStr = prefs.getString(_prefUserKey);
     if (jsonStr != null) {
       try {
-        final Map<String, dynamic> decoded = json.decode(jsonStr) as Map<String, dynamic>;
+        final Map<String, dynamic> decoded =
+            json.decode(jsonStr) as Map<String, dynamic>;
         return UserModel.fromJson(decoded);
       } catch (_) {
         return null;

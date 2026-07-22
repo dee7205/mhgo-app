@@ -17,9 +17,11 @@ class TaskModel {
   String? assignedToName;
   String? assignedToRole;
 
-  late String status; // 'todo' | 'in_progress' | 'under_review' | 'done' | 'blocked'
+  late String
+  status; // 'todo' | 'in_progress' | 'under_review' | 'done' | 'blocked'
   late String priority; // 'low' | 'medium' | 'high' | 'critical'
-  late String category; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'QA/QC' | 'Commissioning'
+  late String
+  category; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'QA/QC' | 'Commissioning'
 
   late DateTime dueDate;
   late double progress; // 0.0 to 1.0

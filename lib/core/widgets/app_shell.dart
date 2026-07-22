@@ -8,10 +8,7 @@ import 'package:mhgo/features/auth/presentation/providers/auth_provider.dart';
 class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AppShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const AppShell({super.key, required this.navigationShell});
 
   void _onTabSelected(int index) {
     navigationShell.goBranch(
@@ -80,9 +77,9 @@ const List<_NavItem> _navItems = [
     selectedIcon: Icons.verified_user,
   ),
   _NavItem(
-    label: 'O&M',
-    icon: Icons.settings_suggest_outlined,
-    selectedIcon: Icons.settings_suggest,
+    label: 'Settings',
+    icon: Icons.settings_outlined,
+    selectedIcon: Icons.settings,
   ),
 ];
 
@@ -108,7 +105,10 @@ class _MobileLayout extends StatelessWidget {
         destinations: _navItems.map((item) {
           return NavigationDestination(
             icon: Icon(item.icon),
-            selectedIcon: Icon(item.selectedIcon, color: Theme.of(context).colorScheme.primary),
+            selectedIcon: Icon(
+              item.selectedIcon,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             label: item.label,
           );
         }).toList(),
@@ -144,24 +144,36 @@ class _TabletLayout extends StatelessWidget {
                     selectedIndex: navigationShell.currentIndex,
                     onDestinationSelected: onTabSelected,
                     labelType: NavigationRailLabelType.all,
-                    backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+                    backgroundColor: isDark
+                        ? AppTheme.darkBg
+                        : AppTheme.lightBg,
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: Image.asset(
                         'assets/logo.png', // Fallback to icon if asset not found
                         width: 32,
                         height: 32,
-                        errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                          radius: 18,
-                          backgroundColor: theme.colorScheme.primary,
-                          child: const Text('M', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: theme.colorScheme.primary,
+                              child: const Text(
+                                'M',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       ),
                     ),
                     destinations: _navItems.map((item) {
                       return NavigationRailDestination(
                         icon: Icon(item.icon),
-                        selectedIcon: Icon(item.selectedIcon, color: theme.colorScheme.primary),
+                        selectedIcon: Icon(
+                          item.selectedIcon,
+                          color: theme.colorScheme.primary,
+                        ),
                         label: Text(item.label),
                       );
                     }).toList(),
@@ -172,11 +184,7 @@ class _TabletLayout extends StatelessWidget {
           },
         ),
         const VerticalDivider(width: 1, thickness: 1),
-        Expanded(
-          child: Scaffold(
-            body: navigationShell,
-          ),
-        ),
+        Expanded(child: Scaffold(body: navigationShell)),
       ],
     );
   }
@@ -208,7 +216,12 @@ class _DesktopLayout extends StatelessWidget {
             children: [
               // Logo & App Name Header
               Padding(
-                padding: const EdgeInsets.only(left: 24.0, right: 16.0, top: 24.0, bottom: 20.0),
+                padding: const EdgeInsets.only(
+                  left: 24.0,
+                  right: 16.0,
+                  top: 24.0,
+                  bottom: 20.0,
+                ),
                 child: Row(
                   children: [
                     CircleAvatar(
@@ -216,7 +229,11 @@ class _DesktopLayout extends StatelessWidget {
                       backgroundColor: theme.colorScheme.primary,
                       child: const Text(
                         'M',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -233,7 +250,9 @@ class _DesktopLayout extends StatelessWidget {
                         Text(
                           'Built for MHG',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary,
+                            color: isDark
+                                ? AppTheme.darkTextMuted
+                                : AppTheme.lightTextSecondary,
                             fontWeight: FontWeight.w500,
                             fontSize: 10,
                           ),
@@ -250,7 +269,8 @@ class _DesktopLayout extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: ListView.separated(
                     itemCount: _navItems.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 4),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 4),
                     itemBuilder: (context, index) {
                       final item = _navItems[index];
                       final isSelected = index == navigationShell.currentIndex;
@@ -273,11 +293,7 @@ class _DesktopLayout extends StatelessWidget {
           ),
         ),
         const VerticalDivider(width: 1, thickness: 1),
-        Expanded(
-          child: Scaffold(
-            body: navigationShell,
-          ),
-        ),
+        Expanded(child: Scaffold(body: navigationShell)),
       ],
     );
   }
@@ -311,7 +327,9 @@ class _SidebarLinkState extends State<_SidebarLink> {
 
     final Color activeColor = theme.colorScheme.primary;
     final Color activeBg = theme.colorScheme.primary.withOpacity(0.08);
-    final Color hoverBg = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02);
+    final Color hoverBg = isDark
+        ? Colors.white.withOpacity(0.04)
+        : Colors.black.withOpacity(0.02);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -325,8 +343,8 @@ class _SidebarLinkState extends State<_SidebarLink> {
             color: widget.isSelected
                 ? activeBg
                 : _isHovered
-                    ? hoverBg
-                    : Colors.transparent,
+                ? hoverBg
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
           ),
           child: Row(
@@ -337,19 +355,21 @@ class _SidebarLinkState extends State<_SidebarLink> {
                 color: widget.isSelected
                     ? activeColor
                     : isDark
-                        ? AppTheme.darkTextSecondary
-                        : AppTheme.lightTextSecondary,
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.lightTextSecondary,
               ),
               const SizedBox(width: 12),
               Text(
                 widget.label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: widget.isSelected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
                   color: widget.isSelected
                       ? activeColor
                       : isDark
-                          ? AppTheme.darkTextPrimary
-                          : AppTheme.lightTextPrimary,
+                      ? AppTheme.darkTextPrimary
+                      : AppTheme.lightTextPrimary,
                 ),
               ),
             ],
@@ -368,7 +388,7 @@ class _SidebarFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final String name = user?.name ?? 'Guest User';
@@ -405,7 +425,9 @@ class _SidebarFooter extends ConsumerWidget {
                 'Offline First (Synced)',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 11,
-                  color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary,
+                  color: isDark
+                      ? AppTheme.darkTextMuted
+                      : AppTheme.lightTextSecondary,
                 ),
               ),
             ],
@@ -443,7 +465,9 @@ class _SidebarFooter extends ConsumerWidget {
                       role,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 11,
-                        color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary,
+                        color: isDark
+                            ? AppTheme.darkTextMuted
+                            : AppTheme.lightTextSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

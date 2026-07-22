@@ -84,7 +84,7 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
       qualityComplianceRate: 0.0,
     );
     final activityLogs = <ProjectActivityLog>[];
-    
+
     // Timeline auto-updated from progress entries
     final timeline = categoryProgresses.map((c) {
       String status = c.status;
@@ -99,10 +99,13 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
     }).toList();
 
     List<ProjectTeamMember> team = [];
-    if (project.teamMembersJson != null && project.teamMembersJson!.isNotEmpty) {
+    if (project.teamMembersJson != null &&
+        project.teamMembersJson!.isNotEmpty) {
       try {
         final decoded = jsonDecode(project.teamMembersJson!) as List<dynamic>;
-        team = decoded.map((e) => ProjectTeamMember.fromJson(e as Map<String, dynamic>)).toList();
+        team = decoded
+            .map((e) => ProjectTeamMember.fromJson(e as Map<String, dynamic>))
+            .toList();
       } catch (e) {
         team = [];
       }
@@ -145,7 +148,10 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
   }
 
   @override
-  Future<void> updateProjectTeam(String projectUuid, List<ProjectTeamMember> team) async {
+  Future<void> updateProjectTeam(
+    String projectUuid,
+    List<ProjectTeamMember> team,
+  ) async {
     final project = await _isar.projectModels
         .filter()
         .uuidEqualTo(projectUuid)

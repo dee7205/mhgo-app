@@ -186,10 +186,7 @@ class _SurveyListViewState extends ConsumerState<SurveyListView> {
             ),
             items: const [
               DropdownMenuItem(value: null, child: Text('All Status')),
-              DropdownMenuItem(
-                value: 'Surveyed',
-                child: Text('Surveyed'),
-              ),
+              DropdownMenuItem(value: 'Surveyed', child: Text('Surveyed')),
               DropdownMenuItem(value: 'Quoted', child: Text('Quoted')),
               DropdownMenuItem(
                 value: 'Waiting Client',

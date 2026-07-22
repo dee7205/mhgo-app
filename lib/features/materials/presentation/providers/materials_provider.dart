@@ -4,7 +4,7 @@ import '../../../../core/database/isar_service.dart';
 import '../../domain/repositories/materials_repository.dart';
 import '../../data/repositories/materials_repository_impl.dart';
 import '../../domain/entities/materials_entities.dart';
-
+import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 final materialsRepositoryProvider = Provider<MaterialsRepository>((ref) {
   final isar = ref.watch(isarServiceProvider).isar;
   return MaterialsRepositoryImpl(isar);
@@ -80,8 +80,18 @@ class MaterialsNotifier extends AsyncNotifier<void> {
       await _repo.saveRequirement(req);
       ref.invalidate(projectMaterialRequirementsProvider(req.projectUuid));
       ref.invalidate(materialAllocationsProvider(req.materialUuid));
-      ref.invalidate(materialsProvider); // Allocations changed, stock might be affected implicitly
+      ref.invalidate(
+        materialsProvider,
+      ); // Allocations changed, stock might be affected implicitly
       ref.invalidate(materialDetailsProvider(req.materialUuid));
+
+      ref.read(notificationProvider.notifier).createNotification(
+        title: 'Material Requirement Updated',
+        description: 'Material requirement has been allocated or updated for project.',
+        type: 'material',
+        relatedUuid: req.projectUuid,
+        targetRoute: '/projects/${req.projectUuid}',
+      );
     });
   }
 
@@ -91,12 +101,20 @@ class MaterialsNotifier extends AsyncNotifier<void> {
       // We need the req before deleting to invalidate its material UUID
       final reqs = await _repo.getRequirementsForProject(projectUuid);
       final req = reqs.firstWhere((r) => r.uuid == uuid);
-      
+
       await _repo.deleteRequirement(uuid);
       ref.invalidate(projectMaterialRequirementsProvider(projectUuid));
       ref.invalidate(materialAllocationsProvider(req.materialUuid));
       ref.invalidate(materialsProvider);
       ref.invalidate(materialDetailsProvider(req.materialUuid));
+
+      ref.read(notificationProvider.notifier).createNotification(
+        title: 'Material Requirement Removed',
+        description: 'A material requirement was removed from the project.',
+        type: 'material',
+        relatedUuid: projectUuid,
+        targetRoute: '/projects/$projectUuid',
+      );
     });
   }
 }

@@ -15,10 +15,7 @@ import 'package:mhgo/features/survey/presentation/views/pdf_preview_view.dart';
 class SurveyDetailsView extends ConsumerStatefulWidget {
   final String uuid;
 
-  const SurveyDetailsView({
-    super.key,
-    required this.uuid,
-  });
+  const SurveyDetailsView({super.key, required this.uuid});
 
   @override
   ConsumerState<SurveyDetailsView> createState() => _SurveyDetailsViewState();
@@ -36,11 +33,13 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
       ref.invalidate(surveyDetailsProvider(survey.uuid));
       ref.invalidate(projectsListProvider);
       ref.invalidate(dashboardStateProvider);
-      
+
       if (mounted && newProjectUuid != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Project created successfully. Complete the remaining project details (e.g. End Date) from the Projects module.'),
+            content: Text(
+              'Project created successfully. Complete the remaining project details (e.g. End Date) from the Projects module.',
+            ),
             duration: Duration(seconds: 4),
           ),
         );
@@ -50,9 +49,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isConverting = false);
@@ -64,7 +63,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Survey'),
-        content: const Text('Are you sure you want to delete this survey? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this survey? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -84,7 +85,7 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
         final repo = ref.read(surveyRepositoryProvider);
         await repo.deleteSurvey(survey.uuid);
         ref.invalidate(surveyListProvider);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Survey deleted successfully')),
@@ -95,9 +96,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting survey: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error deleting survey: $e')));
         }
       }
     }
@@ -150,7 +151,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
             }
 
             final statusColor = _getStatusColor(survey.status);
-            final formattedDate = DateFormat('EEEE, MMMM dd, yyyy').format(survey.surveyDate);
+            final formattedDate = DateFormat(
+              'EEEE, MMMM dd, yyyy',
+            ).format(survey.surveyDate);
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -171,25 +174,33 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                               children: [
                                 Text(
                                   survey.clientName,
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -1.0,
-                                  ),
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -1.0,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Survey Date: $formattedDate',
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.disabledColor,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor.withAlpha(25),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: statusColor.withAlpha(51)),
+                              border: Border.all(
+                                color: statusColor.withAlpha(51),
+                              ),
                             ),
                             child: Text(
                               survey.status.toUpperCase(),
@@ -207,11 +218,24 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton.icon(
-                            onPressed: _isConverting ? null : () => _convertToProject(survey),
-                            icon: _isConverting 
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            onPressed: _isConverting
+                                ? null
+                                : () => _convertToProject(survey),
+                            icon: _isConverting
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
                                 : const Icon(Icons.check_circle_outline),
-                            label: Text(_isConverting ? 'Converting...' : 'Convert to Active Project'),
+                            label: Text(
+                              _isConverting
+                                  ? 'Converting...'
+                                  : 'Convert to Active Project',
+                            ),
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
@@ -228,18 +252,26 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                           AppButton(
                             text: 'Edit Survey',
                             icon: Icons.edit_document,
-                            onPressed: () => context.push('/survey/edit/${survey.uuid}'),
+                            onPressed: () =>
+                                context.push('/survey/edit/${survey.uuid}'),
                           ),
                           AppButton(
                             text: 'View PDF',
                             icon: Icons.picture_as_pdf,
                             onPressed: () async {
-                              final options = await showPdfExportDialog(context);
+                              final options = await showPdfExportDialog(
+                                context,
+                              );
                               if (!context.mounted) return;
                               if (options == null) return;
                               Future.microtask(() async {
                                 await Printing.layoutPdf(
-                                  onLayout: (format) => SurveyPdfPreviewView.generatePdfDocument(survey, format, options: options),
+                                  onLayout: (format) =>
+                                      SurveyPdfPreviewView.generatePdfDocument(
+                                        survey,
+                                        format,
+                                        options: options,
+                                      ),
                                   name: 'survey_report_${survey.uuid}.pdf',
                                 );
                               });
@@ -258,37 +290,73 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                       const SizedBox(height: 24),
 
                       // Contact Info
-                      _buildSectionHeader('Client Contact Info', Icons.person, theme),
+                      _buildSectionHeader(
+                        'Client Contact Info',
+                        Icons.person,
+                        theme,
+                      ),
                       const SizedBox(height: 12),
-                      _buildInfoRow('Contact Number', survey.contactNumber, theme, isDark),
+                      _buildInfoRow(
+                        'Contact Number',
+                        survey.contactNumber,
+                        theme,
+                        isDark,
+                      ),
                       _buildInfoRow('Email', survey.email, theme, isDark),
                       _buildInfoRow('Address', survey.address, theme, isDark),
-                      if (survey.coordinates != null && survey.coordinates!.isNotEmpty)
-                        _buildInfoRow('Coordinates', survey.coordinates!, theme, isDark),
-                      
+                      if (survey.coordinates != null &&
+                          survey.coordinates!.isNotEmpty)
+                        _buildInfoRow(
+                          'Coordinates',
+                          survey.coordinates!,
+                          theme,
+                          isDark,
+                        ),
+
                       const SizedBox(height: 24),
 
                       // Technical Specifications
-                      _buildSectionHeader('Technical Specifications', Icons.handyman, theme),
+                      _buildSectionHeader(
+                        'Technical Specifications',
+                        Icons.handyman,
+                        theme,
+                      ),
                       const SizedBox(height: 12),
                       if (survey.technicalSpecs.isEmpty)
                         Text(
-                          'No technical specifications provided.', 
+                          'No technical specifications provided.',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted,
+                            color: isDark
+                                ? AppTheme.darkTextMuted
+                                : AppTheme.lightTextMuted,
                           ),
                         )
                       else
-                        ...survey.technicalSpecs.entries.map((e) => _buildInfoRow(e.key, e.value, theme, isDark)),
-
+                        ...survey.technicalSpecs.entries.map(
+                          (e) => _buildInfoRow(e.key, e.value, theme, isDark),
+                        ),
 
                       const SizedBox(height: 24),
 
                       // Proposed System
-                      _buildSectionHeader('Proposed System', Icons.solar_power, theme),
+                      _buildSectionHeader(
+                        'Proposed System',
+                        Icons.solar_power,
+                        theme,
+                      ),
                       const SizedBox(height: 12),
-                      _buildInfoRow('System', survey.proposedSystem, theme, isDark),
-                      _buildInfoRow('Capacity', '${(survey.proposedCapacityKw.isNaN || survey.proposedCapacityKw.isInfinite ? 0.0 : survey.proposedCapacityKw).toStringAsFixed(2)} kW', theme, isDark),
+                      _buildInfoRow(
+                        'System',
+                        survey.proposedSystem,
+                        theme,
+                        isDark,
+                      ),
+                      _buildInfoRow(
+                        'Capacity',
+                        '${(survey.proposedCapacityKw.isNaN || survey.proposedCapacityKw.isInfinite ? 0.0 : survey.proposedCapacityKw).toStringAsFixed(2)} kWp',
+                        theme,
+                        isDark,
+                      ),
 
                       if (survey.notes != null && survey.notes!.isNotEmpty) ...[
                         const SizedBox(height: 24),
@@ -297,16 +365,28 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
                         Text(
                           survey.notes!,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark ? AppTheme.darkTextPrimary : AppTheme.lightTextPrimary,
+                            color: isDark
+                                ? AppTheme.darkTextPrimary
+                                : AppTheme.lightTextPrimary,
                           ),
                         ),
                       ],
 
-                      if (survey.convertedProjectUuid != null && survey.convertedProjectUuid!.isNotEmpty) ...[
+                      if (survey.convertedProjectUuid != null &&
+                          survey.convertedProjectUuid!.isNotEmpty) ...[
                         const SizedBox(height: 24),
-                        _buildSectionHeader('Project Info', Icons.business_center, theme),
+                        _buildSectionHeader(
+                          'Project Info',
+                          Icons.business_center,
+                          theme,
+                        ),
                         const SizedBox(height: 12),
-                        _buildInfoRow('Converted Project ID', survey.convertedProjectUuid!, theme, isDark),
+                        _buildInfoRow(
+                          'Converted Project ID',
+                          survey.convertedProjectUuid!,
+                          theme,
+                          isDark,
+                        ),
                       ],
 
                       const SizedBox(height: 48),
@@ -328,13 +408,20 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
         const SizedBox(width: 8),
         Text(
           title,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, bool isDark) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -345,7 +432,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted,
+                color: isDark
+                    ? AppTheme.darkTextMuted
+                    : AppTheme.lightTextMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -354,7 +443,9 @@ class _SurveyDetailsViewState extends ConsumerState<SurveyDetailsView> {
             child: Text(
               value,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? AppTheme.darkTextPrimary : AppTheme.lightTextPrimary,
+                color: isDark
+                    ? AppTheme.darkTextPrimary
+                    : AppTheme.lightTextPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),

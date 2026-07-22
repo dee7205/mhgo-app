@@ -33,7 +33,9 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
   Future<void> toggleTheme(BuildContext context) async {
     final currentBrightness = Theme.of(context).brightness;
-    final newMode = currentBrightness == Brightness.dark ? ThemeMode.light : ThemeMode.dark;
+    final newMode = currentBrightness == Brightness.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
     await setThemeMode(newMode);
   }
 }

@@ -14,14 +14,16 @@ class ProjectModel {
   @Name('capacityMw')
   late double capacity;
   String? capacityUnit; // 'MWp' | 'kWp'
-  late String status; // 'planning' | 'construction' | 'commissioning' | 'om' | 'completed' | 'on_hold'
-  String? stage; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'Commissioning' | 'Grid Tie'
+  late String
+  status; // 'planning' | 'construction' | 'commissioning' | 'om' | 'completed' | 'on_hold'
+  String?
+  stage; // 'Engineering' | 'Procurement' | 'Civil Works' | 'Electrical' | 'Commissioning' | 'Grid Tie'
   late String type; // 'Rooftop' | 'Ground Mounted' | 'Floating'
   String? systemType; // 'On-Grid' | 'Off-Grid' | 'Hybrid'
   late String location;
   String? supervisor;
   String? client;
-  
+
   late double progress; // 0.0 to 1.0
   double totalCost = 0.0;
 

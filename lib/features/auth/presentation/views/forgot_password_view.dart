@@ -13,7 +13,8 @@ class ForgotPasswordView extends ConsumerStatefulWidget {
   ConsumerState<ForgotPasswordView> createState() => _ForgotPasswordViewState();
 }
 
-class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with SingleTickerProviderStateMixin {
+class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _emailFocusNode = FocusNode();
@@ -87,14 +88,18 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
               Expanded(
                 flex: 5,
                 child: Container(
-                  color: isDark ? const Color(0xFF0A2E16) : const Color(0xFFE8F5E9),
+                  color: isDark
+                      ? const Color(0xFF0A2E16)
+                      : const Color(0xFFE8F5E9),
                   child: Stack(
                     children: [
                       // Solar Cell Grid Blueprint Painter background
                       Positioned.fill(
                         child: CustomPaint(
                           painter: SolarBlueprintPainter(
-                            isDark ? const Color(0xFF2E7D32) : const Color(0xFF81C784),
+                            isDark
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFF81C784),
                           ),
                         ),
                       ),
@@ -113,10 +118,11 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                 const SizedBox(width: 8),
                                 Text(
                                   'MHGo',
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -1.0,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -1.0,
+                                      ),
                                 ),
                               ],
                             ),
@@ -128,19 +134,23 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                 children: [
                                   Text(
                                     'Account Recovery',
-                                    style: theme.textTheme.displayMedium?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -2.0,
-                                      height: 1.1,
-                                    ),
+                                    style: theme.textTheme.displayMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -2.0,
+                                          height: 1.1,
+                                        ),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Enter your registered MHG corporate email address to receive password reset links and security guidelines.',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
-                                      fontWeight: FontWeight.w400,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? AppTheme.darkTextSecondary
+                                              : AppTheme.lightTextSecondary,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -166,7 +176,10 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
               flex: 4,
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                    vertical: 24.0,
+                  ),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 420),
@@ -227,7 +240,9 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                               Text(
                                 'We have simulated sending password reset instructions to your work email:\n\n${_emailController.text}\n\nSince this is an offline-first deployment, please note that simulated link operations can be skipped in production.',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                                  color: isDark
+                                      ? AppTheme.darkTextSecondary
+                                      : AppTheme.lightTextSecondary,
                                   height: 1.4,
                                 ),
                               ),
@@ -238,7 +253,9 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                 child: AppButton(
                                   text: 'Return to Sign In',
                                   onPressed: () {
-                                    ref.read(authProvider.notifier).clearErrors();
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .clearErrors();
                                     context.pop();
                                   },
                                 ),
@@ -256,7 +273,9 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                               Text(
                                 'Enter your work email address, and we will send password reset links.',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                                  color: isDark
+                                      ? AppTheme.darkTextSecondary
+                                      : AppTheme.lightTextSecondary,
                                 ),
                               ),
                               const SizedBox(height: 28),
@@ -268,9 +287,10 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                   children: [
                                     Text(
                                       'Work Email Address',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     const SizedBox(height: 8),
                                     TextFormField(
@@ -280,24 +300,33 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                       textInputAction: TextInputAction.done,
                                       decoration: InputDecoration(
                                         hintText: 'e.g. name@mhg.com',
-                                        prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                                        prefixIcon: const Icon(
+                                          Icons.email_outlined,
+                                          size: 20,
+                                        ),
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                       validator: (val) {
                                         if (val == null || val.isEmpty) {
                                           return 'Email is required';
                                         }
-                                        if (!val.contains('@') || !val.contains('.')) {
+                                        if (!val.contains('@') ||
+                                            !val.contains('.')) {
                                           return 'Please enter a valid email address';
                                         }
-                                        if (!val.trim().toLowerCase().endsWith('@mhg.com')) {
+                                        if (!val.trim().toLowerCase().endsWith(
+                                          '@mhg.com',
+                                        )) {
                                           return 'Email must belong to the @mhg.com domain';
                                         }
                                         return null;
                                       },
-                                      onFieldSubmitted: (_) => _submitForgotPassword(),
+                                      onFieldSubmitted: (_) =>
+                                          _submitForgotPassword(),
                                     ),
                                     const SizedBox(height: 28),
 
@@ -305,9 +334,15 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> with Si
                                       width: double.infinity,
                                       height: 48,
                                       child: AppButton(
-                                        text: authState.isLoading ? 'Sending Request...' : 'Send Recovery Email',
-                                        icon: authState.isLoading ? null : Icons.send,
-                                        onPressed: authState.isLoading ? null : _submitForgotPassword,
+                                        text: authState.isLoading
+                                            ? 'Sending Request...'
+                                            : 'Send Recovery Email',
+                                        icon: authState.isLoading
+                                            ? null
+                                            : Icons.send,
+                                        onPressed: authState.isLoading
+                                            ? null
+                                            : _submitForgotPassword,
                                       ),
                                     ),
                                   ],

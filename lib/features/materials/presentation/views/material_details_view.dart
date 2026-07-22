@@ -61,10 +61,7 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
 
           return TabBarView(
             controller: _tabController,
-            children: [
-              _buildStockLevels(material),
-              _buildAllocations(),
-            ],
+            children: [_buildStockLevels(material), _buildAllocations()],
           );
         },
       ),
@@ -160,7 +157,9 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
   }
 
   Widget _buildAllocations() {
-    final allocationsAsync = ref.watch(materialAllocationsProvider(widget.uuid));
+    final allocationsAsync = ref.watch(
+      materialAllocationsProvider(widget.uuid),
+    );
     return allocationsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
@@ -188,8 +187,10 @@ class _AllocationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final projectAsync = ref.watch(projectDetailsProvider(allocation.projectUuid));
-    
+    final projectAsync = ref.watch(
+      projectDetailsProvider(allocation.projectUuid),
+    );
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       child: projectAsync.when(
@@ -204,8 +205,12 @@ class _AllocationTile extends ConsumerWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Required: ${allocation.requiredQuantity} ${allocation.unit}'),
-                Text('Allocated: ${allocation.allocatedQuantity} ${allocation.unit}'),
+                Text(
+                  'Required: ${allocation.requiredQuantity} ${allocation.unit}',
+                ),
+                Text(
+                  'Allocated: ${allocation.allocatedQuantity} ${allocation.unit}',
+                ),
               ],
             ),
           );

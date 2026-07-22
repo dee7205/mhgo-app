@@ -19,16 +19,14 @@ class ProjectDetailsView extends ConsumerStatefulWidget {
   // Add getter for projectUuid aliases
   String get projectUuid => uuid;
 
-  const ProjectDetailsView({
-    super.key,
-    required this.uuid,
-  });
+  const ProjectDetailsView({super.key, required this.uuid});
 
   @override
   ConsumerState<ProjectDetailsView> createState() => _ProjectDetailsViewState();
 }
 
-class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with SingleTickerProviderStateMixin {
+class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -47,7 +45,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final detailsAsync = ref.watch(projectDetailsProvider(widget.uuid));
 
     return detailsAsync.when(
@@ -65,7 +63,11 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   }
 
   // --- HEADER & TABBED LAYOUT ---
-  Widget _buildProjectLayout(DetailedProjectData data, ThemeData theme, bool isDark) {
+  Widget _buildProjectLayout(
+    DetailedProjectData data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     final project = data.project;
     final statusColor = _getStatusColor(project.status);
 
@@ -80,7 +82,8 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               if (value == 'edit') {
                 showDialog(
                   context: context,
-                  builder: (ctx) => ProjectCreateEditDialog(existingProject: project),
+                  builder: (ctx) =>
+                      ProjectCreateEditDialog(existingProject: project),
                 );
               } else if (value == 'pdf') {
                 context.push('/projects/${project.uuid}/pdf');
@@ -89,17 +92,25 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Delete Project?'),
-                    content: Text('Are you sure you want to delete ${project.name}? This action cannot be undone.'),
+                    content: Text(
+                      'Are you sure you want to delete ${project.name}? This action cannot be undone.',
+                    ),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ],
                   ),
                 );
-                
+
                 if (confirm == true && context.mounted) {
                   final repo = ref.read(projectsRepositoryProvider);
                   await repo.deleteProject(project.uuid);
@@ -108,16 +119,27 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   if (context.mounted) {
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${project.name} deleted successfully')),
+                      SnackBar(
+                        content: Text('${project.name} deleted successfully'),
+                      ),
                     );
                   }
                 }
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'pdf', child: Text('Export PDF Specs')),
+              const PopupMenuItem(
+                value: 'pdf',
+                child: Text('Export PDF Specs'),
+              ),
               const PopupMenuItem(value: 'edit', child: Text('Edit Project')),
-              const PopupMenuItem(value: 'delete', child: Text('Delete Project', style: TextStyle(color: Colors.red))),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  'Delete Project',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             ],
           ),
         ],
@@ -133,173 +155,200 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
       body: SafeArea(
         child: Column(
           children: [
+            // 2. Main Title Header Card
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 750;
 
-        // 2. Main Title Header Card
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 750;
-
-              final titleInfo = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  final titleInfo = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: statusColor.withOpacity(0.2)),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: statusColor.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Text(
+                              project.status.toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.systemType != null ? '${project.systemType} ' : ''}${project.type}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        project.name,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.0,
                         ),
-                        child: Text(
-                          project.status.toUpperCase(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.0,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Client: ${project.client ?? "MHG Internals"} | Location: ${project.location}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  );
+
+                  final progressIndicator = Column(
+                    crossAxisAlignment: isNarrow
+                        ? CrossAxisAlignment.start
+                        : CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Current Stage: ${project.stage}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}%',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: isNarrow ? double.infinity : 200,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: LinearProgressIndicator(
+                            value:
+                                (project.progress.isNaN ||
+                                        project.progress.isInfinite
+                                    ? 0.0
+                                    : project.progress) /
+                                100.0,
+                            minHeight: 8.0,
+                            backgroundColor: theme.colorScheme.primary
+                                .withOpacity(0.1),
                           ),
                         ),
                       ),
-                      Text(
-                        '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'} • ${project.systemType != null ? '${project.systemType} ' : ''}${project.type}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    project.name,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Client: ${project.client ?? "MHG Internals"} | Location: ${project.location}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
-                    ),
-                  ),
-                ],
-              );
+                  );
 
-              final progressIndicator = Column(
-                crossAxisAlignment: isNarrow ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        titleInfo,
+                        const SizedBox(height: 16),
+                        progressIndicator,
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+
+                  return Row(
                     children: [
-                      Flexible(
-                        child: Text(
-                          'Current Stage: ${project.stage}',
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${(project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress).toStringAsFixed(0)}%',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
+                      Expanded(child: titleInfo),
+                      const SizedBox(width: 24),
+                      progressIndicator,
                     ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: isNarrow ? double.infinity : 200,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: LinearProgressIndicator(
-                        value: (project.progress.isNaN || project.progress.isInfinite ? 0.0 : project.progress) / 100.0,
-                        minHeight: 8.0,
-                        backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-
-              if (isNarrow) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    titleInfo,
-                    const SizedBox(height: 16),
-                    progressIndicator,
-                    const SizedBox(height: 16),
-                  ],
-                );
-              }
-
-              return Row(
-                children: [
-                  Expanded(child: titleInfo),
-                  const SizedBox(width: 24),
-                  progressIndicator,
-                ],
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        // 3. Tab Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              labelStyle: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-              unselectedLabelStyle: theme.textTheme.bodyMedium,
-              indicatorSize: TabBarIndicatorSize.tab,
-              tabs: const [
-                Tab(text: 'Overview & Analytics'),
-                Tab(text: 'Timeline & Milestones'),
-                Tab(text: 'Engineering Team'),
-                Tab(text: 'Material Requirements'),
-              ],
+                  );
+                },
+              ),
             ),
-          ),
-        ),
 
-        const Divider(height: 1),
+            const SizedBox(height: 12),
 
-        // 4. Tab Bar View
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildOverviewTab(data, theme, isDark),
-              _buildTimelineTab(data, theme, isDark),
-              _buildTeamTab(data, theme, isDark),
-              ProjectMaterialRequirementsTab(projectUuid: widget.uuid, projectType: data.project.type),
-            ],
-          ),
+            // 3. Tab Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  unselectedLabelStyle: theme.textTheme.bodyMedium,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  tabs: const [
+                    Tab(text: 'Overview & Analytics'),
+                    Tab(text: 'Timeline & Milestones'),
+                    Tab(text: 'Engineering Team'),
+                    Tab(text: 'Material Requirements'),
+                  ],
+                ),
+              ),
+            ),
+
+            const Divider(height: 1),
+
+            // 4. Tab Bar View
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOverviewTab(data, theme, isDark),
+                  _buildTimelineTab(data, theme, isDark),
+                  _buildTeamTab(data, theme, isDark),
+                  ProjectMaterialRequirementsTab(
+                    projectUuid: widget.uuid,
+                    projectType: data.project.type,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
-    ),),);
+      ),
+    );
   }
 
   // ==========================================
   // TAB 1: OVERVIEW & ANALYTICS
   // ==========================================
-  Widget _buildOverviewTab(DetailedProjectData data, ThemeData theme, bool isDark) {
+  Widget _buildOverviewTab(
+    DetailedProjectData data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: LayoutBuilder(
@@ -313,7 +362,11 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               const SizedBox(height: 20),
               _buildBomCard(data.project, theme, isDark),
               const SizedBox(height: 20),
-              _buildCategoryProgressCard(data.categoryProgresses, theme, isDark),
+              _buildCategoryProgressCard(
+                data.categoryProgresses,
+                theme,
+                isDark,
+              ),
               const SizedBox(height: 20),
             ],
           );
@@ -338,11 +391,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           }
 
           return Column(
-            children: [
-              leftColumn,
-              const SizedBox(height: 20),
-              rightColumn,
-            ],
+            children: [leftColumn, const SizedBox(height: 20), rightColumn],
           );
         },
       ),
@@ -350,8 +399,14 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   }
 
   // --- SUB-CARD: PROJECT INFO ---
-  Widget _buildProjectInfoCard(ProjectModel project, ThemeData theme, bool isDark) {
-    final formattedStart = DateFormat('MMMM dd, yyyy').format(project.startDate);
+  Widget _buildProjectInfoCard(
+    ProjectModel project,
+    ThemeData theme,
+    bool isDark,
+  ) {
+    final formattedStart = DateFormat(
+      'MMMM dd, yyyy',
+    ).format(project.startDate);
     final formattedEnd = DateFormat('MMMM dd, yyyy').format(project.endDate);
 
     return AppCard(
@@ -362,28 +417,55 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
         children: [
           Text(
             'Project Profile & Specs',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           if (project.description != null) ...[
             const SizedBox(height: 8),
             Text(
               project.description!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                color: isDark
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.lightTextSecondary,
               ),
             ),
           ],
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          _buildInfoRow('Client Name', project.client ?? 'MHG Internals', theme, isDark),
-          _buildInfoRow('Contract Reference', 'CONTR-${project.uuid.toUpperCase().substring(0, 6)}', theme, isDark),
+          _buildInfoRow(
+            'Client Name',
+            project.client ?? 'MHG Internals',
+            theme,
+            isDark,
+          ),
+          _buildInfoRow(
+            'Contract Reference',
+            'CONTR-${project.uuid.toUpperCase().substring(0, 6)}',
+            theme,
+            isDark,
+          ),
           _buildInfoRow('Site Location', project.location, theme, isDark),
-          _buildInfoRow('Target Capacity', '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '').replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}', theme, isDark),
+          _buildInfoRow(
+            'Target Capacity',
+            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}',
+            theme,
+            isDark,
+          ),
           _buildInfoRow('Arrangement Type', project.type, theme, isDark),
           _buildInfoRow('Contract Start', formattedStart, theme, isDark),
           _buildInfoRow('Expected Completion', formattedEnd, theme, isDark),
-          _buildInfoRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost), theme, isDark),
+          _buildInfoRow(
+            'Total Project Cost',
+            NumberFormat.currency(
+              symbol: '₱',
+              decimalDigits: 2,
+            ).format(project.totalCost),
+            theme,
+            isDark,
+          ),
         ],
       ),
     );
@@ -401,18 +483,23 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
         solar = bom['solar'] as Map<String, dynamic>? ?? {};
         battery = bom['battery'] as Map<String, dynamic>? ?? {};
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
-        
+
         // Backward compatibility
-        if (solar.isEmpty && bom['panels'] != null) solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null) battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null) inverter['brand'] = bom['inverter'];
+        if (solar.isEmpty && bom['panels'] != null)
+          solar['brand'] = bom['panels'];
+        if (battery.isEmpty && bom['battery'] != null)
+          battery['brand'] = bom['battery'];
+        if (inverter.isEmpty && bom['inverter'] != null)
+          inverter['brand'] = bom['inverter'];
       } catch (_) {}
     }
 
     String formatSpecs(Map<String, dynamic> specs) {
       final entries = specs.entries.where((e) => e.value.toString().isNotEmpty);
       if (entries.isEmpty) return 'N/A';
-      return entries.map((e) => '${e.key.toUpperCase()}: ${e.value}').join(' | ');
+      return entries
+          .map((e) => '${e.key.toUpperCase()}: ${e.value}')
+          .join(' | ');
     }
 
     return AppCard(
@@ -427,7 +514,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               const SizedBox(width: 8),
               Text(
                 'BOM Specifications',
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -440,7 +529,12 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, bool isDark) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -449,7 +543,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
           Text(
             label,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextSecondary,
+              color: isDark
+                  ? AppTheme.darkTextMuted
+                  : AppTheme.lightTextSecondary,
             ),
           ),
           const SizedBox(width: 16),
@@ -457,7 +553,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -467,7 +565,11 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   }
 
   // --- SUB-CARD: ENGINEERING PROGRESS ---
-  Widget _buildCategoryProgressCard(List<ProjectCategoryProgress> categories, ThemeData theme, bool isDark) {
+  Widget _buildCategoryProgressCard(
+    List<ProjectCategoryProgress> categories,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return AppCard(
       variant: AppCardVariant.outlined,
       padding: const EdgeInsets.all(20),
@@ -476,7 +578,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
         children: [
           Text(
             'Project Progress Categories',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 16),
           if (categories.isEmpty)
@@ -485,7 +589,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               child: Center(
                 child: Text(
                   'No categories added yet.',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.disabledColor,
+                  ),
                 ),
               ),
             ),
@@ -502,7 +608,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                       Expanded(
                         child: Text(
                           stage.name,
-                          style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -521,7 +629,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                     child: LinearProgressIndicator(
                       value: val,
                       minHeight: 5.0,
-                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.08,
+                      ),
                     ),
                   ),
                 ],
@@ -548,7 +658,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,7 +693,11 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   }
 
   // --- SUB-CARD: RECENT ACTIVITY LOG ---
-  Widget _buildRecentActivityCard(List<ProjectActivityLog> logs, ThemeData theme, bool isDark) {
+  Widget _buildRecentActivityCard(
+    List<ProjectActivityLog> logs,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return AppCard(
       variant: AppCardVariant.outlined,
       padding: const EdgeInsets.all(20),
@@ -590,7 +706,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
         children: [
           Text(
             'Recent Field Operations Log',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 16),
           ListView.separated(
@@ -614,7 +732,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                     child: Icon(
                       log.category == 'QC'
                           ? Icons.verified_user_outlined
-                          : (log.category == 'Logistics' ? Icons.local_shipping_outlined : Icons.engineering_outlined),
+                          : (log.category == 'Logistics'
+                                ? Icons.local_shipping_outlined
+                                : Icons.engineering_outlined),
                       size: 14,
                       color: categoryColor,
                     ),
@@ -630,13 +750,17 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                             Expanded(
                               child: Text(
                                 log.title,
-                                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Text(
                               DateFormat('HH:mm').format(log.timestamp),
-                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -644,13 +768,18 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                         Text(
                           log.description,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                            color: isDark
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.lightTextSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'By: ${log.author}',
-                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 9, fontWeight: FontWeight.w600),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -679,7 +808,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+        ),
       ),
       child: Row(
         children: [
@@ -691,11 +822,16 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               children: [
                 Text(
                   title,
-                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   detail,
-                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: theme.disabledColor),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: theme.disabledColor,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -717,7 +853,11 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   // ==========================================
   // TAB 2: TIMELINE & MILESTONES
   // ==========================================
-  Widget _buildTimelineTab(DetailedProjectData data, ThemeData theme, bool isDark) {
+  Widget _buildTimelineTab(
+    DetailedProjectData data,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Center(
@@ -731,13 +871,17 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               children: [
                 Text(
                   'Vertical Milestone Timeline',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Key deliverables, actual completion dates, and personnel responsibilities.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                    color: isDark
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.lightTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -793,14 +937,18 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                   shape: BoxShape.circle,
                                   border: Border.all(color: dotColor, width: 2),
                                 ),
-                                child: Icon(statusIcon, size: 16, color: dotColor),
+                                child: Icon(
+                                  statusIcon,
+                                  size: 16,
+                                  color: dotColor,
+                                ),
                               ),
                               if (!isLast)
                                 Expanded(
                                   child: Container(
                                     width: 2.0,
-                                    color: item.status == 'completed' 
-                                        ? const Color(0xFF2E7D32) 
+                                    color: item.status == 'completed'
+                                        ? const Color(0xFF2E7D32)
                                         : theme.disabledColor.withOpacity(0.3),
                                   ),
                                 ),
@@ -814,37 +962,51 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
+                                  color: isDark
+                                      ? AppTheme.darkSurface
+                                      : AppTheme.lightSurface,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? AppTheme.darkBorder
+                                        : AppTheme.lightBorder,
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
                                             item.milestoneName,
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                           ),
                                         ),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: dotColor.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           child: Text(
                                             item.status.toUpperCase(),
-                                            style: theme.textTheme.labelSmall?.copyWith(
-                                              color: dotColor,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w800,
-                                            ),
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: dotColor,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
                                           ),
                                         ),
                                       ],
@@ -852,37 +1014,45 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                     const SizedBox(height: 6),
                                     Text(
                                       'Target Date: ${DateFormat('MMMM dd, yyyy').format(item.date)}',
-                                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(fontSize: 11),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Milestone Owner: ${item.owner}',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        fontSize: 11,
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            fontSize: 11,
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
                                       children: [
                                         Expanded(
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(100),
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
                                             child: LinearProgressIndicator(
                                               value: item.progress,
                                               minHeight: 4.0,
-                                              backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
+                                              backgroundColor: theme
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.08),
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
                                           '${(item.progress.isNaN || item.progress.isInfinite ? 0.0 : item.progress).toStringAsFixed(0)}%',
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -918,7 +1088,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
             children: [
               Text(
                 'Project Team',
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               AppButton(
                 text: 'Add Member',
@@ -942,12 +1114,18 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
 
               if (data.team.isEmpty) {
                 return Center(
-                  child: Text('No team members added yet.', style: theme.textTheme.bodyMedium),
+                  child: Text(
+                    'No team members added yet.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 );
               }
 
               return GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 8.0,
+                ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
                   mainAxisSpacing: 16,
@@ -968,7 +1146,8 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                           children: [
                             CircleAvatar(
                               radius: 20,
-                              backgroundColor: theme.colorScheme.primaryContainer,
+                              backgroundColor:
+                                  theme.colorScheme.primaryContainer,
                               child: Text(
                                 member.avatarInitials,
                                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -984,7 +1163,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                 children: [
                                   Text(
                                     member.name,
-                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -992,18 +1173,26 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                                     '${member.role} (${member.department})',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: theme.disabledColor),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontSize: 11,
+                                      color: theme.disabledColor,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.edit, size: 16),
-                              onPressed: () => _showTeamMemberDialog(data, index),
+                              onPressed: () =>
+                                  _showTeamMemberDialog(data, index),
                               tooltip: 'Edit',
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                              icon: const Icon(
+                                Icons.delete,
+                                size: 16,
+                                color: Colors.redAccent,
+                              ),
                               onPressed: () => _deleteTeamMember(data, index),
                               tooltip: 'Delete',
                             ),
@@ -1014,14 +1203,20 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                         const Spacer(),
                         Row(
                           children: [
-                            const Icon(Icons.email_outlined, size: 12, color: Colors.grey),
+                            const Icon(
+                              Icons.email_outlined,
+                              size: 12,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
                                 member.contactEmail,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ],
@@ -1029,12 +1224,18 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.phone_outlined, size: 12, color: Colors.grey),
+                            const Icon(
+                              Icons.phone_outlined,
+                              size: 12,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
                                 member.contactPhone,
-                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -1052,7 +1253,10 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
     );
   }
 
-  Future<void> _showTeamMemberDialog(DetailedProjectData data, int? editIndex) async {
+  Future<void> _showTeamMemberDialog(
+    DetailedProjectData data,
+    int? editIndex,
+  ) async {
     final isEdit = editIndex != null;
     final member = isEdit ? data.team[editIndex] : null;
 
@@ -1073,27 +1277,42 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: roleController,
-                  decoration: const InputDecoration(labelText: 'Role', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: deptController,
-                  decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Department',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Phone',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ],
             ),
@@ -1113,8 +1332,8 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   contactPhone: phoneController.text.trim(),
                   assignedTasksCount: member?.assignedTasksCount ?? 0,
                   workload: member?.workload ?? 'Optimal',
-                  avatarInitials: nameController.text.trim().isNotEmpty 
-                      ? nameController.text.trim().substring(0, 1).toUpperCase() 
+                  avatarInitials: nameController.text.trim().isNotEmpty
+                      ? nameController.text.trim().substring(0, 1).toUpperCase()
                       : '?',
                 );
 
@@ -1125,7 +1344,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
                   updatedTeam.add(newMember);
                 }
 
-                await ref.read(projectsRepositoryProvider).updateProjectTeam(widget.projectUuid, updatedTeam);
+                await ref
+                    .read(projectsRepositoryProvider)
+                    .updateProjectTeam(widget.projectUuid, updatedTeam);
                 ref.invalidate(projectDetailsProvider(widget.projectUuid));
                 if (context.mounted) Navigator.pop(context);
               },
@@ -1140,7 +1361,9 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
   Future<void> _deleteTeamMember(DetailedProjectData data, int index) async {
     final updatedTeam = List<ProjectTeamMember>.from(data.team);
     updatedTeam.removeAt(index);
-    await ref.read(projectsRepositoryProvider).updateProjectTeam(widget.projectUuid, updatedTeam);
+    await ref
+        .read(projectsRepositoryProvider)
+        .updateProjectTeam(widget.projectUuid, updatedTeam);
     ref.invalidate(projectDetailsProvider(widget.projectUuid));
   }
 
@@ -1152,14 +1375,14 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView> with Si
         children: [
           const Icon(Icons.error_outline, size: 56, color: Color(0xFFD32F2F)),
           const SizedBox(height: 16),
-          Text('Failed to load project details', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Failed to load project details',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
-          AppButton(
-            text: 'Return to Projects',
-            onPressed: () => context.pop(),
-          ),
+          AppButton(text: 'Return to Projects', onPressed: () => context.pop()),
         ],
       ),
     );

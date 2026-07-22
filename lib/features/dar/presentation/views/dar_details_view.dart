@@ -12,10 +12,7 @@ import 'package:mhgo/features/dashboard/presentation/providers/dashboard_provide
 class DarDetailsView extends ConsumerStatefulWidget {
   final String id;
 
-  const DarDetailsView({
-    super.key,
-    required this.id,
-  });
+  const DarDetailsView({super.key, required this.id});
 
   @override
   ConsumerState<DarDetailsView> createState() => _DarDetailsViewState();
@@ -58,8 +55,12 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
             }
 
             final statusColor = _getStatusColor(report.status);
-            final formattedDate = DateFormat('EEEE, MMMM dd, yyyy').format(report.reportDate);
-            final formattedUpdated = DateFormat('MMMM dd, yyyy hh:mm a').format(report.lastUpdated);
+            final formattedDate = DateFormat(
+              'EEEE, MMMM dd, yyyy',
+            ).format(report.reportDate);
+            final formattedUpdated = DateFormat(
+              'MMMM dd, yyyy hh:mm a',
+            ).format(report.lastUpdated);
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -86,17 +87,24 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                               const SizedBox(height: 2),
                               Text(
                                 'Last modified on $formattedUpdated',
-                                style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.disabledColor,
+                                ),
                               ),
                             ],
                           );
 
                           final statusTag = Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: statusColor.withOpacity(0.2)),
+                              border: Border.all(
+                                color: statusColor.withOpacity(0.2),
+                              ),
                             ),
                             child: Text(
                               report.status.toUpperCase(),
@@ -140,14 +148,16 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                             AppButton(
                               text: 'Edit Draft Report',
                               icon: Icons.edit_outlined,
-                              onPressed: () => context.push('/dar/edit/${report.id}'),
+                              onPressed: () =>
+                                  context.push('/dar/edit/${report.id}'),
                             ),
                           ],
                           AppButton(
                             text: 'Preview Print PDF',
                             icon: Icons.picture_as_pdf_outlined,
                             variant: AppButtonVariant.secondary,
-                            onPressed: () => context.push('/dar/pdf/${report.id}'),
+                            onPressed: () =>
+                                context.push('/dar/pdf/${report.id}'),
                           ),
                           AppButton(
                             text: 'Delete Report',
@@ -158,15 +168,20 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                                 context: context,
                                 builder: (ctx) => AlertDialog(
                                   title: const Text('Delete Report'),
-                                  content: Text('Are you sure you want to delete ${report.darNumber}?'),
+                                  content: Text(
+                                    'Are you sure you want to delete ${report.darNumber}?',
+                                  ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
                                       child: const Text('Cancel'),
                                     ),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFD32F2F),
+                                        backgroundColor: const Color(
+                                          0xFFD32F2F,
+                                        ),
                                         foregroundColor: Colors.white,
                                       ),
                                       onPressed: () => Navigator.pop(ctx, true),
@@ -183,7 +198,11 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                                 ref.invalidate(dashboardStateProvider);
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Report deleted successfully.')),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Report deleted successfully.',
+                                      ),
+                                    ),
                                   );
                                   context.pop();
                                 }
@@ -202,16 +221,36 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(flex: 5, child: _buildInfoBlock(report, formattedDate, theme, isDark)),
+                                Expanded(
+                                  flex: 5,
+                                  child: _buildInfoBlock(
+                                    report,
+                                    formattedDate,
+                                    theme,
+                                    isDark,
+                                  ),
+                                ),
                                 const SizedBox(width: 16),
-                                Expanded(flex: 4, child: _buildWeatherBlock(report, theme, isDark)),
+                                Expanded(
+                                  flex: 4,
+                                  child: _buildWeatherBlock(
+                                    report,
+                                    theme,
+                                    isDark,
+                                  ),
+                                ),
                               ],
                             );
                           }
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildInfoBlock(report, formattedDate, theme, isDark),
+                              _buildInfoBlock(
+                                report,
+                                formattedDate,
+                                theme,
+                                isDark,
+                              ),
                               const SizedBox(height: 16),
                               _buildWeatherBlock(report, theme, isDark),
                             ],
@@ -225,8 +264,13 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Daily Accomplishments',
                         icon: Icons.construction_outlined,
                         isExpanded: _showAccomplishments,
-                        onToggle: () => setState(() => _showAccomplishments = !_showAccomplishments),
-                        child: _buildAccomplishmentsList(report.accomplishments, theme),
+                        onToggle: () => setState(
+                          () => _showAccomplishments = !_showAccomplishments,
+                        ),
+                        child: _buildAccomplishmentsList(
+                          report.accomplishments,
+                          theme,
+                        ),
                         theme: theme,
                       ),
                       const SizedBox(height: 16),
@@ -236,8 +280,13 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Manpower Tally',
                         icon: Icons.people_outline,
                         isExpanded: _showManpower,
-                        onToggle: () => setState(() => _showManpower = !_showManpower),
-                        child: _buildManpowerList(report.manpower, theme, isDark),
+                        onToggle: () =>
+                            setState(() => _showManpower = !_showManpower),
+                        child: _buildManpowerList(
+                          report.manpower,
+                          theme,
+                          isDark,
+                        ),
                         theme: theme,
                       ),
                       const SizedBox(height: 16),
@@ -247,8 +296,13 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Equipment & Machinery Hours',
                         icon: Icons.local_shipping_outlined,
                         isExpanded: _showEquipment,
-                        onToggle: () => setState(() => _showEquipment = !_showEquipment),
-                        child: _buildEquipmentList(report.equipment, theme, isDark),
+                        onToggle: () =>
+                            setState(() => _showEquipment = !_showEquipment),
+                        child: _buildEquipmentList(
+                          report.equipment,
+                          theme,
+                          isDark,
+                        ),
                         theme: theme,
                       ),
                       const SizedBox(height: 16),
@@ -258,8 +312,13 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Materials Installed Logs',
                         icon: Icons.inventory_2_outlined,
                         isExpanded: _showMaterials,
-                        onToggle: () => setState(() => _showMaterials = !_showMaterials),
-                        child: _buildMaterialsList(report.materials, theme, isDark),
+                        onToggle: () =>
+                            setState(() => _showMaterials = !_showMaterials),
+                        child: _buildMaterialsList(
+                          report.materials,
+                          theme,
+                          isDark,
+                        ),
                         theme: theme,
                       ),
                       const SizedBox(height: 16),
@@ -269,7 +328,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Technical Delays & Issues',
                         icon: Icons.warning_amber_rounded,
                         isExpanded: _showDelays,
-                        onToggle: () => setState(() => _showDelays = !_showDelays),
+                        onToggle: () =>
+                            setState(() => _showDelays = !_showDelays),
                         child: _buildDelaysList(report.delays, theme),
                         theme: theme,
                       ),
@@ -280,7 +340,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         title: 'Operations Photos Documentation',
                         icon: Icons.photo_library_outlined,
                         isExpanded: _showPhotos,
-                        onToggle: () => setState(() => _showPhotos = !_showPhotos),
+                        onToggle: () =>
+                            setState(() => _showPhotos = !_showPhotos),
                         child: _buildPhotosGrid(report.photos, theme),
                         theme: theme,
                       ),
@@ -301,14 +362,24 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
   }
 
   // --- SUB-BLOCKS ---
-  Widget _buildInfoBlock(DarReport report, String formattedDate, ThemeData theme, bool isDark) {
+  Widget _buildInfoBlock(
+    DarReport report,
+    String formattedDate,
+    ThemeData theme,
+    bool isDark,
+  ) {
     return AppCard(
       variant: AppCardVariant.outlined,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Project Spec Details', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Project Spec Details',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -321,7 +392,11 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Projects', report.projectName, theme),
-                          _buildInfoRow('Report Log Date', formattedDate, theme),
+                          _buildInfoRow(
+                            'Report Log Date',
+                            formattedDate,
+                            theme,
+                          ),
                         ],
                       ),
                     ),
@@ -330,8 +405,16 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoRow('Prepared By', report.preparedBy, theme),
-                          _buildInfoRow('Reporting Shift', report.reportingPeriod, theme),
+                          _buildInfoRow(
+                            'Prepared By',
+                            report.preparedBy,
+                            theme,
+                          ),
+                          _buildInfoRow(
+                            'Reporting Shift',
+                            report.reportingPeriod,
+                            theme,
+                          ),
                         ],
                       ),
                     ),
@@ -344,7 +427,11 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                   _buildInfoRow('Project Name', report.projectName, theme),
                   _buildInfoRow('Report Log Date', formattedDate, theme),
                   _buildInfoRow('Prepared By', report.preparedBy, theme),
-                  _buildInfoRow('Reporting Shift', report.reportingPeriod, theme),
+                  _buildInfoRow(
+                    'Reporting Shift',
+                    report.reportingPeriod,
+                    theme,
+                  ),
                 ],
               );
             },
@@ -364,9 +451,19 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+                Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.disabledColor,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
               ],
             );
@@ -374,12 +471,19 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.disabledColor,
+                ),
+              ),
               Expanded(
                 child: Text(
                   value,
                   textAlign: TextAlign.right,
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -396,7 +500,12 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Site Environment', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Site Environment',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -408,19 +517,39 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                 children: [
                   SizedBox(
                     width: isNarrow ? (constraints.maxWidth - 20) / 2 : 150,
-                    child: _buildWeatherStatus('Weather', report.weather, Icons.cloud_outlined, theme),
+                    child: _buildWeatherStatus(
+                      'Weather',
+                      report.weather,
+                      Icons.cloud_outlined,
+                      theme,
+                    ),
                   ),
                   SizedBox(
                     width: isNarrow ? (constraints.maxWidth - 20) / 2 : 150,
-                    child: _buildWeatherStatus('Avg Temp', '${report.temperature}°C', Icons.thermostat_outlined, theme),
+                    child: _buildWeatherStatus(
+                      'Avg Temp',
+                      '${report.temperature}°C',
+                      Icons.thermostat_outlined,
+                      theme,
+                    ),
                   ),
                   SizedBox(
                     width: isNarrow ? (constraints.maxWidth - 20) / 2 : 150,
-                    child: _buildWeatherStatus('Wind Velocity', report.windCondition, Icons.wind_power_outlined, theme),
+                    child: _buildWeatherStatus(
+                      'Wind Velocity',
+                      report.windCondition,
+                      Icons.wind_power_outlined,
+                      theme,
+                    ),
                   ),
                   SizedBox(
                     width: isNarrow ? (constraints.maxWidth - 20) / 2 : 150,
-                    child: _buildWeatherStatus('Terrain Type', report.siteCondition, Icons.landscape_outlined, theme),
+                    child: _buildWeatherStatus(
+                      'Terrain Type',
+                      report.siteCondition,
+                      Icons.landscape_outlined,
+                      theme,
+                    ),
                   ),
                 ],
               );
@@ -431,14 +560,31 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
     );
   }
 
-  Widget _buildWeatherStatus(String label, String value, IconData icon, ThemeData theme) {
+  Widget _buildWeatherStatus(
+    String label,
+    String value,
+    IconData icon,
+    ThemeData theme,
+  ) {
     return Column(
       children: [
         Icon(icon, size: 20, color: theme.colorScheme.primary),
         const SizedBox(height: 6),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: theme.disabledColor)),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 10,
+            color: theme.disabledColor,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
@@ -469,7 +615,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                   Expanded(
                     child: Text(
                       title,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
@@ -479,10 +627,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
           ),
           if (isExpanded) ...[
             const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: child,
-            ),
+            Padding(padding: const EdgeInsets.all(20.0), child: child),
           ],
         ],
       ),
@@ -490,7 +635,10 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
   }
 
   // --- ACC ITEM LIST ---
-  Widget _buildAccomplishmentsList(List<AccomplishmentItem> items, ThemeData theme) {
+  Widget _buildAccomplishmentsList(
+    List<AccomplishmentItem> items,
+    ThemeData theme,
+  ) {
     if (items.isEmpty) return const Text('No accomplishments listed.');
     return ListView.separated(
       shrinkWrap: true,
@@ -505,19 +653,37 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
             CircleAvatar(
               radius: 12,
               backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-              child: Text('${idx + 1}', style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+              child: Text(
+                '${idx + 1}',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.workDescription, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    item.workDescription,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 2),
-                  Text('Area: ${item.areaLocation} | Quantity: ${item.quantity} ${item.unit}'),
+                  Text(
+                    'Area: ${item.areaLocation} | Quantity: ${item.quantity} ${item.unit}',
+                  ),
                   if (item.remarks.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text('Remarks: ${item.remarks}', style: TextStyle(fontStyle: FontStyle.italic, color: theme.disabledColor)),
+                    Text(
+                      'Remarks: ${item.remarks}',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: theme.disabledColor,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -534,13 +700,20 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
       child: Text(
         text,
         textAlign: center ? TextAlign.center : TextAlign.left,
-        style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.3),
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }
 
   // --- MANPOWER LIST ---
-  Widget _buildManpowerList(List<ManpowerAccomplishment> list, ThemeData theme, bool isDark) {
+  Widget _buildManpowerList(
+    List<ManpowerAccomplishment> list,
+    ThemeData theme,
+    bool isDark,
+  ) {
     if (list.isEmpty) return const Text('No manpower count recorded.');
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -559,7 +732,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+              color: theme.colorScheme.primary.withOpacity(
+                isDark ? 0.15 : 0.06,
+              ),
             ),
             children: [
               _tableHeader('Personnel Role', theme),
@@ -568,33 +743,68 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               _tableHeader('OT', theme, center: true),
             ],
           ),
-          ...list.map((m) => TableRow(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.category, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.planned.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.present.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.overtime.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          )),
+          ...list.map(
+            (m) => TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.category,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.planned.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.present.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.overtime.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   // --- EQUIPMENT LIST ---
-  Widget _buildEquipmentList(List<EquipmentUsage> list, ThemeData theme, bool isDark) {
+  Widget _buildEquipmentList(
+    List<EquipmentUsage> list,
+    ThemeData theme,
+    bool isDark,
+  ) {
     if (list.isEmpty) return const Text('No machinery logs recorded.');
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -612,7 +822,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+              color: theme.colorScheme.primary.withOpacity(
+                isDark ? 0.15 : 0.06,
+              ),
             ),
             children: [
               _tableHeader('Equipment Name', theme),
@@ -620,29 +832,57 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               _tableHeader('Hrs', theme, center: true),
             ],
           ),
-          ...list.map((e) => TableRow(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(e.name, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(e.count.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(e.hoursUsed.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          )),
+          ...list.map(
+            (e) => TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    e.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    e.count.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    e.hoursUsed.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   // --- MATERIALS LIST ---
-  Widget _buildMaterialsList(List<MaterialInstalled> list, ThemeData theme, bool isDark) {
+  Widget _buildMaterialsList(
+    List<MaterialInstalled> list,
+    ThemeData theme,
+    bool isDark,
+  ) {
     if (list.isEmpty) return const Text('No material logs recorded.');
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -660,7 +900,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.06),
+              color: theme.colorScheme.primary.withOpacity(
+                isDark ? 0.15 : 0.06,
+              ),
             ),
             children: [
               _tableHeader('Material Name', theme),
@@ -668,22 +910,49 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               _tableHeader('Unit', theme, center: true),
             ],
           ),
-          ...list.map((m) => TableRow(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.name, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Text(m.unit, textAlign: TextAlign.center, style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)),
-              ),
-            ],
-          )),
+          ...list.map(
+            (m) => TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.quantity.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    m.unit,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.disabledColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -705,8 +974,17 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(d.type, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
-                Text('${d.impactHours} hrs impact', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  d.type,
+                  style: const TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${d.impactHours} hrs impact',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             const SizedBox(height: 4),
@@ -719,7 +997,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
 
   // --- PHOTOS GRID ---
   Widget _buildPhotosGrid(List<DarPhoto> list, ThemeData theme) {
-    if (list.isEmpty) return const Text('No supporting documentation photo logs attached.');
+    if (list.isEmpty)
+      return const Text('No supporting documentation photo logs attached.');
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 500 ? 2 : 1;
@@ -756,11 +1035,17 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                     right: 0,
                     child: Container(
                       color: Colors.black.withOpacity(0.6),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       child: Text(
                         p.caption,
                         maxLines: 2,
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -781,15 +1066,41 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Approvals Log Status', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Approvals Log Status',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 600;
               final boxes = [
-                _buildSignatureSignBox('Prepared By', report.signedPrepared, theme, isDark),
-                _buildSignatureSignBox('Checked By (QA/QC)', report.signedChecked.isEmpty ? 'Pending Check' : report.signedChecked, theme, isDark, pending: report.signedChecked.isEmpty),
-                _buildSignatureSignBox('Approved By (PM)', report.signedApproved.isEmpty ? 'Pending Approval' : report.signedApproved, theme, isDark, pending: report.signedApproved.isEmpty),
+                _buildSignatureSignBox(
+                  'Prepared By',
+                  report.signedPrepared,
+                  theme,
+                  isDark,
+                ),
+                _buildSignatureSignBox(
+                  'Checked By (QA/QC)',
+                  report.signedChecked.isEmpty
+                      ? 'Pending Check'
+                      : report.signedChecked,
+                  theme,
+                  isDark,
+                  pending: report.signedChecked.isEmpty,
+                ),
+                _buildSignatureSignBox(
+                  'Approved By (PM)',
+                  report.signedApproved.isEmpty
+                      ? 'Pending Approval'
+                      : report.signedApproved,
+                  theme,
+                  isDark,
+                  pending: report.signedApproved.isEmpty,
+                ),
               ];
               if (isWide) {
                 return Row(
@@ -805,7 +1116,14 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: boxes.map((box) => Padding(padding: const EdgeInsets.only(bottom: 12), child: box)).toList(),
+                children: boxes
+                    .map(
+                      (box) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: box,
+                      ),
+                    )
+                    .toList(),
               );
             },
           ),
@@ -814,18 +1132,32 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
     );
   }
 
-  Widget _buildSignatureSignBox(String label, String value, ThemeData theme, bool isDark, {bool pending = false}) {
+  Widget _buildSignatureSignBox(
+    String label,
+    String value,
+    ThemeData theme,
+    bool isDark, {
+    bool pending = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : AppTheme.lightBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: theme.disabledColor)),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 10,
+              color: theme.disabledColor,
+            ),
+          ),
           const SizedBox(height: 10),
           Text(
             value,
@@ -833,7 +1165,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
               fontStyle: pending ? FontStyle.normal : FontStyle.italic,
               fontWeight: FontWeight.bold,
               fontSize: 12,
-              color: pending ? Colors.orange : theme.textTheme.bodyMedium?.color,
+              color: pending
+                  ? Colors.orange
+                  : theme.textTheme.bodyMedium?.color,
             ),
           ),
         ],
@@ -849,14 +1183,14 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           const Icon(Icons.error_outline, size: 56, color: Color(0xFFD32F2F)),
           const SizedBox(height: 16),
-          Text('Failed to load report spec', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Failed to load report spec',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(message, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
-          AppButton(
-            text: 'Return to list',
-            onPressed: () => context.pop(),
-          ),
+          AppButton(text: 'Return to list', onPressed: () => context.pop()),
         ],
       ),
     );

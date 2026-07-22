@@ -17,10 +17,7 @@ import 'package:mhgo/core/widgets/pdf_export_dialog.dart';
 class ProjectPdfPreviewView extends ConsumerWidget {
   final String uuid;
 
-  const ProjectPdfPreviewView({
-    super.key,
-    required this.uuid,
-  });
+  const ProjectPdfPreviewView({super.key, required this.uuid});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +42,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 if (options == null) return;
                 Future.microtask(() async {
                   await Printing.layoutPdf(
-                    onLayout: (PdfPageFormat format) async => _generatePdf(projectAsync.value!.project, materialsAsync.value!, options),
+                    onLayout: (PdfPageFormat format) async => _generatePdf(
+                      projectAsync.value!.project,
+                      materialsAsync.value!,
+                      options,
+                    ),
                   );
                 });
               }
@@ -60,10 +61,15 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 if (!context.mounted) return;
                 if (options == null) return;
                 Future.microtask(() async {
-                  final bytes = await _generatePdf(projectAsync.value!.project, materialsAsync.value!, options);
+                  final bytes = await _generatePdf(
+                    projectAsync.value!.project,
+                    materialsAsync.value!,
+                    options,
+                  );
                   await Printing.sharePdf(
-                    bytes: bytes, 
-                    filename: 'Project_BOM_${projectAsync.value!.project.name.replaceAll(' ', '_')}.pdf',
+                    bytes: bytes,
+                    filename:
+                        'Project_BOM_${projectAsync.value!.project.name.replaceAll(' ', '_')}.pdf',
                   );
                 });
               }
@@ -81,18 +87,22 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             if (project == null) {
               return const Center(child: Text('Project not found.'));
             }
-            
+
             return materialsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, stack) => Center(child: Text('Error: $err')),
               data: (materials) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 32.0,
+                    horizontal: 16.0,
+                  ),
                   child: Center(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final double availableWidth = constraints.maxWidth;
-                        final double targetWidth = 794.0; // A4 portrait width at 96 DPI
+                        final double targetWidth =
+                            794.0; // A4 portrait width at 96 DPI
 
                         Widget pageContent = Hero(
                           tag: 'pdf_page_${project.uuid}',
@@ -102,15 +112,21 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                             child: Container(
                               width: targetWidth,
                               padding: const EdgeInsets.all(40.0),
-                              color: Colors.white, 
+                              color: Colors.white,
                               child: DefaultTextStyle(
-                                style: const TextStyle(color: Colors.black87, fontFamily: 'Courier'),
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontFamily: 'Courier',
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildPdfHeader(project),
                                     const SizedBox(height: 12),
-                                    const Divider(color: Colors.black54, thickness: 1.5),
+                                    const Divider(
+                                      color: Colors.black54,
+                                      thickness: 1.5,
+                                    ),
                                     const SizedBox(height: 12),
 
                                     _buildPdfInfoRow(project),
@@ -123,7 +139,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                                       _buildPdfMaterialsTable(materials),
                                       const SizedBox(height: 24),
                                     ],
-                                    
+
                                     const SizedBox(height: 40),
                                     const Divider(color: Colors.black26),
                                     const SizedBox(height: 8),
@@ -213,7 +229,10 @@ class ProjectPdfPreviewView extends ConsumerWidget {
           _buildInfoItem('PROJECT NAME:', project.name),
           _buildInfoItem('CLIENT:', project.client ?? 'N/A'),
           _buildInfoItem('LOCATION:', project.location),
-          _buildInfoItem('CAPACITY:', '${project.capacity} ${project.capacityUnit ?? 'kWp'}'),
+          _buildInfoItem(
+            'CAPACITY:',
+            '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}',
+          ),
         ],
       ),
     );
@@ -226,7 +245,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54),
+            style: const TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
@@ -251,17 +274,22 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         solar = bom['solar'] as Map<String, dynamic>? ?? {};
         battery = bom['battery'] as Map<String, dynamic>? ?? {};
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
-        
-        if (solar.isEmpty && bom['panels'] != null) solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null) battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null) inverter['brand'] = bom['inverter'];
+
+        if (solar.isEmpty && bom['panels'] != null)
+          solar['brand'] = bom['panels'];
+        if (battery.isEmpty && bom['battery'] != null)
+          battery['brand'] = bom['battery'];
+        if (inverter.isEmpty && bom['inverter'] != null)
+          inverter['brand'] = bom['inverter'];
       } catch (_) {}
     }
 
     String formatSpecs(Map<String, dynamic> specs) {
       final entries = specs.entries.where((e) => e.value.toString().isNotEmpty);
       if (entries.isEmpty) return 'N/A';
-      return entries.map((e) => '${e.key.toUpperCase()}: ${e.value}').join(' | ');
+      return entries
+          .map((e) => '${e.key.toUpperCase()}: ${e.value}')
+          .join(' | ');
     }
 
     return Column(
@@ -269,7 +297,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
       children: [
         const Text(
           'EQUIPMENT SPECIFICATIONS',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -280,7 +312,13 @@ class ProjectPdfPreviewView extends ConsumerWidget {
               _buildSpecsRow('Solar Panels', formatSpecs(solar), isFirst: true),
               _buildSpecsRow('Inverter', formatSpecs(inverter)),
               _buildSpecsRow('Battery System', formatSpecs(battery)),
-              _buildSpecsRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost)),
+              _buildSpecsRow(
+                'Total Project Cost',
+                NumberFormat.currency(
+                  symbol: '₱',
+                  decimalDigits: 2,
+                ).format(project.totalCost),
+              ),
             ],
           ),
         ),
@@ -291,7 +329,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
   Widget _buildSpecsRow(String label, String value, {bool isFirst = false}) {
     return Container(
       decoration: BoxDecoration(
-        border: Border(top: isFirst ? BorderSide.none : const BorderSide(color: Colors.black26)),
+        border: Border(
+          top: isFirst
+              ? BorderSide.none
+              : const BorderSide(color: Colors.black26),
+        ),
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -302,17 +344,21 @@ class ProjectPdfPreviewView extends ConsumerWidget {
               color: const Color(0xFFF0F0F0),
               child: Text(
                 label,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const VerticalDivider(width: 1, thickness: 1, color: Colors.black26),
+            const VerticalDivider(
+              width: 1,
+              thickness: 1,
+              color: Colors.black26,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  value,
-                  style: const TextStyle(fontSize: 10),
-                ),
+                child: Text(value, style: const TextStyle(fontSize: 10)),
               ),
             ),
           ],
@@ -321,14 +367,20 @@ class ProjectPdfPreviewView extends ConsumerWidget {
     );
   }
 
-  Widget _buildPdfMaterialsTable(List<ProjectMaterialRequirementEntity> materials) {
+  Widget _buildPdfMaterialsTable(
+    List<ProjectMaterialRequirementEntity> materials,
+  ) {
     double grandTotal = 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'BILL OF MATERIALS',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -340,26 +392,95 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 child: const Row(
                   children: [
-                    Expanded(flex: 3, child: Text('DESCRIPTION', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 1, child: Text('QTY', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 1, child: Text('UNIT', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('STATUS', textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold))),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        'DESCRIPTION',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'QTY',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'UNIT',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'STATUS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
               const Divider(height: 1, thickness: 1, color: Colors.black54),
               ...materials.map((m) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 8,
+                  ),
                   decoration: const BoxDecoration(
                     border: Border(bottom: BorderSide(color: Colors.black12)),
                   ),
                   child: Row(
                     children: [
-                      Expanded(flex: 3, child: Text(m.materialUuid, style: const TextStyle(fontSize: 9))),
-                      Expanded(flex: 1, child: Text(m.requiredQuantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
-                      Expanded(flex: 1, child: Text(m.unit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
-                      Expanded(flex: 2, child: Text(m.status, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9))),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          m.materialUuid,
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          m.requiredQuantity.toString(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          m.unit,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          m.status,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -388,7 +509,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
   }
 
   // --- PDF GENERATION LOGIC ---
-  Future<Uint8List> _generatePdf(ProjectModel project, List<ProjectMaterialRequirementEntity> materials, [PdfExportOptions options = const PdfExportOptions()]) async {
+  Future<Uint8List> _generatePdf(
+    ProjectModel project,
+    List<ProjectMaterialRequirementEntity> materials, [
+    PdfExportOptions options = const PdfExportOptions(),
+  ]) async {
     final pdf = pw.Document();
 
     Map<String, dynamic> solar = {};
@@ -401,21 +526,28 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         solar = bom['solar'] as Map<String, dynamic>? ?? {};
         battery = bom['battery'] as Map<String, dynamic>? ?? {};
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
-        if (solar.isEmpty && bom['panels'] != null) solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null) battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null) inverter['brand'] = bom['inverter'];
+        if (solar.isEmpty && bom['panels'] != null)
+          solar['brand'] = bom['panels'];
+        if (battery.isEmpty && bom['battery'] != null)
+          battery['brand'] = bom['battery'];
+        if (inverter.isEmpty && bom['inverter'] != null)
+          inverter['brand'] = bom['inverter'];
       } catch (_) {}
     }
 
     String formatSpecs(Map<String, dynamic> specs) {
       final entries = specs.entries.where((e) => e.value.toString().isNotEmpty);
       if (entries.isEmpty) return 'N/A';
-      return entries.map((e) => '${e.key.toUpperCase()}: ${e.value}').join(' | ');
+      return entries
+          .map((e) => '${e.key.toUpperCase()}: ${e.value}')
+          .join(' | ');
     }
 
     pw.ImageProvider? logoImage;
     try {
-      final ByteData logoData = await rootBundle.load('assets/images/company_logo.png');
+      final ByteData logoData = await rootBundle.load(
+        'assets/images/company_logo.png',
+      );
       final Uint8List logoBytes = logoData.buffer.asUint8List();
       logoImage = pw.MemoryImage(logoBytes);
     } catch (_) {
@@ -435,40 +567,63 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   if (logoImage != null)
-                    pw.Image(logoImage, width: 90, height: 45, fit: pw.BoxFit.contain)
+                    pw.Image(
+                      logoImage,
+                      width: 90,
+                      height: 45,
+                      fit: pw.BoxFit.contain,
+                    )
                   else
-                    pw.Text('COMPANY LOGO', style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey500)),
-                  
+                    pw.Text(
+                      'COMPANY LOGO',
+                      style: const pw.TextStyle(
+                        fontSize: 16,
+                        color: PdfColors.grey500,
+                      ),
+                    ),
+
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
                       pw.Text(
                         'PROJECT SPECIFICATIONS',
-                        style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                          color: const PdfColor.fromInt(0xFF0F172A),
+                        ),
                       ),
                       pw.SizedBox(height: 4),
                       pw.Text(
                         'DATE: ${DateFormat('MMM dd, yyyy').format(DateTime.now())}',
-                        style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 12),
-              pw.Divider(color: const PdfColor.fromInt(0xFF0F172A), thickness: 1.0),
+              pw.Divider(
+                color: const PdfColor.fromInt(0xFF0F172A),
+                thickness: 1.0,
+              ),
               pw.SizedBox(height: 16),
             ],
           );
         },
         build: (pw.Context context) {
           return [
-
             // INFO
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: const PdfColor.fromInt(0xFFE0E0E0)),
+                border: pw.Border.all(
+                  color: const PdfColor.fromInt(0xFFE0E0E0),
+                ),
                 color: const PdfColor.fromInt(0xFFF5F5F5),
               ),
               child: pw.Row(
@@ -477,7 +632,10 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                   _pdfInfoItem('PROJECT NAME:', project.name),
                   _pdfInfoItem('CLIENT:', project.client ?? 'N/A'),
                   _pdfInfoItem('LOCATION:', project.location),
-                  _pdfInfoItem('CAPACITY:', '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '').replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}'),
+                  _pdfInfoItem(
+                    'CAPACITY:',
+                    '${(project.capacity.isNaN || project.capacity.isInfinite ? 0.0 : project.capacity).toString().replaceAll(RegExp(r'\.0$'), '')} ${project.capacityUnit ?? 'kWp'}',
+                  ),
                 ],
               ),
             ),
@@ -486,11 +644,17 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             // SPECS
             pw.Text(
               'EQUIPMENT SPECIFICATIONS',
-              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+                color: const PdfColor.fromInt(0xFF0F172A),
+              ),
             ),
             pw.SizedBox(height: 8),
             pw.Table(
-              border: pw.TableBorder.all(color: const PdfColor.fromInt(0xFF9E9E9E)),
+              border: pw.TableBorder.all(
+                color: const PdfColor.fromInt(0xFF9E9E9E),
+              ),
               columnWidths: {
                 0: const pw.FixedColumnWidth(120),
                 1: const pw.FlexColumnWidth(),
@@ -499,7 +663,13 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                 _pdfSpecsRow('Solar Panels', formatSpecs(solar)),
                 _pdfSpecsRow('Inverter', formatSpecs(inverter)),
                 _pdfSpecsRow('Battery System', formatSpecs(battery)),
-                _pdfSpecsRow('Total Project Cost', NumberFormat.currency(symbol: '₱', decimalDigits: 2).format(project.totalCost)),
+                _pdfSpecsRow(
+                  'Total Project Cost',
+                  NumberFormat.currency(
+                    symbol: '₱',
+                    decimalDigits: 2,
+                  ).format(project.totalCost),
+                ),
               ],
             ),
             pw.SizedBox(height: 24),
@@ -508,16 +678,27 @@ class ProjectPdfPreviewView extends ConsumerWidget {
             if (materials.isNotEmpty) ...[
               pw.Text(
                 'BILL OF MATERIALS',
-                style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A)),
+                style: pw.TextStyle(
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                  color: const PdfColor.fromInt(0xFF0F172A),
+                ),
               ),
               pw.SizedBox(height: 8),
               _buildRealPdfMaterialsTable(materials, project.totalCost),
             ],
-            
+
             // Signatory Block
             if (options.includeSignatures) ...[
               pw.SizedBox(height: 35),
-              pw.Text('AUTHORIZATION & SIGN-OFF', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF0F172A))),
+              pw.Text(
+                'AUTHORIZATION & SIGN-OFF',
+                style: pw.TextStyle(
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                  color: const PdfColor.fromInt(0xFF0F172A),
+                ),
+              ),
               pw.SizedBox(height: 8),
               pw.Column(
                 children: [
@@ -533,13 +714,27 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                             crossAxisAlignment: pw.CrossAxisAlignment.start,
                             children: [
                               pw.SizedBox(height: 24),
-                              pw.Text(options.engineerName.isEmpty ? '_______________________' : options.engineerName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                              pw.Text(
+                                options.engineerName.isEmpty
+                                    ? '_______________________'
+                                    : options.engineerName.toUpperCase(),
+                                style: pw.TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
+                              ),
                               pw.SizedBox(height: 2),
-                              pw.Text(options.engineerTitle, style: const pw.TextStyle(fontSize: 9)),
+                              pw.Text(
+                                options.engineerTitle,
+                                style: const pw.TextStyle(fontSize: 9),
+                              ),
                               pw.SizedBox(height: 4),
                               pw.Divider(thickness: 1, color: PdfColors.black),
                               pw.SizedBox(height: 4),
-                              pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                              pw.Text(
+                                'Date: ____ / ____ / ________',
+                                style: const pw.TextStyle(fontSize: 10),
+                              ),
                             ],
                           ),
                         ),
@@ -552,13 +747,27 @@ class ProjectPdfPreviewView extends ConsumerWidget {
                             crossAxisAlignment: pw.CrossAxisAlignment.start,
                             children: [
                               pw.SizedBox(height: 24),
-                              pw.Text(options.clientName.isEmpty ? '_______________________' : options.clientName.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                              pw.Text(
+                                options.clientName.isEmpty
+                                    ? '_______________________'
+                                    : options.clientName.toUpperCase(),
+                                style: pw.TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
+                              ),
                               pw.SizedBox(height: 2),
-                              pw.Text(options.clientTitle, style: const pw.TextStyle(fontSize: 9)),
+                              pw.Text(
+                                options.clientTitle,
+                                style: const pw.TextStyle(fontSize: 9),
+                              ),
                               pw.SizedBox(height: 4),
                               pw.Divider(thickness: 1, color: PdfColors.black),
                               pw.SizedBox(height: 4),
-                              pw.Text('Date: ____ / ____ / ________', style: const pw.TextStyle(fontSize: 10)),
+                              pw.Text(
+                                'Date: ____ / ____ / ________',
+                                style: const pw.TextStyle(fontSize: 10),
+                              ),
                             ],
                           ),
                         ),
@@ -593,7 +802,11 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         children: [
           pw.Text(
             label,
-            style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF757575)),
+            style: pw.TextStyle(
+              fontSize: 8,
+              fontWeight: pw.FontWeight.bold,
+              color: const PdfColor.fromInt(0xFF757575),
+            ),
           ),
           pw.SizedBox(height: 2),
           pw.Text(
@@ -611,7 +824,10 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         pw.Container(
           padding: const pw.EdgeInsets.all(6),
           color: const PdfColor.fromInt(0xFFEEEEEE),
-          child: pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+          child: pw.Text(
+            label,
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+          ),
         ),
         pw.Container(
           padding: const pw.EdgeInsets.all(6),
@@ -621,7 +837,10 @@ class ProjectPdfPreviewView extends ConsumerWidget {
     );
   }
 
-  pw.Widget _buildRealPdfMaterialsTable(List<ProjectMaterialRequirementEntity> materials, double totalCost) {
+  pw.Widget _buildRealPdfMaterialsTable(
+    List<ProjectMaterialRequirementEntity> materials,
+    double totalCost,
+  ) {
     return pw.Table(
       border: pw.TableBorder.all(color: const PdfColor.fromInt(0xFF9E9E9E)),
       columnWidths: {
@@ -633,33 +852,123 @@ class ProjectPdfPreviewView extends ConsumerWidget {
       children: [
         // Header
         pw.TableRow(
-          decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFEEEEEE)),
+          decoration: const pw.BoxDecoration(
+            color: PdfColor.fromInt(0xFFEEEEEE),
+          ),
           children: [
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('DESCRIPTION', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('QTY', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('UNIT', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('STATUS', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold))),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'DESCRIPTION',
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'QTY',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'UNIT',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'STATUS',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
         // Rows
         ...materials.map((m) {
           return pw.TableRow(
             children: [
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.customName ?? m.materialUuid, style: const pw.TextStyle(fontSize: 9))),
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.requiredQuantity.toString(), textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.unit, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
-              pw.Container(padding: const pw.EdgeInsets.all(4), child: pw.Text(m.status, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9))),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  m.customName ?? m.materialUuid,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  m.requiredQuantity.toString(),
+                  textAlign: pw.TextAlign.center,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  m.unit,
+                  textAlign: pw.TextAlign.center,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  m.status,
+                  textAlign: pw.TextAlign.center,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
+              ),
             ],
           );
         }),
         // Grand Total omitted from material list, as it was moved to specs. But to satisfy "Replace with project saved totalCost":
         pw.TableRow(
-          decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFF5F5F5)),
+          decoration: const pw.BoxDecoration(
+            color: PdfColor.fromInt(0xFFF5F5F5),
+          ),
           children: [
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('TOTAL PROJECT COST', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'TOTAL PROJECT COST',
+                textAlign: pw.TextAlign.right,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
             pw.Container(),
             pw.Container(),
-            pw.Container(padding: const pw.EdgeInsets.all(6), child: pw.Text('PHP ${(totalCost.isNaN || totalCost.isInfinite ? 0.0 : totalCost).toStringAsFixed(2)}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                'PHP ${(totalCost.isNaN || totalCost.isInfinite ? 0.0 : totalCost).toStringAsFixed(2)}',
+                textAlign: pw.TextAlign.right,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ],

@@ -26,7 +26,9 @@ class PdfExportDialog extends StatefulWidget {
 class _PdfExportDialogState extends State<PdfExportDialog> {
   bool _includeSignatures = true;
   bool _isPopping = false;
-  final _engineerNameCtrl = TextEditingController(text: 'ENGR. MARY HEIKE D. GARCIA');
+  final _engineerNameCtrl = TextEditingController(
+    text: 'ENGR. MARY HEIKE D. GARCIA',
+  );
   final _engineerTitleCtrl = TextEditingController(text: 'Project Engineer');
   final _clientNameCtrl = TextEditingController();
   final _clientTitleCtrl = TextEditingController(text: 'Client Acknowledgment');
@@ -58,7 +60,10 @@ class _PdfExportDialogState extends State<PdfExportDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SwitchListTile(
-              title: const Text('Include Signatures and Authorization Block', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              title: const Text(
+                'Include Signatures and Authorization Block',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
               value: _includeSignatures,
               onChanged: (val) {
                 setState(() => _includeSignatures = val);
@@ -69,24 +74,36 @@ class _PdfExportDialogState extends State<PdfExportDialog> {
               const SizedBox(height: 16),
               TextField(
                 controller: _engineerNameCtrl,
-                decoration: const InputDecoration(labelText: 'Engineer Name', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Engineer Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _engineerTitleCtrl,
-                decoration: const InputDecoration(labelText: 'Engineer Title', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Engineer Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),
               TextField(
                 controller: _clientNameCtrl,
-                decoration: const InputDecoration(labelText: 'Client Name (Optional)', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Client Name (Optional)',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _clientTitleCtrl,
-                decoration: const InputDecoration(labelText: 'Client Title', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Client Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ],
           ],
@@ -99,13 +116,15 @@ class _PdfExportDialogState extends State<PdfExportDialog> {
         ),
         FilledButton(
           onPressed: () {
-            _safePop(PdfExportOptions(
-              includeSignatures: _includeSignatures,
-              engineerName: _engineerNameCtrl.text.trim(),
-              engineerTitle: _engineerTitleCtrl.text.trim(),
-              clientName: _clientNameCtrl.text.trim(),
-              clientTitle: _clientTitleCtrl.text.trim(),
-            ));
+            _safePop(
+              PdfExportOptions(
+                includeSignatures: _includeSignatures,
+                engineerName: _engineerNameCtrl.text.trim(),
+                engineerTitle: _engineerTitleCtrl.text.trim(),
+                clientName: _clientNameCtrl.text.trim(),
+                clientTitle: _clientTitleCtrl.text.trim(),
+              ),
+            );
           },
           child: const Text('Generate Report'),
         ),

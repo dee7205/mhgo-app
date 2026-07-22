@@ -1,5 +1,6 @@
 class ManpowerAccomplishment {
-  final String category; // e.g. 'Project Engineer', 'Site Supervisor', 'Electricians', 'Civil Workers', 'Mechanical Workers', 'Helpers'
+  final String
+  category; // e.g. 'Project Engineer', 'Site Supervisor', 'Electricians', 'Civil Workers', 'Mechanical Workers', 'Helpers'
   final int planned;
   final int present;
   final int overtime;
@@ -12,11 +13,11 @@ class ManpowerAccomplishment {
   });
 
   Map<String, dynamic> toJson() => {
-        'category': category,
-        'planned': planned,
-        'present': present,
-        'overtime': overtime,
-      };
+    'category': category,
+    'planned': planned,
+    'present': present,
+    'overtime': overtime,
+  };
 
   factory ManpowerAccomplishment.fromJson(Map<String, dynamic> json) =>
       ManpowerAccomplishment(
@@ -28,7 +29,8 @@ class ManpowerAccomplishment {
 }
 
 class EquipmentUsage {
-  final String name; // e.g. 'Crane', 'Boom Truck', 'Excavator', 'Concrete Mixer', 'Service Vehicle'
+  final String
+  name; // e.g. 'Crane', 'Boom Truck', 'Excavator', 'Concrete Mixer', 'Service Vehicle'
   final int count;
   final double hoursUsed;
 
@@ -39,20 +41,21 @@ class EquipmentUsage {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'count': count,
-        'hoursUsed': hoursUsed,
-      };
+    'name': name,
+    'count': count,
+    'hoursUsed': hoursUsed,
+  };
 
   factory EquipmentUsage.fromJson(Map<String, dynamic> json) => EquipmentUsage(
-        name: json['name'] as String,
-        count: json['count'] as int,
-        hoursUsed: (json['hoursUsed'] as num).toDouble(),
-      );
+    name: json['name'] as String,
+    count: json['count'] as int,
+    hoursUsed: (json['hoursUsed'] as num).toDouble(),
+  );
 }
 
 class MaterialInstalled {
-  final String name; // e.g. 'PV Modules', 'Mounting Rails', 'Inverters', 'DC Cables', 'AC Cables', 'Combiner Boxes'
+  final String
+  name; // e.g. 'PV Modules', 'Mounting Rails', 'Inverters', 'DC Cables', 'AC Cables', 'Combiner Boxes'
   final int quantity;
   final String unit;
 
@@ -63,10 +66,10 @@ class MaterialInstalled {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'quantity': quantity,
-        'unit': unit,
-      };
+    'name': name,
+    'quantity': quantity,
+    'unit': unit,
+  };
 
   factory MaterialInstalled.fromJson(Map<String, dynamic> json) =>
       MaterialInstalled(
@@ -77,7 +80,8 @@ class MaterialInstalled {
 }
 
 class DelayIssue {
-  final String type; // 'Weather Delay', 'Material Delay', 'Safety Issue', 'Technical Issue', 'Other'
+  final String
+  type; // 'Weather Delay', 'Material Delay', 'Safety Issue', 'Technical Issue', 'Other'
   final String description;
   final double impactHours;
 
@@ -88,36 +92,30 @@ class DelayIssue {
   });
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'description': description,
-        'impactHours': impactHours,
-      };
+    'type': type,
+    'description': description,
+    'impactHours': impactHours,
+  };
 
   factory DelayIssue.fromJson(Map<String, dynamic> json) => DelayIssue(
-        type: json['type'] as String,
-        description: json['description'] as String,
-        impactHours: (json['impactHours'] as num).toDouble(),
-      );
+    type: json['type'] as String,
+    description: json['description'] as String,
+    impactHours: (json['impactHours'] as num).toDouble(),
+  );
 }
 
 class DarPhoto {
   final String path;
   final String caption;
 
-  const DarPhoto({
-    required this.path,
-    required this.caption,
-  });
+  const DarPhoto({required this.path, required this.caption});
 
-  Map<String, dynamic> toJson() => {
-        'path': path,
-        'caption': caption,
-      };
+  Map<String, dynamic> toJson() => {'path': path, 'caption': caption};
 
   factory DarPhoto.fromJson(Map<String, dynamic> json) => DarPhoto(
-        path: json['path'] as String,
-        caption: json['caption'] as String,
-      );
+    path: json['path'] as String,
+    caption: json['caption'] as String,
+  );
 }
 
 class AccomplishmentItem {
@@ -136,12 +134,12 @@ class AccomplishmentItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'workDescription': workDescription,
-        'areaLocation': areaLocation,
-        'quantity': quantity,
-        'unit': unit,
-        'remarks': remarks,
-      };
+    'workDescription': workDescription,
+    'areaLocation': areaLocation,
+    'quantity': quantity,
+    'unit': unit,
+    'remarks': remarks,
+  };
 
   factory AccomplishmentItem.fromJson(Map<String, dynamic> json) =>
       AccomplishmentItem(
@@ -213,66 +211,71 @@ class DarReport {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'darNumber': darNumber,
-        'projectUuid': projectUuid,
-        'projectName': projectName,
-        'reportDate': reportDate.toIso8601String(),
-        'preparedBy': preparedBy,
-        'reportingPeriod': reportingPeriod,
-        'weather': weather,
-        'temperature': temperature,
-        'windCondition': windCondition,
-        'siteCondition': siteCondition,
-        'accomplishments': accomplishments.map((a) => a.toJson()).toList(),
-        'manpower': manpower.map((m) => m.toJson()).toList(),
-        'equipment': equipment.map((e) => e.toJson()).toList(),
-        'materials': materials.map((m) => m.toJson()).toList(),
-        'delays': delays.map((d) => d.toJson()).toList(),
-        'photos': photos.map((p) => p.toJson()).toList(),
-        'signedPrepared': signedPrepared,
-        'signedChecked': signedChecked,
-        'signedApproved': signedApproved,
-        'status': status,
-        'lastUpdated': lastUpdated.toIso8601String(),
-      };
+    'id': id,
+    'darNumber': darNumber,
+    'projectUuid': projectUuid,
+    'projectName': projectName,
+    'reportDate': reportDate.toIso8601String(),
+    'preparedBy': preparedBy,
+    'reportingPeriod': reportingPeriod,
+    'weather': weather,
+    'temperature': temperature,
+    'windCondition': windCondition,
+    'siteCondition': siteCondition,
+    'accomplishments': accomplishments.map((a) => a.toJson()).toList(),
+    'manpower': manpower.map((m) => m.toJson()).toList(),
+    'equipment': equipment.map((e) => e.toJson()).toList(),
+    'materials': materials.map((m) => m.toJson()).toList(),
+    'delays': delays.map((d) => d.toJson()).toList(),
+    'photos': photos.map((p) => p.toJson()).toList(),
+    'signedPrepared': signedPrepared,
+    'signedChecked': signedChecked,
+    'signedApproved': signedApproved,
+    'status': status,
+    'lastUpdated': lastUpdated.toIso8601String(),
+  };
 
   factory DarReport.fromJson(Map<String, dynamic> json) => DarReport(
-        id: json['id'] as String,
-        darNumber: json['darNumber'] as String,
-        projectUuid: json['projectUuid'] as String,
-        projectName: json['projectName'] as String,
-        reportDate: DateTime.parse(json['reportDate'] as String),
-        preparedBy: json['preparedBy'] as String,
-        reportingPeriod: json['reportingPeriod'] as String,
-        weather: json['weather'] as String,
-        temperature: (json['temperature'] as num).toDouble(),
-        windCondition: json['windCondition'] as String,
-        siteCondition: json['siteCondition'] as String,
-        accomplishments: (json['accomplishments'] as List)
-            .map((item) => AccomplishmentItem.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        manpower: (json['manpower'] as List)
-            .map((item) => ManpowerAccomplishment.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        equipment: (json['equipment'] as List)
-            .map((item) => EquipmentUsage.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        materials: (json['materials'] as List)
-            .map((item) => MaterialInstalled.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        delays: (json['delays'] as List)
-            .map((item) => DelayIssue.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        photos: (json['photos'] as List)
-            .map((item) => DarPhoto.fromJson(item as Map<String, dynamic>))
-            .toList(),
-        signedPrepared: json['signedPrepared'] as String,
-        signedChecked: json['signedChecked'] as String,
-        signedApproved: json['signedApproved'] as String,
-        status: json['status'] as String,
-        lastUpdated: DateTime.parse(json['lastUpdated'] as String),
-      );
+    id: json['id'] as String,
+    darNumber: json['darNumber'] as String,
+    projectUuid: json['projectUuid'] as String,
+    projectName: json['projectName'] as String,
+    reportDate: DateTime.parse(json['reportDate'] as String),
+    preparedBy: json['preparedBy'] as String,
+    reportingPeriod: json['reportingPeriod'] as String,
+    weather: json['weather'] as String,
+    temperature: (json['temperature'] as num).toDouble(),
+    windCondition: json['windCondition'] as String,
+    siteCondition: json['siteCondition'] as String,
+    accomplishments: (json['accomplishments'] as List)
+        .map(
+          (item) => AccomplishmentItem.fromJson(item as Map<String, dynamic>),
+        )
+        .toList(),
+    manpower: (json['manpower'] as List)
+        .map(
+          (item) =>
+              ManpowerAccomplishment.fromJson(item as Map<String, dynamic>),
+        )
+        .toList(),
+    equipment: (json['equipment'] as List)
+        .map((item) => EquipmentUsage.fromJson(item as Map<String, dynamic>))
+        .toList(),
+    materials: (json['materials'] as List)
+        .map((item) => MaterialInstalled.fromJson(item as Map<String, dynamic>))
+        .toList(),
+    delays: (json['delays'] as List)
+        .map((item) => DelayIssue.fromJson(item as Map<String, dynamic>))
+        .toList(),
+    photos: (json['photos'] as List)
+        .map((item) => DarPhoto.fromJson(item as Map<String, dynamic>))
+        .toList(),
+    signedPrepared: json['signedPrepared'] as String,
+    signedChecked: json['signedChecked'] as String,
+    signedApproved: json['signedApproved'] as String,
+    status: json['status'] as String,
+    lastUpdated: DateTime.parse(json['lastUpdated'] as String),
+  );
 
   DarReport copyWith({
     String? id,

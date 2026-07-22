@@ -15,25 +15,34 @@ class SurveyRepositoryImpl implements SurveyRepository {
   @override
   Future<List<Survey>> getAllSurveys() async {
     // Queries Isar and sorts natively by client name
-    final models = await _isar.surveyModels.where().sortByClientName().findAll();
+    final models = await _isar.surveyModels
+        .where()
+        .sortByClientName()
+        .findAll();
     return models.map((m) => _modelToEntity(m)).toList();
   }
 
   @override
   Future<Survey?> getSurveyByUuid(String uuid) async {
-    final model = await _isar.surveyModels.filter().uuidEqualTo(uuid).findFirst();
+    final model = await _isar.surveyModels
+        .filter()
+        .uuidEqualTo(uuid)
+        .findFirst();
     if (model == null) return null;
-    
+
     return _modelToEntity(model);
   }
 
   @override
   Future<void> saveSurvey(Survey survey) async {
-    final existing = await _isar.surveyModels.filter().uuidEqualTo(survey.uuid).findFirst();
+    final existing = await _isar.surveyModels
+        .filter()
+        .uuidEqualTo(survey.uuid)
+        .findFirst();
 
     await _isar.writeTxn(() async {
       final model = existing ?? SurveyModel();
-      
+
       // Strict 1:1 mapping based on modern fields
       model.uuid = survey.uuid;
       model.clientName = survey.clientName;
@@ -48,7 +57,7 @@ class SurveyRepositoryImpl implements SurveyRepository {
       model.status = survey.status;
       model.notes = survey.notes;
       model.convertedProjectUuid = survey.convertedProjectUuid;
-      
+
       model.createdAt = existing?.createdAt ?? DateTime.now();
       model.updatedAt = DateTime.now();
       model.isSynced = false;
@@ -59,7 +68,10 @@ class SurveyRepositoryImpl implements SurveyRepository {
 
   @override
   Future<void> deleteSurvey(String uuid) async {
-    final model = await _isar.surveyModels.filter().uuidEqualTo(uuid).findFirst();
+    final model = await _isar.surveyModels
+        .filter()
+        .uuidEqualTo(uuid)
+        .findFirst();
     if (model != null) {
       await _isar.writeTxn(() async {
         await _isar.surveyModels.delete(model.id);
@@ -69,21 +81,27 @@ class SurveyRepositoryImpl implements SurveyRepository {
 
   @override
   Future<String?> convertToProject(Survey survey) async {
-    final model = await _isar.surveyModels.filter().uuidEqualTo(survey.uuid).findFirst();
-    
+    final model = await _isar.surveyModels
+        .filter()
+        .uuidEqualTo(survey.uuid)
+        .findFirst();
+
     if (model == null) throw Exception('Survey not found in local database.');
-    if (model.convertedProjectUuid != null) return model.convertedProjectUuid; // Already converted
+    if (model.convertedProjectUuid != null)
+      return model.convertedProjectUuid; // Already converted
 
     final newProjectUuid = 'p-${const Uuid().v4()}';
-    
+
     // Architecting the Project Entity from Survey Context
     final project = ProjectModel()
       ..uuid = newProjectUuid
       ..name = '${model.clientName} - ${model.proposedSystem}'
       ..client = model.clientName
       ..location = model.address
-      ..type = 'Rooftop' // Or mapped dynamically if needed
-      ..capacity = model.proposedCapacityKw // Map directly as kWp
+      ..type =
+          'Rooftop' // Or mapped dynamically if needed
+      ..capacity = model
+          .proposedCapacityKw // Map directly as kWp
       ..capacityUnit = 'kWp'
       ..status = 'planning'
       ..stage = 'Engineering'
@@ -99,12 +117,12 @@ class SurveyRepositoryImpl implements SurveyRepository {
     await _isar.writeTxn(() async {
       // 1. Persist the newly born project
       await _isar.projectModels.put(project);
-      
+
       // 2. Lock the survey by updating its status and link
       model.status = 'Converted';
       model.convertedProjectUuid = newProjectUuid;
       model.updatedAt = DateTime.now();
-      
+
       await _isar.surveyModels.put(model);
     });
 
@@ -119,7 +137,9 @@ class SurveyRepositoryImpl implements SurveyRepository {
       if (m.technicalSpecsJson.isNotEmpty) {
         final decoded = jsonDecode(m.technicalSpecsJson);
         if (decoded is Map) {
-          parsedSpecs = decoded.map((key, value) => MapEntry(key.toString(), value.toString()));
+          parsedSpecs = decoded.map(
+            (key, value) => MapEntry(key.toString(), value.toString()),
+          );
         }
       }
     } catch (e) {

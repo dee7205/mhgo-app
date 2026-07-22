@@ -104,50 +104,85 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: [null, 'Raw', 'Electrical', 'Structural', 'Misc'].contains(_selectedCategory) ? _selectedCategory : null,
-                    items: [null, 'Raw', 'Electrical', 'Structural', 'Misc']
-                        .toSet()
-                        .map(
-                          (c) => DropdownMenuItem<String?>(
-                            value: c,
-                            child: Row(children: [Expanded(child: Text(c ?? 'All Categories', overflow: TextOverflow.ellipsis))]),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (val) => setState(() => _selectedCategory = val),
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
                   ),
+                  value:
+                      [
+                        null,
+                        'Raw',
+                        'Electrical',
+                        'Structural',
+                        'Misc',
+                      ].contains(_selectedCategory)
+                      ? _selectedCategory
+                      : null,
+                  items: [null, 'Raw', 'Electrical', 'Structural', 'Misc']
+                      .toSet()
+                      .map(
+                        (c) => DropdownMenuItem<String?>(
+                          value: c,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  c ?? 'All Categories',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedCategory = val),
+                ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Sort By',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: ['Name A-Z', 'Name Z-A', 'Stock: Low to High', 'Stock: High to Low'].contains(_sortOption) ? _sortOption : null,
-                    items:
-                        [
-                              'Name A-Z',
-                              'Name Z-A',
-                              'Stock: Low to High',
-                              'Stock: High to Low',
-                            ]
-                            .toSet()
-                            .map(
-                              (s) => DropdownMenuItem<String>(
-                                value: s,
-                                child: Row(children: [Expanded(child: Text(s, overflow: TextOverflow.ellipsis))]),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (val) {
-                      if (val != null) setState(() => _sortOption = val);
-                    },
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Sort By',
+                    border: OutlineInputBorder(),
                   ),
+                  value:
+                      [
+                        'Name A-Z',
+                        'Name Z-A',
+                        'Stock: Low to High',
+                        'Stock: High to Low',
+                      ].contains(_sortOption)
+                      ? _sortOption
+                      : null,
+                  items:
+                      [
+                            'Name A-Z',
+                            'Name Z-A',
+                            'Stock: Low to High',
+                            'Stock: High to Low',
+                          ]
+                          .toSet()
+                          .map(
+                            (s) => DropdownMenuItem<String>(
+                              value: s,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      s,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _sortOption = val);
+                  },
+                ),
               ],
             ),
           ),
@@ -199,9 +234,15 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                               },
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                              icon: const Icon(
+                                Icons.delete,
+                                size: 20,
+                                color: Colors.red,
+                              ),
                               onPressed: () {
-                                ref.read(materialsNotifierProvider.notifier).deleteMaterial(item.uuid);
+                                ref
+                                    .read(materialsNotifierProvider.notifier)
+                                    .deleteMaterial(item.uuid);
                               },
                             ),
                           ],

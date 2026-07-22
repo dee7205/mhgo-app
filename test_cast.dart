@@ -5,7 +5,7 @@ class ProgressReport {
 
 void main() {
   List<ProgressReport> reports = [ProgressReport('123')];
-  
+
   try {
     final report = reports.cast<ProgressReport?>().firstWhere(
       (r) => r?.uuid == '456',

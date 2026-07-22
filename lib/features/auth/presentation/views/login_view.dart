@@ -12,9 +12,10 @@ class LoginView extends ConsumerStatefulWidget {
   ConsumerState<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProviderStateMixin {
+class _LoginViewState extends ConsumerState<LoginView>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'dave@mhg.com');
+  final _emailController = TextEditingController(text: 'heiks@mhg.com');
   final _passwordController = TextEditingController(text: 'password123');
 
   final _emailFocusNode = FocusNode();
@@ -51,11 +52,9 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
 
   void _submitLogin() {
     if (_formKey.currentState!.validate()) {
-      ref.read(authProvider.notifier).login(
-            _emailController.text,
-            _passwordController.text,
-            _rememberMe,
-          );
+      ref
+          .read(authProvider.notifier)
+          .login(_emailController.text, _passwordController.text, _rememberMe);
     }
   }
 
@@ -98,14 +97,18 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
               Expanded(
                 flex: 5,
                 child: Container(
-                  color: isDark ? const Color(0xFF0A2E16) : const Color(0xFFE8F5E9),
+                  color: isDark
+                      ? const Color(0xFF0A2E16)
+                      : const Color(0xFFE8F5E9),
                   child: Stack(
                     children: [
                       // Solar Cell Grid Blueprint Painter background
                       Positioned.fill(
                         child: CustomPaint(
                           painter: SolarBlueprintPainter(
-                            isDark ? const Color(0xFF2E7D32) : const Color(0xFF81C784),
+                            isDark
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFF81C784),
                           ),
                         ),
                       ),
@@ -120,7 +123,9 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFFB300).withOpacity(isDark ? 0.04 : 0.08),
+                                color: const Color(
+                                  0xFFFFB300,
+                                ).withOpacity(isDark ? 0.04 : 0.08),
                                 blurRadius: 100,
                                 spreadRadius: 50,
                               ),
@@ -144,10 +149,11 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                 const SizedBox(width: 8),
                                 Text(
                                   'MHGo',
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -1.0,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -1.0,
+                                      ),
                                 ),
                               ],
                             ),
@@ -158,36 +164,45 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary.withOpacity(0.1),
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
                                       'ENTERPRISE PORTAL',
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.5,
-                                      ),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.5,
+                                          ),
                                     ),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Powering Solar EPC\nProject Delivery.',
-                                    style: theme.textTheme.displayMedium?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -2.0,
-                                      height: 1.1,
-                                    ),
+                                    style: theme.textTheme.displayMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -2.0,
+                                          height: 1.1,
+                                        ),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Manage solar procurement, structural testing, layout updates, and site engineering logs in one offline-first application.',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
-                                      fontWeight: FontWeight.w400,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? AppTheme.darkTextSecondary
+                                              : AppTheme.lightTextSecondary,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -213,7 +228,10 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
               flex: 4,
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                    vertical: 24.0,
+                  ),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 420),
@@ -256,7 +274,9 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                             Text(
                               'Enter your credentials to access the MHG solar platform.',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                                color: isDark
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.lightTextSecondary,
                               ),
                             ),
                             const SizedBox(height: 28),
@@ -281,7 +301,10 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                     textInputAction: TextInputAction.next,
                                     decoration: InputDecoration(
                                       hintText: 'e.g. name@mhg.com',
-                                      prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                                      prefixIcon: const Icon(
+                                        Icons.email_outlined,
+                                        size: 20,
+                                      ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -290,35 +313,43 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                       if (val == null || val.isEmpty) {
                                         return 'Email is required';
                                       }
-                                      if (!val.contains('@') || !val.contains('.')) {
+                                      if (!val.contains('@') ||
+                                          !val.contains('.')) {
                                         return 'Please enter a valid email address';
                                       }
                                       return null;
                                     },
                                     onFieldSubmitted: (_) {
-                                      FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                      FocusScope.of(
+                                        context,
+                                      ).requestFocus(_passwordFocusNode);
                                     },
                                   ),
                                   const SizedBox(height: 20),
 
                                   // Password text field
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Password',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       GestureDetector(
-                                        onTap: () => context.push('/forgot-password'),
+                                        onTap: () =>
+                                            context.push('/forgot-password'),
                                         child: Text(
                                           'Forgot password?',
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            color: theme.colorScheme.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                       ),
                                     ],
@@ -331,7 +362,10 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                     textInputAction: TextInputAction.done,
                                     decoration: InputDecoration(
                                       hintText: 'Enter password',
-                                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                                      prefixIcon: const Icon(
+                                        Icons.lock_outline,
+                                        size: 20,
+                                      ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _obscurePassword
@@ -340,7 +374,10 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                           size: 20,
                                         ),
                                         onPressed: () {
-                                          setState(() => _obscurePassword = !_obscurePassword);
+                                          setState(
+                                            () => _obscurePassword =
+                                                !_obscurePassword,
+                                          );
                                         },
                                       ),
                                       border: OutlineInputBorder(
@@ -368,9 +405,12 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                         height: 24,
                                         child: Checkbox(
                                           value: _rememberMe,
-                                          activeColor: theme.colorScheme.primary,
+                                          activeColor:
+                                              theme.colorScheme.primary,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                           onChanged: (val) {
                                             if (val != null) {
@@ -382,10 +422,11 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                       const SizedBox(width: 8),
                                       Text(
                                         'Remember my session offline',
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -396,9 +437,15 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                     width: double.infinity,
                                     height: 48,
                                     child: AppButton(
-                                      text: authState.isLoading ? 'Signing In...' : 'Sign In',
-                                      icon: authState.isLoading ? null : Icons.login,
-                                      onPressed: authState.isLoading ? null : _submitLogin,
+                                      text: authState.isLoading
+                                          ? 'Signing In...'
+                                          : 'Sign In',
+                                      icon: authState.isLoading
+                                          ? null
+                                          : Icons.login,
+                                      onPressed: authState.isLoading
+                                          ? null
+                                          : _submitLogin,
                                     ),
                                   ),
                                 ],
@@ -412,15 +459,18 @@ class _LoginViewState extends ConsumerState<LoginView> with SingleTickerProvider
                                 children: [
                                   Text(
                                     'Offline sync requires local cached data.',
-                                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontSize: 10,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Demo credentials: dave@mhg.com / password123',
+                                    'Demo credentials: heiks@mhg.com / password123',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.primary.withOpacity(0.7),
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.7),
                                     ),
                                   ),
                                 ],
@@ -482,9 +532,17 @@ class SolarBlueprintPainter extends CustomPainter {
 
         // Draw internal solar cell grids
         for (double px = x + 30; px < x + panelW; px += 30) {
-          canvas.drawLine(Offset(px, y), Offset(px, y + panelH), paintSolarBorder);
+          canvas.drawLine(
+            Offset(px, y),
+            Offset(px, y + panelH),
+            paintSolarBorder,
+          );
         }
-        canvas.drawLine(Offset(x, y + panelH / 2), Offset(x + panelW, y + panelH / 2), paintSolarBorder);
+        canvas.drawLine(
+          Offset(x, y + panelH / 2),
+          Offset(x + panelW, y + panelH / 2),
+          paintSolarBorder,
+        );
       }
     }
   }

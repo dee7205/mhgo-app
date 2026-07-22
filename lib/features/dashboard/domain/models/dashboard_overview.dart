@@ -9,8 +9,9 @@ class DashboardOverview {
   final int planningProjectsCount;
   final Map<String, double> capacityByUnit;
   final double accumulatedTotalCost;
-  final double overallProgress; // average progress of active/construction projects (0.0 to 1.0)
-  
+  final double
+  overallProgress; // average progress of active/construction projects (0.0 to 1.0)
+
   final Map<String, int> projectsByStage;
 
   final List<ProjectModel> projects;
