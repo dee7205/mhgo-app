@@ -1,6 +1,14 @@
 # Changelog
 
-## [v1.1.2] - Current
+## [v1.3.0] - Current
+### Added
+- **Global AI Assistant:** Integrated Gemini API (`gemini-3-flash-preview` over `v1beta` endpoint) to provide an interactive chatbot on the Dashboard.
+- **RAG Architecture:** Added `DashboardContextBuilder` to automatically parse and serialize Isar database content (Projects, KPIs, Inventory, Surveys) into structured Markdown for grounded AI responses.
+- **AI UI:** Developed `AiAssistantView` with an auto-scrolling chat interface, Markdown rendering for AI responses, and loading state management.
+
+---
+
+## [v1.2.3]
 ### Added
 - Standardized corporate logo (`assets/images/company_logo.png`) header across Project, Survey, and DAR PDF generators.
 - Built a fallback mechanism in PDF previews preventing crashes if branding assets are temporarily missing.

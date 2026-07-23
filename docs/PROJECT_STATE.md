@@ -12,6 +12,7 @@ This document tracks the current implementation status of MHGo modules and highl
 | **DAR (Daily Reports)** | ✅ Complete | Fully Reactive | ✅ Professional Header |
 | **Materials (BOM)** | ✅ Complete | Embedded in Project | Included in Project PDF |
 | **Progress** | 🟡 Partial | Fully Reactive | Pending |
+| **AI Assistant** | ✅ Complete | Global Dashboard Context | N/A |
 
 ## 2. Implemented Features
 - **Isar Database Pipeline:** Full offline CRUD operations for Projects, Surveys, DARs, and Progress.
@@ -20,6 +21,7 @@ This document tracks the current implementation status of MHGo modules and highl
 - **Material Requirements (BOM):** Custom Material 3 UI for on-grid tracking. Removed per-item costs in favor of a single `totalCost` Project field. Supports editable material names without creating duplicate system defaults.
 - **Data Safety Validators:** Protection against `NaN` and `Infinity` mathematical errors on the UI. Default fallback handling for missing currencies (`₱0`) and capacities (`0 kWp`).
 - **Zero-Flex Layouts:** Prevented `RenderFlex` overflows in mobile viewport constraints using `Wrap`, constrained `DropdownButtonFormField`, and `FittedBox` widgets.
+- **Retrieval-Augmented Generation (RAG):** Implemented a global AI Assistant powered by the Gemini API. Uses `DashboardContextBuilder` to serialize offline Isar database models into contextual markdown prompts, allowing intelligent querying of local project data.
 
 ## 3. Pending Work
 - **Progress PDF Engine:** Develop a standalone PDF exporter for the Progress module (Gantt-style milestone exports).
