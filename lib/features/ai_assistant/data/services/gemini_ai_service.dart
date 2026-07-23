@@ -8,11 +8,10 @@ class GeminiAiService {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     
     // Safely check if the API key exists before trying to initialize Gemini
-    if (apiKey == null || apiKey.isEmpty || apiKey == 'your_api_key_here') {
+    if (apiKey == null || apiKey.isEmpty || apiKey == 'GEMINI_API_KEY') {
       throw Exception('Gemini API Key is missing or invalid in .env file.');
     }
     
-    // Using the requested gemini-3-flash-preview model. Preview models require the v1beta endpoint.
     _model = GenerativeModel(
       model: 'gemini-3-flash-preview',
       apiKey: apiKey,
@@ -27,10 +26,10 @@ class GeminiAiService {
     required String userQuestion,
   }) async {
     try {
-      // 1. We construct a strictly formatted prompt.
-      // We place the System Prompt at the top to give the AI its rules.
-      // We inject the Context Data in the middle so the AI has the exact facts.
-      // We place the User Question at the bottom.
+      // 1. construct a strictly formatted prompt.
+      // place the System Prompt at the top to give the AI its rules.
+      // inject the Context Data in the middle so the AI has the exact facts.
+      // place the User Question at the bottom.
       final fullPrompt = '''
 $systemPrompt
 
@@ -41,10 +40,10 @@ $contextData
 User Question: $userQuestion
 ''';
       
-      // 2. We send the prompt to Gemini
+      // send the prompt to Gemini
       final response = await _model.generateContent([Content.text(fullPrompt)]);
       
-      // 3. We return the raw text response
+      // return the raw text response
       return response.text ?? 'I could not generate an answer.';
     } catch (e) {
       throw Exception('Failed to get answer from AI: $e');

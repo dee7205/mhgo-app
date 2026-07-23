@@ -1,5 +1,10 @@
 # MHGo
 
+![Version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
+![Flutter](https://img.shields.io/badge/Flutter-Material_3-02569B?logo=flutter)
+![Database](https://img.shields.io/badge/Database-Isar_Offline-FF9900)
+![AI](https://img.shields.io/badge/AI-Gemini_3_Flash-8E75B2?logo=google)
+
 > **Built for MHG.**
 
 MHGo is an **offline-first Solar EPC Project Management Platform** built with **Flutter** to streamline the complete lifecycle of solar engineering projects. It replaces spreadsheets, paper forms, and scattered communications with a centralized application for managing surveys, project execution, progress tracking, materials, and reporting.
@@ -59,6 +64,7 @@ Future versions will support optional cloud synchronization using **Laravel** an
 - Notifications
 - Quick Actions
 - Live module synchronization
+- **Global AI Assistant (Gemini API Integration)**
 
 ## Survey Module
 
@@ -108,6 +114,13 @@ Planned functionality includes:
 - Stock Monitoring
 - Project Material Requirements
 
+## AI Integration
+
+- Global AI Assistant (Dashboard Scope)
+- Secure API Key Management (.env)
+- Project Context Builder (Database to Markdown)
+- Powered by `gemini-3-flash-preview` model
+
 ---
 
 # Development Roadmap
@@ -116,6 +129,7 @@ Planned functionality includes:
 |---------|--------|
 | Project Foundation | ✅ Complete |
 | Dashboard | ✅ Complete |
+| AI Assistant Integration | ✅ Complete |
 | Survey Module | ✅ Complete *(ongoing refinements)* |
 | Projects | ✅ Complete |
 | Daily Accomplishment Reports | ✅ Complete |
@@ -151,6 +165,7 @@ lib/
 ├── core/
 ├── shared/
 ├── features/
+│   ├── ai_assistant/
 │   ├── authentication/
 │   ├── dashboard/
 │   ├── survey/

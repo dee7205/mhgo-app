@@ -36,8 +36,6 @@ class ProjectContextBuilder {
     // 3. BOM & Specifications (if available)
     if (project.bomSpecsJson != null && project.bomSpecsJson!.isNotEmpty) {
       buffer.writeln('# System Specifications & Brands');
-      // AI models are exceptionally good at reading raw JSON, 
-      // so we can just pass the JSON string directly!
       buffer.writeln('JSON Data: ${project.bomSpecsJson}');
       buffer.writeln('');
     }

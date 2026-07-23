@@ -2,8 +2,6 @@ import 'package:mhgo/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:intl/intl.dart';
 
 class DashboardContextBuilder {
-  /// Converts a [DashboardOverview] object into a structured Markdown string
-  /// that Gemini can easily read and analyze.
   static String build(DashboardOverview data) {
     final buffer = StringBuffer();
     final currencyFormatter = NumberFormat.currency(symbol: '₱', decimalDigits: 2);

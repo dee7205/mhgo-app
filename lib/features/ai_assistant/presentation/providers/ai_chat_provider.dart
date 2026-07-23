@@ -47,7 +47,7 @@ class AiChatNotifier extends Notifier<AiChatState> {
     return AiChatState(messages: [
       ChatMessage(
         id: const Uuid().v4(),
-        text: 'Hello! I am your Global AI Assistant. What would you like to know about your dashboard or projects?',
+        text: 'Hello! I am MHGo - AI Assistant. What would you like to know about your dashboard or projects?',
         isUser: false,
       )
     ]);
