@@ -176,10 +176,10 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.1),
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: statusColor.withOpacity(0.2),
+                                color: statusColor.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Text(
@@ -262,7 +262,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                                 100.0,
                             minHeight: 8.0,
                             backgroundColor: theme.colorScheme.primary
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                           ),
                         ),
                       ),
@@ -485,12 +485,15 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
 
         // Backward compatibility
-        if (solar.isEmpty && bom['panels'] != null)
+        if (solar.isEmpty && bom['panels'] != null) {
           solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null)
+        }
+        if (battery.isEmpty && bom['battery'] != null) {
           battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null)
+        }
+        if (inverter.isEmpty && bom['inverter'] != null) {
           inverter['brand'] = bom['inverter'];
+        }
       } catch (_) {}
     }
 
@@ -726,7 +729,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                     margin: const EdgeInsets.only(top: 4),
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: categoryColor.withOpacity(0.1),
+                      color: categoryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -933,7 +936,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: dotColor.withOpacity(0.1),
+                                  color: dotColor.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: dotColor, width: 2),
                                 ),
@@ -949,7 +952,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                                     width: 2.0,
                                     color: item.status == 'completed'
                                         ? const Color(0xFF2E7D32)
-                                        : theme.disabledColor.withOpacity(0.3),
+                                        : theme.disabledColor.withValues(alpha: 0.3),
                                   ),
                                 ),
                             ],
@@ -994,7 +997,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: dotColor.withOpacity(0.1),
+                                            color: dotColor.withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(
                                               8,
                                             ),
@@ -1041,7 +1044,7 @@ class _ProjectDetailsViewState extends ConsumerState<ProjectDetailsView>
                                               backgroundColor: theme
                                                   .colorScheme
                                                   .primary
-                                                  .withOpacity(0.08),
+                                                  .withValues(alpha: 0.08),
                                             ),
                                           ),
                                         ),

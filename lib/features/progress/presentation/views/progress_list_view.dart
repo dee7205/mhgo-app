@@ -493,7 +493,7 @@ class _CreateProgressDialogState extends ConsumerState<_CreateProgressDialog> {
                     labelText: 'Project',
                     border: OutlineInputBorder(),
                   ),
-                  value: _selectedProjectUuid,
+                  initialValue: _selectedProjectUuid,
                   items: availableProjects.map((p) {
                     return DropdownMenuItem(
                       value: p.uuid,

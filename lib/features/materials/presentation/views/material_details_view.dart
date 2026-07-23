@@ -56,8 +56,9 @@ class _MaterialDetailsViewState extends ConsumerState<MaterialDetailsView>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
         data: (material) {
-          if (material == null)
+          if (material == null) {
             return const Center(child: Text('Material not found'));
+          }
 
           return TabBarView(
             controller: _tabController,

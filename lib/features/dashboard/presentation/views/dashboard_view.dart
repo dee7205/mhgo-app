@@ -14,7 +14,6 @@ import 'package:mhgo/features/dashboard/domain/models/dashboard_overview.dart';
 import 'package:mhgo/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
-import 'package:mhgo/features/materials/data/models/material_model.dart';
 import 'package:mhgo/features/materials/domain/entities/materials_entities.dart';
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
 
@@ -486,13 +485,13 @@ class _DashboardViewState extends ConsumerState<DashboardView>
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withOpacity(0.04)
-                : Colors.black.withOpacity(0.03),
+                ? Colors.white.withValues(alpha: 0.04)
+                : Colors.black.withValues(alpha: 0.03),
             shape: BoxShape.circle,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.05),
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.05),
             ),
           ),
           child: AnimatedBuilder(
@@ -506,15 +505,15 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                       ? Colors.amber
                       : const Color(
                           0xFF2E7D32,
-                        ).withOpacity(_pulseAnimation.value),
+                        ).withValues(alpha: _pulseAnimation.value),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: _isSyncing
-                          ? Colors.amber.withOpacity(0.4)
+                          ? Colors.amber.withValues(alpha: 0.4)
                           : const Color(
                               0xFF2E7D32,
-                            ).withOpacity(0.4 * _pulseAnimation.value),
+                            ).withValues(alpha: 0.4 * _pulseAnimation.value),
                       blurRadius: 4,
                       spreadRadius: 2,
                     ),
@@ -531,13 +530,13 @@ class _DashboardViewState extends ConsumerState<DashboardView>
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isDark
-            ? Colors.white.withOpacity(0.04)
-            : Colors.black.withOpacity(0.03),
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.05),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: Row(
@@ -555,15 +554,15 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                       ? Colors.amber
                       : const Color(
                           0xFF2E7D32,
-                        ).withOpacity(_pulseAnimation.value),
+                        ).withValues(alpha: _pulseAnimation.value),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: _isSyncing
-                          ? Colors.amber.withOpacity(0.4)
+                          ? Colors.amber.withValues(alpha: 0.4)
                           : const Color(
                               0xFF2E7D32,
-                            ).withOpacity(0.4 * _pulseAnimation.value),
+                            ).withValues(alpha: 0.4 * _pulseAnimation.value),
                       blurRadius: 4,
                       spreadRadius: 2,
                     ),
@@ -931,15 +930,15 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withOpacity(0.02)
-                        : Colors.black.withOpacity(0.01),
+                        ? Colors.white.withValues(alpha: 0.02)
+                        : Colors.black.withValues(alpha: 0.01),
                     borderRadius: BorderRadius.circular(
                       AppTheme.borderRadiusMedium,
                     ),
                     border: Border.all(
                       color: isDark
-                          ? Colors.white.withOpacity(0.06)
-                          : Colors.black.withOpacity(0.04),
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : Colors.black.withValues(alpha: 0.04),
                     ),
                   ),
                   child: Row(
@@ -947,7 +946,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: action.color.withOpacity(0.1),
+                          color: action.color.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(action.icon, color: action.color, size: 16),
@@ -1274,10 +1273,10 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD32F2F).withOpacity(0.1),
+                  color: const Color(0xFFD32F2F).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: const Color(0xFFD32F2F).withOpacity(0.2),
+                    color: const Color(0xFFD32F2F).withValues(alpha: 0.2),
                   ),
                 ),
                 child: Text(
@@ -1370,9 +1369,9 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(isDark ? 0.08 : 0.05),
+                color: Colors.green.withValues(alpha: isDark ? 0.08 : 0.05),
                 borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-                border: Border.all(color: Colors.green.withOpacity(0.2)),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -1409,14 +1408,14 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                   decoration: BoxDecoration(
                     color: const Color(
                       0xFFD32F2F,
-                    ).withOpacity(isDark ? 0.06 : 0.03),
+                    ).withValues(alpha: isDark ? 0.06 : 0.03),
                     borderRadius: BorderRadius.circular(
                       AppTheme.borderRadiusMedium,
                     ),
                     border: Border.all(
                       color: const Color(
                         0xFFD32F2F,
-                      ).withOpacity(isDark ? 0.15 : 0.1),
+                      ).withValues(alpha: isDark ? 0.15 : 0.1),
                     ),
                   ),
                   child: Row(
@@ -1424,7 +1423,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD32F2F).withOpacity(0.1),
+                          color: const Color(0xFFD32F2F).withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -1632,7 +1631,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: act.color.withOpacity(0.1),
+                          color: act.color.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(act.icon, size: 14, color: act.color),
@@ -1703,7 +1702,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFD32F2F).withOpacity(0.1),
+                color: const Color(0xFFD32F2F).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1760,11 +1759,10 @@ class _KpiCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.accentColor,
-    this.progressValue,
     required this.theme,
     required this.isDark,
     this.customBody,
-  });
+  }) : progressValue = null;
 
   @override
   Widget build(BuildContext context) {
@@ -1862,24 +1860,24 @@ class _ProjectExpandedListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusBg = Colors.grey.withOpacity(0.12);
+    Color statusBg = Colors.grey.withValues(alpha: 0.12);
     Color statusFg = isDark ? Colors.white70 : Colors.black87;
 
     switch (project.status) {
       case 'construction':
-        statusBg = theme.colorScheme.primary.withOpacity(0.08);
+        statusBg = theme.colorScheme.primary.withValues(alpha: 0.08);
         statusFg = theme.colorScheme.primary;
         break;
       case 'planning':
-        statusBg = Colors.blue.withOpacity(0.08);
+        statusBg = Colors.blue.withValues(alpha: 0.08);
         statusFg = Colors.blue.shade400;
         break;
       case 'completed':
-        statusBg = Colors.green.withOpacity(0.08);
+        statusBg = Colors.green.withValues(alpha: 0.08);
         statusFg = Colors.green.shade400;
         break;
       case 'on_hold':
-        statusBg = Colors.amber.withOpacity(0.08);
+        statusBg = Colors.amber.withValues(alpha: 0.08);
         statusFg = Colors.amber.shade400;
         break;
     }
@@ -1910,7 +1908,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                                 : project.type.contains('Float')
                                 ? theme.colorScheme.tertiary
                                 : theme.colorScheme.primary)
-                            .withOpacity(0.08),
+                            .withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -1960,7 +1958,7 @@ class _ProjectExpandedListItem extends StatelessWidget {
                               color: statusBg,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: statusFg.withOpacity(0.2),
+                                color: statusFg.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Text(
@@ -2202,9 +2200,9 @@ class _TaskListItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: priorityColor.withOpacity(0.1),
+              color: priorityColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: priorityColor.withOpacity(0.2)),
+              border: Border.all(color: priorityColor.withValues(alpha: 0.2)),
             ),
             child: Text(
               task.priority.toUpperCase(),
@@ -2287,9 +2285,9 @@ class _QCListItem extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.08),
+                        color: statusColor.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: statusColor.withOpacity(0.2)),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                       ),
                       child: Text(
                         audit.status.toUpperCase(),
@@ -2355,8 +2353,8 @@ class _DashboardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final skeletonColor = isDark
-        ? Colors.white.withOpacity(0.05)
-        : Colors.black.withOpacity(0.04);
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.04);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32.0),

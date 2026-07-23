@@ -144,7 +144,7 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _categories.contains(_selectedCategory)
+                    initialValue: _categories.contains(_selectedCategory)
                         ? _selectedCategory
                         : null,
                     items: _categories
@@ -177,7 +177,7 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    value: _units.contains(_selectedUnit)
+                    initialValue: _units.contains(_selectedUnit)
                         ? _selectedUnit
                         : null,
                     items: _units

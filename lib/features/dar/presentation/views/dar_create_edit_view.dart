@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -398,7 +397,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 20, color: theme.colorScheme.primary),
@@ -444,7 +443,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
             error: (e, _) => Text('Error: $e'),
             data: (projects) {
               return DropdownButtonFormField<String?>(
-                value: _selectedProjectUuid,
+                initialValue: _selectedProjectUuid,
                 isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Select Project',
@@ -503,7 +502,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               SizedBox(
                 width: isDesktop ? 320 : double.infinity,
                 child: DropdownButtonFormField<String>(
-                  value: _reportingPeriod,
+                  initialValue: _reportingPeriod,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Reporting Period',
@@ -568,7 +567,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               SizedBox(
                 width: isDesktop ? 240 : double.infinity,
                 child: DropdownButtonFormField<String>(
-                  value: _weather,
+                  initialValue: _weather,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Weather',
@@ -605,7 +604,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               SizedBox(
                 width: isDesktop ? 240 : double.infinity,
                 child: DropdownButtonFormField<String>(
-                  value: _windCondition,
+                  initialValue: _windCondition,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Wind',
@@ -633,7 +632,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               SizedBox(
                 width: isDesktop ? 240 : double.infinity,
                 child: DropdownButtonFormField<String>(
-                  value: _siteCondition,
+                  initialValue: _siteCondition,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Terrain',
@@ -687,7 +686,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.03),
+                color: theme.colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: theme.dividerColor),
               ),
@@ -713,7 +712,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _accomplishments.length,
-              separatorBuilder: (_, __) => const Divider(height: 20),
+              separatorBuilder: (_, _) => const Divider(height: 20),
               itemBuilder: (context, index) {
                 final item = _accomplishments[index];
                 return Row(
@@ -721,8 +720,8 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(
-                        0.1,
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.1,
                       ),
                       child: Text(
                         '${index + 1}',
@@ -914,8 +913,8 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 // Header row
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(
-                      isDark ? 0.15 : 0.06,
+                    color: theme.colorScheme.primary.withValues(
+                      alpha: isDark ? 0.15 : 0.06,
                     ),
                   ),
                   children: [
@@ -1049,8 +1048,8 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               children: [
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(
-                      isDark ? 0.15 : 0.06,
+                    color: theme.colorScheme.primary.withValues(
+                      alpha: isDark ? 0.15 : 0.06,
                     ),
                   ),
                   children: [
@@ -1193,8 +1192,8 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               children: [
                 TableRow(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(
-                      isDark ? 0.15 : 0.06,
+                    color: theme.colorScheme.primary.withValues(
+                      alpha: isDark ? 0.15 : 0.06,
                     ),
                   ),
                   children: [
@@ -1293,7 +1292,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withOpacity(0.03),
+                color: theme.colorScheme.secondary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: theme.dividerColor),
               ),
@@ -1311,7 +1310,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _delays.length,
-              separatorBuilder: (_, __) => const Divider(height: 16),
+              separatorBuilder: (_, _) => const Divider(height: 16),
               itemBuilder: (context, index) {
                 final d = _delays[index];
                 return Row(
@@ -1385,7 +1384,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: delayType,
+                initialValue: delayType,
                 isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Category',
@@ -1498,7 +1497,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.04),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.04),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: theme.dividerColor,
@@ -1538,7 +1537,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.blueGrey.withOpacity(0.08),
+                            color: Colors.blueGrey.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Center(
@@ -1556,7 +1555,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
+                              color: Colors.black.withValues(alpha: 0.6),
                               borderRadius: const BorderRadius.vertical(
                                 bottom: Radius.circular(12),
                               ),
@@ -1620,7 +1619,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                 height: 100,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.blueGrey.withOpacity(0.08),
+                  color: Colors.blueGrey.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
@@ -1876,7 +1875,7 @@ class _DarCreateEditViewState extends ConsumerState<DarCreateEditView> {
                     backgroundColor: const Color(0xFF2E7D32),
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: const Color(0xFF2E7D32).withOpacity(0.4),
+                    shadowColor: const Color(0xFF2E7D32).withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

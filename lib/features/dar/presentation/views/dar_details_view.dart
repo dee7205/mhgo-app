@@ -100,10 +100,10 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.1),
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: statusColor.withOpacity(0.2),
+                                color: statusColor.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Text(
@@ -652,7 +652,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
           children: [
             CircleAvatar(
               radius: 12,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
               child: Text(
                 '${idx + 1}',
                 style: TextStyle(
@@ -732,8 +732,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(
-                isDark ? 0.15 : 0.06,
+              color: theme.colorScheme.primary.withValues(
+                alpha: isDark ? 0.15 : 0.06,
               ),
             ),
             children: [
@@ -822,8 +822,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(
-                isDark ? 0.15 : 0.06,
+              color: theme.colorScheme.primary.withValues(
+                alpha: isDark ? 0.15 : 0.06,
               ),
             ),
             children: [
@@ -900,8 +900,8 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(
-                isDark ? 0.15 : 0.06,
+              color: theme.colorScheme.primary.withValues(
+                alpha: isDark ? 0.15 : 0.06,
               ),
             ),
             children: [
@@ -997,8 +997,9 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
 
   // --- PHOTOS GRID ---
   Widget _buildPhotosGrid(List<DarPhoto> list, ThemeData theme) {
-    if (list.isEmpty)
+    if (list.isEmpty) {
       return const Text('No supporting documentation photo logs attached.');
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 500 ? 2 : 1;
@@ -1023,7 +1024,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                 children: [
                   Positioned.fill(
                     child: Container(
-                      color: Colors.blueGrey.withOpacity(0.08),
+                      color: Colors.blueGrey.withValues(alpha: 0.08),
                       child: const Center(
                         child: Icon(Icons.image, size: 32, color: Colors.grey),
                       ),
@@ -1034,7 +1035,7 @@ class _DarDetailsViewState extends ConsumerState<DarDetailsView> {
                     left: 0,
                     right: 0,
                     child: Container(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,

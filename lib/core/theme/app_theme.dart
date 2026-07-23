@@ -59,12 +59,12 @@ class AppTheme {
   // Custom shadows
   static List<BoxShadow> get lightShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.03),
+      color: Colors.black.withValues(alpha: 0.03),
       blurRadius: 4,
       offset: const Offset(0, 1),
     ),
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
@@ -72,12 +72,12 @@ class AppTheme {
 
   static List<BoxShadow> get darkShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.12),
+      color: Colors.black.withValues(alpha: 0.12),
       blurRadius: 6,
       offset: const Offset(0, 2),
     ),
     BoxShadow(
-      color: Colors.black.withOpacity(0.16),
+      color: Colors.black.withValues(alpha: 0.16),
       blurRadius: 16,
       offset: const Offset(0, 8),
     ),

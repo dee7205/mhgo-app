@@ -59,8 +59,9 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   }
 
   void _handleHover(bool isHovered) {
-    if (widget.onTap == null)
+    if (widget.onTap == null) {
       return; // Only animate hover for interactive cards
+    }
     setState(() {
       _isHovered = isHovered;
     });
@@ -88,15 +89,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
             (isDark ? AppTheme.darkSurfaceCard : AppTheme.lightSurface);
         border = Border.all(
           color: isDark
-              ? AppTheme.darkBorder.withOpacity(0.5)
-              : AppTheme.lightBorder.withOpacity(0.5),
+              ? AppTheme.darkBorder.withValues(alpha: 0.5)
+              : AppTheme.lightBorder.withValues(alpha: 0.5),
           width: 1,
         );
         shadow = _isHovered
             ? (isDark ? AppTheme.darkShadow : AppTheme.lightShadow)
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.08 : 0.02),
+                  color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -107,12 +108,12 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         bg =
             widget.backgroundColor ??
             (isDark
-                ? Colors.white.withOpacity(0.03)
-                : Colors.white.withOpacity(0.7));
+                ? Colors.white.withValues(alpha: 0.03)
+                : Colors.white.withValues(alpha: 0.7));
         border = Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.06),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
           width: 1,
         );
         shadow = _isHovered
@@ -127,15 +128,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
             (isDark ? AppTheme.darkSurface : AppTheme.lightSurface);
         border = Border.all(
           color: _isHovered
-              ? theme.colorScheme.primary.withOpacity(0.4)
+              ? theme.colorScheme.primary.withValues(alpha: 0.4)
               : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder),
           width: 1.2,
         );
         shadow = _isHovered
             ? [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(
-                    isDark ? 0.12 : 0.05,
+                  color: theme.colorScheme.primary.withValues(
+                    alpha: isDark ? 0.12 : 0.05,
                   ),
                   blurRadius: 8,
                   offset: const Offset(0, 4),

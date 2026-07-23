@@ -156,10 +156,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             enabled: _isEditing,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              if (value == null || value.trim().isEmpty)
+                              if (value == null || value.trim().isEmpty) {
                                 return 'Email is required';
-                              if (!value.contains('@'))
+                              }
+                              if (!value.contains('@')) {
                                 return 'Invalid email address';
+                              }
                               return null;
                             },
                           ),

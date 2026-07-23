@@ -9,5 +9,5 @@ void main() {
     }
   }
   final zipData = ZipEncoder().encode(archive);
-  File('test3.zip').writeAsBytesSync(zipData!);
+  File('test3.zip').writeAsBytesSync(zipData);
 }

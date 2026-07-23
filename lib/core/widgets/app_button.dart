@@ -93,13 +93,13 @@ class _AppButtonState extends State<AppButton>
     switch (widget.variant) {
       case AppButtonVariant.secondary:
         bg = isDark
-            ? Colors.white.withOpacity(0.06)
-            : Colors.black.withOpacity(0.04);
+            ? Colors.white.withValues(alpha: 0.06)
+            : Colors.black.withValues(alpha: 0.04);
         fg = isDark ? AppTheme.darkTextPrimary : AppTheme.lightTextPrimary;
         if (_isHovered && isEnabled) {
           bg = isDark
-              ? Colors.white.withOpacity(0.1)
-              : Colors.black.withOpacity(0.08);
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.08);
         }
         break;
 
@@ -113,7 +113,7 @@ class _AppButtonState extends State<AppButton>
           width: 1.2,
         );
         if (_isHovered && isEnabled) {
-          bg = theme.colorScheme.primary.withOpacity(isDark ? 0.04 : 0.02);
+          bg = theme.colorScheme.primary.withValues(alpha: isDark ? 0.04 : 0.02);
         }
         break;
 
@@ -121,7 +121,7 @@ class _AppButtonState extends State<AppButton>
         bg = Colors.transparent;
         fg = theme.colorScheme.primary;
         if (_isHovered && isEnabled) {
-          bg = theme.colorScheme.primary.withOpacity(isDark ? 0.08 : 0.05);
+          bg = theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.05);
         }
         break;
 
@@ -140,18 +140,18 @@ class _AppButtonState extends State<AppButton>
         if (_isHovered && isEnabled) {
           // Darken/lighten primary on hover
           bg = isDark
-              ? theme.colorScheme.primary.withOpacity(0.9)
-              : theme.colorScheme.primary.withOpacity(0.9);
+              ? theme.colorScheme.primary.withValues(alpha: 0.9)
+              : theme.colorScheme.primary.withValues(alpha: 0.9);
         }
         break;
     }
 
     if (!isEnabled) {
-      bg = bg.withOpacity(0.4);
-      fg = fg.withOpacity(0.4);
+      bg = bg.withValues(alpha: 0.4);
+      fg = fg.withValues(alpha: 0.4);
       if (borderSide != BorderSide.none) {
         borderSide = BorderSide(
-          color: borderSide.color.withOpacity(0.4),
+          color: borderSide.color.withValues(alpha: 0.4),
           width: borderSide.width,
         );
       }

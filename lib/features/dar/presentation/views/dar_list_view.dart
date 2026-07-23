@@ -218,7 +218,7 @@ class _DarListViewState extends ConsumerState<DarListView> {
 
         final projectDropdown = projectsAsync.when(
           loading: () => const SizedBox(width: 120, height: 48),
-          error: (_, __) => const SizedBox(),
+          error: (_, _) => const SizedBox(),
           data: (projects) {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -286,7 +286,7 @@ class _DarListViewState extends ConsumerState<DarListView> {
           ),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.08),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -383,7 +383,7 @@ class _DarListViewState extends ConsumerState<DarListView> {
               onSelected: (_) {
                 ref
                     .read(darStatusFilterProvider.notifier)
-                    .set(status['value'] as String?);
+                    .set(status['value']);
               },
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -537,9 +537,9 @@ class _DarGridCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: statusColor.withOpacity(0.2)),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                 ),
                 child: Text(
                   report.status.toUpperCase(),
@@ -703,9 +703,9 @@ class _DarListCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: statusColor.withOpacity(0.15)),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.15)),
                     ),
                     child: Text(
                       report.status.toUpperCase(),

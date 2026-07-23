@@ -402,7 +402,7 @@ class _ProjectCreateEditDialogState
                           labelText: 'Unit',
                           border: OutlineInputBorder(),
                         ),
-                        value: ['MWp', 'kWp', 'Wp'].contains(_capacityUnit)
+                        initialValue: ['MWp', 'kWp', 'Wp'].contains(_capacityUnit)
                             ? _capacityUnit
                             : 'MWp',
                         items: ['MWp', 'kWp', 'Wp']
@@ -429,7 +429,7 @@ class _ProjectCreateEditDialogState
                           labelText: 'Installation Type',
                           border: OutlineInputBorder(),
                         ),
-                        value:
+                        initialValue:
                             [
                               'Ground Mounted',
                               'Rooftop',
@@ -458,7 +458,7 @@ class _ProjectCreateEditDialogState
                           labelText: 'System Type',
                           border: OutlineInputBorder(),
                         ),
-                        value:
+                        initialValue:
                             [
                               'On-Grid',
                               'Off-Grid',
@@ -649,7 +649,7 @@ class _ProjectCreateEditDialogState
                           labelText: 'Project Stage',
                           border: OutlineInputBorder(),
                         ),
-                        value:
+                        initialValue:
                             [
                               'Engineering',
                               'Procurement',
@@ -689,7 +689,7 @@ class _ProjectCreateEditDialogState
                           labelText: 'Status',
                           border: OutlineInputBorder(),
                         ),
-                        value:
+                        initialValue:
                             [
                               'active',
                               'planning',

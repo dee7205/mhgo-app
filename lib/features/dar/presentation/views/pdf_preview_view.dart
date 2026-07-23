@@ -204,7 +204,7 @@ class PdfPreviewView extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                background: Paint()..color = Colors.yellow.withOpacity(0.3),
+                background: Paint()..color = Colors.yellow.withValues(alpha: 0.3),
               ),
             ),
           ],
@@ -621,7 +621,7 @@ class PdfPreviewView extends ConsumerWidget {
                       right: 0,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withValues(alpha: 0.6),
                         child: Text(
                           p.caption,
                           maxLines: 1,

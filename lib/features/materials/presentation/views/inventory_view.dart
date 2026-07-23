@@ -109,7 +109,7 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                     labelText: 'Category',
                     border: OutlineInputBorder(),
                   ),
-                  value:
+                  initialValue:
                       [
                         null,
                         'Raw',
@@ -119,8 +119,7 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                       ].contains(_selectedCategory)
                       ? _selectedCategory
                       : null,
-                  items: [null, 'Raw', 'Electrical', 'Structural', 'Misc']
-                      .toSet()
+                  items: {null, 'Raw', 'Electrical', 'Structural', 'Misc'}
                       .map(
                         (c) => DropdownMenuItem<String?>(
                           value: c,
@@ -146,7 +145,7 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                     labelText: 'Sort By',
                     border: OutlineInputBorder(),
                   ),
-                  value:
+                  initialValue:
                       [
                         'Name A-Z',
                         'Name Z-A',
@@ -156,13 +155,12 @@ class _InventoryViewState extends ConsumerState<InventoryView> {
                       ? _sortOption
                       : null,
                   items:
-                      [
+                      {
                             'Name A-Z',
                             'Name Z-A',
                             'Stock: Low to High',
                             'Stock: High to Low',
-                          ]
-                          .toSet()
+                          }
                           .map(
                             (s) => DropdownMenuItem<String>(
                               value: s,

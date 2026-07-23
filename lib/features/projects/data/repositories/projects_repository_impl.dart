@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:isar_community/isar.dart';
 import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/progress_model.dart';
-import 'package:mhgo/features/progress/domain/entities/progress_entities.dart';
 import 'package:mhgo/features/projects/domain/entities/projects_entities.dart';
 import 'package:mhgo/features/projects/domain/repositories/projects_repository.dart';
 

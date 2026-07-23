@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../features/projects/presentation/providers/projects_provider.dart';
 import '../../domain/entities/materials_entities.dart';
 import '../providers/materials_provider.dart';
 
 const List<String> bomSections = [
+  'System Components',
   'DC Wire Materials',
   'AC Wire Materials',
   'DC Conduits and Materials',
@@ -17,6 +20,12 @@ const List<String> bomSections = [
 ];
 
 const Map<String, List<(String, String, double)>> onGridBom = {
+  'System Components': [
+    ('Solar Panel', 'pcs', 0.0),
+    ('Inverter', 'units', 0.0),
+    ('Battery', 'units', 0.0),
+    ('Twisted Wire #18', 'meters', 0.0),
+  ],
   'DC Wire Materials': [
     ('PV Cable Single Core 2-4mmsq Black', 'roll/100m', 90.0),
     ('PV Cable Single Core 2-4mmsq Red', 'roll/100m', 90.0),
@@ -78,6 +87,12 @@ const Map<String, List<(String, String, double)>> onGridBom = {
 };
 
 const Map<String, List<(String, String, double)>> hybridBom = {
+  'System Components': [
+    ('Solar Panel', 'pcs', 0.0),
+    ('Inverter', 'units', 0.0),
+    ('Battery', 'units', 0.0),
+    ('Twisted Wire #18', 'meters', 0.0),
+  ],
   'DC Wire Materials': [
     ('PV Cable Single Core 2-4mmsq Black', 'roll/100m', 60.0),
     ('PV Cable Single Core 2-4mmsq Red', 'roll/100m', 60.0),
@@ -170,6 +185,34 @@ class _ProjectMaterialRequirementsTabState
         .read(materialsRepositoryProvider)
         .getRequirementsForProject(widget.projectUuid);
 
+    // Fetch project details for dynamic syncing
+    String solarName = 'Solar Panel';
+    String inverterName = 'Inverter';
+    String batteryName = 'Battery';
+    try {
+      final detailedProject = await ref.read(projectsRepositoryProvider).getProjectDetails(widget.projectUuid);
+      final project = detailedProject.project;
+      if (project.bomSpecsJson != null) {
+        final bom = jsonDecode(project.bomSpecsJson!);
+        final s = bom['solar'] as Map<String, dynamic>? ?? {};
+        final i = bom['inverter'] as Map<String, dynamic>? ?? {};
+        final b = bom['battery'] as Map<String, dynamic>? ?? {};
+
+        final solarBrand = s['brand']?.toString() ?? bom['panels']?.toString();
+        if (solarBrand != null && solarBrand.isNotEmpty) {
+           solarName = 'Solar Panel ($solarBrand)';
+        }
+        final inverterBrand = i['brand']?.toString() ?? bom['inverter']?.toString();
+        if (inverterBrand != null && inverterBrand.isNotEmpty) {
+           inverterName = 'Inverter ($inverterBrand)';
+        }
+        final batteryBrand = b['brand']?.toString() ?? bom['battery']?.toString();
+        if (batteryBrand != null && batteryBrand.isNotEmpty) {
+           batteryName = 'Battery ($batteryBrand)';
+        }
+      }
+    } catch (_) {}
+
     // Gather all valid material names for the current project type
     final validNames = <String>{};
     for (final items in defaultBom.values) {
@@ -200,8 +243,34 @@ class _ProjectMaterialRequirementsTabState
             allocatedQuantity: 0.0,
             unit: item.$2,
             status: 'Pending',
+            customName: item.$1 == 'Solar Panel' ? (solarName != 'Solar Panel' ? solarName : null) 
+                      : item.$1 == 'Inverter' ? (inverterName != 'Inverter' ? inverterName : null) 
+                      : item.$1 == 'Battery' ? (batteryName != 'Battery' ? batteryName : null) : null,
           );
           await notifier.saveRequirement(req);
+        } else {
+          // Sync custom names if they changed
+          if (item.$1 == 'Solar Panel' || item.$1 == 'Inverter' || item.$1 == 'Battery') {
+             final existing = existingReqs.firstWhere((e) => e.materialUuid == item.$1);
+             String? desiredCustomName;
+             if (item.$1 == 'Solar Panel' && solarName != 'Solar Panel') desiredCustomName = solarName;
+             if (item.$1 == 'Inverter' && inverterName != 'Inverter') desiredCustomName = inverterName;
+             if (item.$1 == 'Battery' && batteryName != 'Battery') desiredCustomName = batteryName;
+
+             if (existing.customName != desiredCustomName) {
+                final updatedReq = ProjectMaterialRequirementEntity(
+                  uuid: existing.uuid,
+                  projectUuid: existing.projectUuid,
+                  materialUuid: existing.materialUuid,
+                  requiredQuantity: existing.requiredQuantity,
+                  allocatedQuantity: existing.allocatedQuantity,
+                  unit: existing.unit,
+                  status: existing.status,
+                  customName: desiredCustomName,
+                );
+                await notifier.saveRequirement(updatedReq);
+             }
+          }
         }
       }
     }
@@ -376,7 +445,7 @@ class _ProjectMaterialRequirementsTabState
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: sectionReqs.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          separatorBuilder: (_, _) => const Divider(height: 1),
                           itemBuilder: (ctx, idx) {
                             final req = sectionReqs[idx];
                             return _buildMaterialRow(context, req);
@@ -595,7 +664,7 @@ class _EditRequirementDialogState
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value:
+                  initialValue:
                       [
                         'Pending',
                         'Requested',
@@ -612,15 +681,14 @@ class _EditRequirementDialogState
                     border: OutlineInputBorder(),
                   ),
                   items:
-                      [
+                      {
                             'Pending',
                             'Requested',
                             'Ordered',
                             'Delivered',
                             'Installed',
                             'Cancelled',
-                          ]
-                          .toSet()
+                          }
                           .map(
                             (s) => DropdownMenuItem<String>(
                               value: s,

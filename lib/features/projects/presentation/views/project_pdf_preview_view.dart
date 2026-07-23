@@ -84,9 +84,6 @@ class ProjectPdfPreviewView extends ConsumerWidget {
           error: (err, stack) => Center(child: Text('Error: $err')),
           data: (detailedData) {
             final project = detailedData.project;
-            if (project == null) {
-              return const Center(child: Text('Project not found.'));
-            }
 
             return materialsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -198,7 +195,7 @@ class ProjectPdfPreviewView extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                background: Paint()..color = Colors.yellow.withOpacity(0.3),
+                background: Paint()..color = Colors.yellow.withValues(alpha: 0.3),
               ),
             ),
           ],
@@ -275,12 +272,15 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         battery = bom['battery'] as Map<String, dynamic>? ?? {};
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
 
-        if (solar.isEmpty && bom['panels'] != null)
+        if (solar.isEmpty && bom['panels'] != null) {
           solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null)
+        }
+        if (battery.isEmpty && bom['battery'] != null) {
           battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null)
+        }
+        if (inverter.isEmpty && bom['inverter'] != null) {
           inverter['brand'] = bom['inverter'];
+        }
       } catch (_) {}
     }
 
@@ -526,12 +526,15 @@ class ProjectPdfPreviewView extends ConsumerWidget {
         solar = bom['solar'] as Map<String, dynamic>? ?? {};
         battery = bom['battery'] as Map<String, dynamic>? ?? {};
         inverter = bom['inverter'] as Map<String, dynamic>? ?? {};
-        if (solar.isEmpty && bom['panels'] != null)
+        if (solar.isEmpty && bom['panels'] != null) {
           solar['brand'] = bom['panels'];
-        if (battery.isEmpty && bom['battery'] != null)
+        }
+        if (battery.isEmpty && bom['battery'] != null) {
           battery['brand'] = bom['battery'];
-        if (inverter.isEmpty && bom['inverter'] != null)
+        }
+        if (inverter.isEmpty && bom['inverter'] != null) {
           inverter['brand'] = bom['inverter'];
+        }
       } catch (_) {}
     }
 

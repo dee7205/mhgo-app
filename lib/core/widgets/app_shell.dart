@@ -326,10 +326,10 @@ class _SidebarLinkState extends State<_SidebarLink> {
     final isDark = theme.brightness == Brightness.dark;
 
     final Color activeColor = theme.colorScheme.primary;
-    final Color activeBg = theme.colorScheme.primary.withOpacity(0.08);
+    final Color activeBg = theme.colorScheme.primary.withValues(alpha: 0.08);
     final Color hoverBg = isDark
-        ? Colors.white.withOpacity(0.04)
-        : Colors.black.withOpacity(0.02);
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.02);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -438,7 +438,7 @@ class _SidebarFooter extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: theme.colorScheme.secondary.withOpacity(0.2),
+                backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.2),
                 child: Text(
                   initials,
                   style: TextStyle(

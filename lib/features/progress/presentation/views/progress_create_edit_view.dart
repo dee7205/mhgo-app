@@ -110,8 +110,9 @@ class _ProgressCreateEditViewState
             .filter()
             .uuidEqualTo(widget.id)
             .findFirst();
-        if (project == null)
+        if (project == null) {
           throw Exception('Project not found to attach progress.');
+        }
 
         isNewReport = true;
         report = ProgressReport(
@@ -265,7 +266,7 @@ class _ProgressCreateEditViewState
                       labelText: 'Status',
                       border: OutlineInputBorder(),
                     ),
-                    value: _status,
+                    initialValue: _status,
                     items:
                         [
                               'Not Started',

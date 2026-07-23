@@ -125,7 +125,7 @@ class _LoginViewState extends ConsumerState<LoginView>
                               BoxShadow(
                                 color: const Color(
                                   0xFFFFB300,
-                                ).withOpacity(isDark ? 0.04 : 0.08),
+                                ).withValues(alpha: isDark ? 0.04 : 0.08),
                                 blurRadius: 100,
                                 spreadRadius: 50,
                               ),
@@ -170,7 +170,7 @@ class _LoginViewState extends ConsumerState<LoginView>
                                     ),
                                     decoration: BoxDecoration(
                                       color: theme.colorScheme.primary
-                                          .withOpacity(0.1),
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
@@ -470,7 +470,7 @@ class _LoginViewState extends ConsumerState<LoginView>
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: theme.colorScheme.primary
-                                          .withOpacity(0.7),
+                                          .withValues(alpha: 0.7),
                                     ),
                                   ),
                                 ],
@@ -500,7 +500,7 @@ class SolarBlueprintPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.08)
+      ..color = color.withValues(alpha: 0.08)
       ..strokeWidth = 1.0;
 
     // Draw grid lines
@@ -514,11 +514,11 @@ class SolarBlueprintPainter extends CustomPainter {
 
     // Draw solar panel shapes
     final paintSolar = Paint()
-      ..color = color.withOpacity(0.04)
+      ..color = color.withValues(alpha: 0.04)
       ..style = PaintingStyle.fill;
 
     final paintSolarBorder = Paint()
-      ..color = color.withOpacity(0.12)
+      ..color = color.withValues(alpha: 0.12)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 

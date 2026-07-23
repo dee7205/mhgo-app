@@ -177,7 +177,7 @@ class _SurveyListViewState extends ConsumerState<SurveyListView> {
         final statusDropdown = SizedBox(
           width: isCompact ? double.infinity : 180,
           child: DropdownButtonFormField<String?>(
-            value: _selectedStatus,
+            initialValue: _selectedStatus,
             isExpanded: true,
             decoration: const InputDecoration(
               isDense: true,
@@ -361,10 +361,10 @@ class _SurveyCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.12),
+              color: statusColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: statusColor.withOpacity(0.3),
+                color: statusColor.withValues(alpha: 0.3),
                 width: 1.2,
               ),
             ),

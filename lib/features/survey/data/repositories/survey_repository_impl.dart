@@ -87,8 +87,9 @@ class SurveyRepositoryImpl implements SurveyRepository {
         .findFirst();
 
     if (model == null) throw Exception('Survey not found in local database.');
-    if (model.convertedProjectUuid != null)
+    if (model.convertedProjectUuid != null) {
       return model.convertedProjectUuid; // Already converted
+    }
 
     final newProjectUuid = 'p-${const Uuid().v4()}';
 

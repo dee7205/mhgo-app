@@ -359,7 +359,7 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _specs.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final spec = _specs[index];
               return Row(
@@ -565,7 +565,7 @@ class _SurveyCreateEditViewState extends ConsumerState<SurveyCreateEditView> {
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      value: value,
+      initialValue: value,
       items: items
           .map(
             (s) => DropdownMenuItem(

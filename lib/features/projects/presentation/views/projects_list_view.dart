@@ -305,7 +305,7 @@ class _ProjectsListViewState extends ConsumerState<ProjectsListView> {
               onSelected: (_) {
                 ref
                     .read(projectsFilterStatusProvider.notifier)
-                    .set(filter['value'] as String?);
+                    .set(filter['value']);
               },
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -474,9 +474,9 @@ class _ProjectGridCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: statusColor.withOpacity(0.2)),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                 ),
                 child: Text(
                   project.status.toUpperCase(),
@@ -584,7 +584,7 @@ class _ProjectGridCard extends StatelessWidget {
                       : project.progress) /
                   100.0,
               minHeight: 6.0,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -662,9 +662,9 @@ class _ProjectListCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: statusColor.withOpacity(0.15)),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.15)),
                     ),
                     child: Text(
                       project.status.toUpperCase(),
@@ -746,7 +746,7 @@ class _ProjectListCard extends StatelessWidget {
                             : project.progress) /
                         100.0,
                     minHeight: 5.0,
-                    backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                   ),
                 ),
               ),
