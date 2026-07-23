@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../providers/ai_chat_provider.dart';
+import '../../utils/ai_pdf_generator.dart';
 
 class AiAssistantView extends ConsumerStatefulWidget {
   const AiAssistantView({super.key});
@@ -127,6 +128,9 @@ class _AiAssistantViewState extends ConsumerState<AiAssistantView> {
         ? theme.colorScheme.onPrimary 
         : theme.colorScheme.onSurface;
 
+    final bool hasPdfTrigger = !isUser && msg.text.contains('[GENERATE_PDF]');
+    final String cleanText = hasPdfTrigger ? msg.text.replaceAll('[GENERATE_PDF]', '').trim() : msg.text;
+
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -142,19 +146,40 @@ class _AiAssistantViewState extends ConsumerState<AiAssistantView> {
             bottomLeft: isUser ? const Radius.circular(16) : const Radius.circular(0),
           ),
         ),
-        child: isUser
-            ? Text(
-                msg.text,
-                style: TextStyle(color: textColor),
-              )
-            : MarkdownBody(
-                data: msg.text,
-                styleSheet: MarkdownStyleSheet(
-                  p: TextStyle(color: textColor),
-                  strong: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-                  listBullet: TextStyle(color: textColor),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            isUser
+                ? Text(
+                    cleanText,
+                    style: TextStyle(color: textColor),
+                  )
+                : MarkdownBody(
+                    data: cleanText,
+                    styleSheet: MarkdownStyleSheet(
+                      p: TextStyle(color: textColor),
+                      strong: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                      listBullet: TextStyle(color: textColor),
+                    ),
+                  ),
+            if (hasPdfTrigger) ...[
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => AiPdfGenerator.generateAndPrint(cleanText),
+                icon: const Icon(Icons.picture_as_pdf, size: 18),
+                label: const Text('Export to PDF'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.secondary,
+                  foregroundColor: theme.colorScheme.onSecondary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
+            ],
+          ],
+        ),
       ),
     );
   }
