@@ -1,6 +1,18 @@
 # Changelog
 
-## [v1.3.0] - Current
+## [v1.4.0] - Current
+### Added
+- **AI Solar Calculator Engine:** System prompt engineered to allow Gemini to act as an advanced financial estimator (calculating Daily Yield, Monthly Savings, Annual Savings, and ROI using standard Philippine EPC metrics).
+- **AI EPC Quotation Generator:** Instructed Gemini to automatically generate professional MHGo-branded Solar EPC Quotations, containing Scope of Work, BOMs, Cost Breakdowns, and Payment Terms.
+- **AI PDF Export Engine:** Developed `AiPdfGenerator` to dynamically intercept `[GENERATE_PDF]` flags from Gemini, parsing its Markdown response into a highly professional A4 PDF (complete with company headers, stylized borders, and bullet points) ready for client delivery.
+- **Dynamic Context Injection:** Automatically injects `DateTime.now()` into the AI's system prompt so it has real-time awareness for generating dated quotes.
+
+### Fixed
+- Fixed a bug where the Philippine Peso sign (`₱`) would render as a corrupted `[X]` box in the PDF package; the PDF generator now intercepts and gracefully falls back to `PHP `.
+
+---
+
+## [v1.3.0]
 ### Added
 - **Global AI Assistant:** Integrated Gemini API (`gemini-3-flash-preview` over `v1beta` endpoint) to provide an interactive chatbot on the Dashboard.
 - **RAG Architecture:** Added `DashboardContextBuilder` to automatically parse and serialize Isar database content (Projects, KPIs, Inventory, Surveys) into structured Markdown for grounded AI responses.

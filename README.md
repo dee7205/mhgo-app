@@ -1,6 +1,6 @@
 # MHGo
 
-![Version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-v1.4.0-blue.svg)
 ![Flutter](https://img.shields.io/badge/Flutter-Material_3-02569B?logo=flutter)
 ![Database](https://img.shields.io/badge/Database-Isar_Offline-FF9900)
 ![AI](https://img.shields.io/badge/AI-Gemini_3_Flash-8E75B2?logo=google)
