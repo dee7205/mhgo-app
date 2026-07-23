@@ -16,6 +16,7 @@ import 'package:mhgo/core/database/models/project_model.dart';
 import 'package:mhgo/core/database/models/task_model.dart';
 import 'package:mhgo/features/materials/domain/entities/materials_entities.dart';
 import 'package:mhgo/features/survey/domain/entities/survey_entities.dart';
+import 'package:mhgo/features/ai_assistant/presentation/views/ai_assistant_view.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -174,6 +175,21 @@ class _DashboardViewState extends ConsumerState<DashboardView>
       child: Focus(
         autofocus: true,
         child: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            heroTag: 'dashboard-ai-fab',
+            backgroundColor: theme.colorScheme.tertiary,
+            foregroundColor: theme.colorScheme.onTertiary,
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                builder: (context) => const AiAssistantView(),
+              );
+            },
+            icon: const Icon(Icons.auto_awesome),
+            label: const Text('Ask AI'),
+          ),
           appBar: AppBar(
             title: Row(
               children: [
