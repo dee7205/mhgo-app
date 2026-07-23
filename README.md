@@ -114,6 +114,14 @@ Planned functionality includes:
 - Stock Monitoring
 - Project Material Requirements
 
+## Site Inspections
+
+- Comprehensive safety and quality checklists
+- Pass/Fail/NA toggles with remarks
+- Non-Conformance tracking (severity, deadlines, responsible persons)
+- Offline CRUD and Dashboard Sync
+- Dedicated PDF Reporting with Signatures
+
 ## AI Integration
 
 - Global AI Assistant (Dashboard Scope)
@@ -134,6 +142,7 @@ Planned functionality includes:
 | Projects | ✅ Complete |
 | Daily Accomplishment Reports | ✅ Complete |
 | Progress Tracking | ✅ Complete |
+| Site Inspections | ✅ Complete |
 | Materials & Inventory | 🚧 In Progress |
 | Punch Lists | ⏳ Planned |
 | Documents | ⏳ Planned |
@@ -172,6 +181,7 @@ lib/
 │   ├── projects/
 │   ├── dar/
 │   ├── progress/
+│   ├── inspections/
 │   ├── materials/
 │   ├── punchlist/
 │   ├── documents/
@@ -210,12 +220,10 @@ flutter build apk
 
 Current priorities include:
 
-- Completing the Materials & Inventory module
-- Improving PDF generation
-- Dashboard synchronization
-- Survey workflow refinements
-- Overall UI/UX polish
-- Performance optimization
+- Completing the Materials & Inventory warehouse logic
+- Progress module standalone PDF exporter (Gantt-style)
+- Multi-user authentication integration (Firebase Auth)
+- Ongoing UI/UX polish for offline synchronization
 
 ---
 
